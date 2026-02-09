@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Xenith Capital — Technology-Enhanced Wealth Management</title>
-<meta name="description" content="Xenith Capital is a boutique, technology-enhanced wealth management firm delivering precision investment strategies for high-net-worth individuals and families.">
+<meta name="description" content="Xenith Capital is a boutique, technology-enhanced wealth management firm delivering custom-built investment strategies for high-net-worth individuals and families.">
 <meta property="og:title" content="Xenith Capital — Technology-Enhanced Wealth Management">
-<meta property="og:description" content="Where institutional expertise meets proprietary technology. Precision wealth management for those who demand more.">
+<meta property="og:description" content="Where analytical training meets proprietary technology. Custom-built wealth strategies for those who demand more than a model portfolio.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xenithcap.io">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,6 +34,9 @@
   --border-light: rgba(255,255,255,0.1);
   --grid-color: rgba(0, 229, 255, 0.03);
   --grid-color-strong: rgba(0, 229, 255, 0.06);
+  --red-dim: rgba(255, 80, 80, 0.08);
+  --red-border: rgba(255, 80, 80, 0.15);
+  --red-text: #ff6b6b;
 }
 
 html { scroll-behavior: smooth; }
@@ -55,8 +58,7 @@ body::before {
     linear-gradient(var(--grid-color) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
   background-size: 80px 80px;
-  pointer-events: none;
-  z-index: 0;
+  pointer-events: none; z-index: 0;
 }
 
 /* ── SCAN LINE OVERLAY ────────────────────── */
@@ -64,14 +66,10 @@ body::after {
   content: '';
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
   background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 229, 255, 0.008) 2px,
-    rgba(0, 229, 255, 0.008) 4px
+    0deg, transparent, transparent 2px,
+    rgba(0, 229, 255, 0.008) 2px, rgba(0, 229, 255, 0.008) 4px
   );
-  pointer-events: none;
-  z-index: 1;
+  pointer-events: none; z-index: 1;
 }
 
 /* ── NAV ─────────────────────────────────── */
@@ -133,18 +131,13 @@ nav.scrolled {
     radial-gradient(ellipse at 80% 70%, rgba(0, 229, 255, 0.02) 0%, transparent 40%);
   pointer-events: none;
 }
-/* Animated horizon line */
 .hero::after {
   content: '';
   position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
   background: linear-gradient(90deg, transparent, var(--cyan), var(--gold), var(--cyan), transparent);
-  opacity: 0.3;
-  animation: horizonPulse 4s ease-in-out infinite;
+  opacity: 0.3; animation: horizonPulse 4s ease-in-out infinite;
 }
-@keyframes horizonPulse {
-  0%, 100% { opacity: 0.15; }
-  50% { opacity: 0.4; }
-}
+@keyframes horizonPulse { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.4; } }
 
 .hero-content { position: relative; max-width: 850px; }
 .hero-badge {
@@ -184,7 +177,6 @@ nav.scrolled {
   font-size: 0.8rem; font-weight: 600; letter-spacing: 2.5px;
   text-transform: uppercase; text-decoration: none;
   border: none; cursor: pointer; transition: all 0.3s;
-  position: relative;
 }
 .hero-cta:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 30px rgba(201,168,76,0.3); }
 .hero-scroll {
@@ -244,6 +236,88 @@ section { max-width: 1100px; margin: 0 auto; padding: 6rem 2rem; position: relat
   pointer-events: none;
 }
 
+/* ── GLOW LINE ───────────────────────────── */
+.glow-line {
+  width: 100%; height: 1px; margin: 0;
+  background: linear-gradient(90deg, transparent, var(--cyan-border), var(--gold-dim), var(--cyan-border), transparent);
+}
+
+/* ── REVELATION SECTION ──────────────────── */
+.revelation-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem; margin: 3rem 0;
+}
+.rev-stat {
+  text-align: center; padding: 2rem 1.25rem;
+  background: var(--red-dim);
+  border: 1px solid var(--red-border);
+  position: relative;
+}
+.rev-stat-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 2.2rem; font-weight: 400; color: var(--red-text);
+  line-height: 1; margin-bottom: 0.4rem;
+}
+.rev-stat-label {
+  font-size: 0.65rem; color: var(--text-muted);
+  letter-spacing: 2px; text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 0.6rem;
+}
+.rev-stat-desc {
+  font-size: 0.8rem; color: var(--text-secondary);
+  line-height: 1.7; font-weight: 300;
+}
+@media (max-width: 768px) { .revelation-stats { grid-template-columns: 1fr; } }
+
+.revelation-text {
+  font-size: 1rem; color: var(--text-secondary);
+  max-width: 750px; line-height: 1.9; font-weight: 300;
+  margin-top: 2rem;
+}
+.revelation-text strong { color: var(--text-primary); font-weight: 500; }
+
+/* ── CONTRAST SECTION ────────────────────── */
+.contrast-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 2rem; margin-top: 3rem;
+}
+.contrast-col { padding: 2.5rem 2rem; position: relative; }
+.contrast-col.industry {
+  background: rgba(255, 80, 80, 0.03);
+  border: 1px solid var(--red-border);
+}
+.contrast-col.xenith {
+  background: rgba(0, 229, 255, 0.03);
+  border: 1px solid var(--cyan-border);
+}
+.contrast-col.xenith::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+}
+.contrast-header {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 3px;
+  text-transform: uppercase; margin-bottom: 1.5rem;
+  padding-bottom: 1rem; border-bottom: 1px solid var(--border);
+}
+.contrast-col.industry .contrast-header { color: var(--red-text); }
+.contrast-col.xenith .contrast-header { color: var(--cyan); }
+.contrast-list { list-style: none; }
+.contrast-list li {
+  padding: 0.6rem 0; font-size: 0.88rem; color: var(--text-secondary);
+  line-height: 1.6; font-weight: 300;
+  display: flex; align-items: flex-start; gap: 0.75rem;
+}
+.contrast-list li::before {
+  content: ''; width: 5px; height: 5px; flex-shrink: 0;
+  margin-top: 0.55rem;
+}
+.contrast-col.industry .contrast-list li::before { background: var(--red-text); opacity: 0.4; }
+.contrast-col.xenith .contrast-list li::before { background: var(--cyan); box-shadow: 0 0 6px rgba(0, 229, 255, 0.3); }
+@media (max-width: 768px) { .contrast-grid { grid-template-columns: 1fr; } }
+
 /* ── PHILOSOPHY ──────────────────────────── */
 .philosophy-grid {
   display: grid; grid-template-columns: 1fr 1fr;
@@ -256,14 +330,12 @@ section { max-width: 1100px; margin: 0 auto; padding: 6rem 2rem; position: relat
 .philosophy-item::before {
   content: '';
   position: absolute; top: -1px; left: 0; width: 40px; height: 1px;
-  background: var(--cyan);
-  opacity: 0.5;
+  background: var(--cyan); opacity: 0.5;
 }
 .philosophy-num {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.7rem; font-weight: 300; color: var(--cyan);
-  opacity: 0.5; margin-bottom: 0.75rem;
-  letter-spacing: 2px;
+  opacity: 0.5; margin-bottom: 0.75rem; letter-spacing: 2px;
 }
 .philosophy-item h3 {
   font-family: 'Cormorant Garamond', serif;
@@ -276,7 +348,7 @@ section { max-width: 1100px; margin: 0 auto; padding: 6rem 2rem; position: relat
 }
 @media (max-width: 768px) { .philosophy-grid { grid-template-columns: 1fr; } }
 
-/* ── TECHNOLOGY EDGE ─────────────────────── */
+/* ── TECHNOLOGY ──────────────────────────── */
 .tech-section { position: relative; overflow: hidden; }
 .tech-section::before {
   content: '';
@@ -358,6 +430,14 @@ section { max-width: 1100px; margin: 0 auto; padding: 6rem 2rem; position: relat
   font-size: 3.5rem; float: left; line-height: 1;
   margin-right: 0.5rem; color: var(--gold); font-weight: 400;
 }
+.clearance-callout {
+  background: rgba(0, 229, 255, 0.03);
+  border-left: 2px solid var(--cyan);
+  padding: 1.25rem 1.5rem; margin: 2rem 0;
+  font-size: 0.9rem; color: var(--text-secondary);
+  line-height: 1.8; font-weight: 300;
+}
+.clearance-callout strong { color: var(--cyan); font-weight: 500; }
 @media (max-width: 768px) { .founder-layout { grid-template-columns: 1fr; gap: 2rem; } }
 
 /* ── SERVICES ────────────────────────────── */
@@ -407,9 +487,7 @@ section { max-width: 1100px; margin: 0 auto; padding: 6rem 2rem; position: relat
 .diff-item::before {
   content: '';
   position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-  width: 40px; height: 1px;
-  background: var(--cyan);
-  opacity: 0.3;
+  width: 40px; height: 1px; background: var(--cyan); opacity: 0.3;
 }
 .diff-stat {
   font-family: 'JetBrains Mono', monospace;
@@ -417,6 +495,7 @@ section { max-width: 1100px; margin: 0 auto; padding: 6rem 2rem; position: relat
   line-height: 1; margin-bottom: 0.5rem;
   text-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
 }
+.diff-stat .counter { display: inline-block; }
 .diff-label {
   font-size: 0.7rem; color: var(--text-muted);
   letter-spacing: 2px; text-transform: uppercase;
@@ -442,7 +521,7 @@ section { max-width: 1100px; margin: 0 auto; padding: 6rem 2rem; position: relat
   pointer-events: none;
 }
 .cta-section .section-title { max-width: 600px; margin: 0 auto 1.5rem; }
-.cta-section .section-text { max-width: 500px; margin: 0 auto 2.5rem; text-align: center; }
+.cta-section .section-text { max-width: 550px; margin: 0 auto 2.5rem; text-align: center; }
 .cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 .cta-primary {
   background: var(--gold); color: var(--bg-deep);
@@ -506,18 +585,12 @@ footer {
 }
 .footer-copy { font-size: 0.6rem; color: var(--text-muted); letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; }
 
-/* ── SCROLLBAR ───────────────────────────── */
+/* ── SCROLLBAR & SELECTION ───────────────── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-deep); }
 ::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.15); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(0, 229, 255, 0.3); }
 ::selection { background: rgba(0, 229, 255, 0.2); color: #fff; }
-
-/* ── GLOW LINE DECORATION ────────────────── */
-.glow-line {
-  width: 100%; height: 1px; margin: 0;
-  background: linear-gradient(90deg, transparent, var(--cyan-border), var(--gold-dim), var(--cyan-border), transparent);
-}
 
 @media (max-width: 600px) {
   section { padding: 4rem 1.25rem; }
@@ -534,7 +607,7 @@ footer {
   <a href="#" class="nav-logo">XENITH CAPITAL</a>
   <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">&#9776;</button>
   <ul class="nav-links">
-    <li><a href="#philosophy">Philosophy</a></li>
+    <li><a href="#approach">Approach</a></li>
     <li><a href="#technology">Technology</a></li>
     <li><a href="#founder">Founder</a></li>
     <li><a href="#services">Services</a></li>
@@ -546,16 +619,85 @@ footer {
 <section class="hero">
   <div class="hero-content">
     <div class="hero-badge">Technology-Enhanced Wealth Management</div>
-    <h1>Where Institutional Expertise Meets <em>Proprietary</em> <span class="accent-cyan">Technology</span></h1>
-    <p class="hero-sub">Xenith Capital combines deep market experience with advanced research systems to deliver precision wealth strategies for high-net-worth individuals and families.</p>
+    <h1>Your Portfolio Should Be Built by an <em>Analyst</em>, Not Assembled from a <span class="accent-cyan">Template</span></h1>
+    <p class="hero-sub">Xenith Capital combines an intelligence-trained analytical background with proprietary research systems to deliver custom-built wealth strategies. No model portfolios. No outsourced decisions. Every position selected with conviction.</p>
     <a href="#contact" class="hero-cta">Begin the Conversation</a>
   </div>
   <div class="hero-scroll">Explore</div>
 </section>
 
+<!-- ── THE REVELATION ─────────────────────── -->
+<div class="band">
+<section id="approach" class="section-reveal">
+  <div class="section-label">// The Industry Reality</div>
+  <div class="section-title">What Most Advisors Aren't Telling You</div>
+  <div class="section-divider"></div>
+  <p class="section-text">The wealth management industry has undergone a fundamental shift. Most advisors at large firms no longer build portfolios. They select from pre-built ones.</p>
+
+  <div class="revelation-stats">
+    <div class="rev-stat">
+      <div class="rev-stat-num" data-target="50" data-suffix="%+">0</div>
+      <div class="rev-stat-label">Outsourced</div>
+      <div class="rev-stat-desc">Over half of financial planners outsource their investment management entirely to third-party platforms.</div>
+    </div>
+    <div class="rev-stat">
+      <div class="rev-stat-num" data-target="626" data-prefix="$" data-suffix="B">0</div>
+      <div class="rev-stat-label">Model Assets</div>
+      <div class="rev-stat-desc">Hundreds of billions sit in standardized model portfolios &mdash; the same allocation shared across thousands of clients.</div>
+    </div>
+    <div class="rev-stat">
+      <div class="rev-stat-num" data-target="47" data-suffix="%">0</div>
+      <div class="rev-stat-label">Firm Models</div>
+      <div class="rev-stat-desc">At large firms, nearly half of all portfolio construction relies on in-house corporate models, not advisor judgment.</div>
+    </div>
+  </div>
+
+  <div class="revelation-text">
+    <p><strong>This isn't a coincidence &mdash; it's structural.</strong> The majority of advisors enter the industry from business and sales backgrounds. Their training focuses on client acquisition and relationship management, not quantitative analysis or portfolio construction. The model portfolio industry exists because of this skills gap. Pre-built solutions aren't a convenience &mdash; they're a necessity when the advisor's expertise lies in gathering assets, not analyzing them.</p>
+    <p style="margin-top: 1.25rem;">The result: your "personalized strategy" may be a risk tolerance questionnaire fed into the same model used for thousands of other clients. The advisor is a conduit for corporate products &mdash; not the architect of your financial future.</p>
+  </div>
+</section>
+</div>
+
+<!-- ── THE CONTRAST ───────────────────────── -->
+<section class="section-reveal">
+  <div class="section-label">// The Difference</div>
+  <div class="section-title">Two Models of Wealth Management</div>
+  <div class="section-divider"></div>
+
+  <div class="contrast-grid">
+    <div class="contrast-col industry">
+      <div class="contrast-header">The Industry Standard</div>
+      <ul class="contrast-list">
+        <li>Advisor trained in sales and relationship management</li>
+        <li>Risk questionnaire determines your allocation</li>
+        <li>Pre-built model portfolio or third-party SMA selected</li>
+        <li>Same portfolio shared with hundreds or thousands of clients</li>
+        <li>Investment decisions made by a corporate committee or outsourced manager</li>
+        <li>Advisor may rotate or leave; your portfolio stays on autopilot</li>
+        <li>Quarterly reports generated by the same system as everyone else's</li>
+      </ul>
+    </div>
+    <div class="contrast-col xenith">
+      <div class="contrast-header">The Xenith Standard</div>
+      <ul class="contrast-list">
+        <li>Advisor trained in intelligence analysis and forensic investigation</li>
+        <li>Deep financial discovery process drives your strategy</li>
+        <li>Every portfolio built from scratch &mdash; position by position</li>
+        <li>No two client portfolios are identical</li>
+        <li>Investment decisions made by the same person you speak with</li>
+        <li>One advisor, permanent relationship, direct accountability</li>
+        <li>Proprietary technology systems monitor your positions continuously</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="glow-line"></div>
+
 <!-- ── PHILOSOPHY ──────────────────────────── -->
 <div class="band">
-<section id="philosophy" class="section-reveal">
+<section class="section-reveal">
   <div class="section-label">// Our Philosophy</div>
   <div class="section-title">Built on Conviction, Not Convention</div>
   <div class="section-divider"></div>
@@ -574,7 +716,7 @@ footer {
     <div class="philosophy-item">
       <div class="philosophy-num">// 03</div>
       <h3>Technology as Force Multiplier</h3>
-      <p>Proprietary research systems allow us to monitor markets, analyze data, and surface insights at a scale that manual processes cannot match. Technology amplifies our judgment &mdash; it doesn't replace it.</p>
+      <p>Proprietary research systems allow us to monitor markets, analyze data, and surface insights at a scale that manual processes cannot match. Technology amplifies judgment &mdash; it doesn't replace it.</p>
     </div>
     <div class="philosophy-item">
       <div class="philosophy-num">// 04</div>
@@ -585,7 +727,7 @@ footer {
 </section>
 </div>
 
-<!-- ── TECHNOLOGY EDGE ────────────────────── -->
+<!-- ── TECHNOLOGY ─────────────────────────── -->
 <section id="technology" class="section-reveal tech-section">
   <div class="section-label">// The Xenith Edge</div>
   <div class="section-title">Institutional-Grade Technology, Boutique-Scale Focus</div>
@@ -605,7 +747,7 @@ footer {
     <div class="tech-card">
       <div class="tech-icon">[ SYS.03 ]</div>
       <h3>Intelligent Risk Monitoring</h3>
-      <p>Real-time portfolio analytics track correlation drift, concentration risk, and scenario exposure. Alerts are generated automatically when portfolios deviate from defined risk parameters.</p>
+      <p>Real-time portfolio analytics track correlation drift, concentration risk, and scenario exposure. Alerts trigger automatically when portfolios deviate from defined risk parameters.</p>
     </div>
   </div>
 </section>
@@ -621,17 +763,23 @@ footer {
     <div class="founder-sidebar">
       <ul class="founder-credentials">
         <li><span class="cred-marker"></span>FINRA Series 7, 65, &amp; 66 Licensed</li>
-        <li><span class="cred-marker"></span>Former Military Intelligence Analyst</li>
         <li><span class="cred-marker"></span>Former Law Enforcement Officer</li>
-        <li><span class="cred-marker"></span>Wells Fargo Advisors &mdash; HNW Strategy Lead</li>
+        <li><span class="cred-marker"></span>Former Military Intelligence Analyst</li>
+        <li><span class="cred-marker"></span>U.S. Top Secret / SCI Clearance</li>
+        <li><span class="cred-marker"></span>HNW Strategy Lead &mdash; Major Wirehouse</li>
         <li><span class="cred-marker"></span>5-Branch High-Net-Worth Oversight</li>
         <li><span class="cred-marker"></span>Proprietary Technology Infrastructure</li>
       </ul>
     </div>
     <div class="founder-text">
-      <p>Logan Jackson built his analytical foundation in military intelligence, where the cost of a wrong conclusion isn't a bad quarter &mdash; it's measured in lives. That training instilled a permanent bias toward evidence over narrative, verification over assumption, and decisive action over comfortable consensus.</p>
-      <p>From intelligence work, Logan transitioned to law enforcement before entering the financial industry at Wells Fargo Advisors, where he led high-net-worth investment strategies across five branch offices. The experience provided institutional-grade insight into portfolio construction, risk management, and the behavioral patterns that separate disciplined investors from reactive ones.</p>
-      <p>At Xenith Capital, Logan combines this multi-discipline background with a deep focus on technology. The firm's proprietary research and monitoring systems are built in-house, enabling the kind of continuous market analysis and systematic risk oversight that was once exclusive to large institutional desks &mdash; now applied with the focus of a boutique firm dedicated to a select number of clients.</p>
+      <p>Logan Jackson's career began in law enforcement, where he developed the investigative discipline and pattern recognition that would define his analytical approach. From there, he transitioned to military intelligence, where the stakes of a wrong conclusion aren't measured in quarterly performance &mdash; they're measured in lives. That environment instilled a permanent bias toward evidence over narrative, verification over assumption, and decisive action over comfortable consensus.</p>
+
+      <div class="clearance-callout">
+        <strong>Top Secret / SCI Security Clearance</strong> &mdash; One of the highest levels of U.S. government trust, requiring up to 15 months of comprehensive background investigation. Financial history, personal integrity, and judgment are rigorously evaluated. The same standard of trust and discretion applies to every client relationship at Xenith Capital.
+      </div>
+
+      <p>Logan entered the financial industry at a major wirehouse, where he led high-net-worth investment strategies across five branch offices. It was there he saw the industry's structural problem firsthand: advisors trained in sales, not analysis. Portfolios assembled from templates, not research. Investment decisions made by committees and outsourced managers, not by the person sitting across from the client.</p>
+      <p>Xenith Capital was built to reverse that equation. Logan combines an analytical foundation &mdash; forged in intelligence work, not a business program &mdash; with proprietary technology systems built in-house. Every portfolio is constructed from the ground up. Every investment decision is made by the same person you speak with. The result is the kind of focused, evidence-driven wealth management that the standard industry model structurally cannot deliver.</p>
     </div>
   </div>
 </section>
@@ -642,12 +790,12 @@ footer {
   <div class="section-label">// What We Do</div>
   <div class="section-title">Tailored Wealth Strategies</div>
   <div class="section-divider"></div>
-  <p class="section-text">Every client engagement begins with understanding your complete financial picture. From there, we build.</p>
+  <p class="section-text">Every client engagement begins with understanding your complete financial picture. From there, we build &mdash; from scratch.</p>
   <div class="services-grid">
     <div class="service-card">
       <div class="service-icon">SVC.01</div>
-      <h3>Portfolio Management</h3>
-      <p>Actively managed portfolios constructed around your specific goals, risk tolerance, and time horizon. High-conviction positions backed by systematic research and continuous monitoring.</p>
+      <h3>Custom Portfolio Construction</h3>
+      <p>Every portfolio is built position by position around your specific goals, risk tolerance, and time horizon. No models. No templates. High-conviction positions backed by systematic research.</p>
     </div>
     <div class="service-card">
       <div class="service-icon">SVC.02</div>
@@ -656,8 +804,8 @@ footer {
     </div>
     <div class="service-card">
       <div class="service-icon">SVC.03</div>
-      <h3>Risk Management</h3>
-      <p>Proactive risk architecture powered by real-time analytics. We stress-test portfolios against multiple scenarios and maintain disciplined position sizing and correlation management.</p>
+      <h3>Technology-Enhanced Risk Management</h3>
+      <p>Proactive risk architecture powered by proprietary analytics. We stress-test portfolios against multiple scenarios and maintain disciplined position sizing and correlation management.</p>
     </div>
     <div class="service-card">
       <div class="service-icon">SVC.04</div>
@@ -672,7 +820,7 @@ footer {
     <div class="service-card">
       <div class="service-icon">SVC.06</div>
       <h3>Direct Access</h3>
-      <p>Your advisor is your advisor. No call centers, no rotating contacts, no layers of bureaucracy. When you need us, you reach us. That's not a perk &mdash; it's the foundation of the relationship.</p>
+      <p>Your advisor is your advisor. No call centers, no rotating contacts, no layers of bureaucracy. When you need us, you reach us. That's the foundation of the relationship.</p>
     </div>
   </div>
 </section>
@@ -685,17 +833,17 @@ footer {
   <div class="section-divider"></div>
   <div class="diff-grid">
     <div class="diff-item">
-      <div class="diff-stat">3</div>
+      <div class="diff-stat"><span class="counter" data-target="3">0</span></div>
       <div class="diff-label">Disciplines</div>
-      <div class="diff-desc">Military intelligence, law enforcement, and institutional finance. A combination of analytical rigor that is exceptionally rare in wealth management.</div>
+      <div class="diff-desc">Law enforcement, military intelligence, and institutional finance. An analytical foundation that is exceptionally rare in wealth management.</div>
     </div>
     <div class="diff-item">
       <div class="diff-stat">24/7</div>
       <div class="diff-label">Market Monitoring</div>
-      <div class="diff-desc">Proprietary technology systems provide continuous surveillance of portfolio positions, market conditions, and risk parameters &mdash; even when markets are closed.</div>
+      <div class="diff-desc">Proprietary technology systems provide continuous surveillance of portfolio positions, market conditions, and risk parameters.</div>
     </div>
     <div class="diff-item">
-      <div class="diff-stat">1:1</div>
+      <div class="diff-stat"><span class="counter" data-target="1">0</span>:1</div>
       <div class="diff-label">Advisor Ratio</div>
       <div class="diff-desc">You work directly with the founder. No hand-offs, no junior associates, no learning curve. Continuity and accountability from day one.</div>
     </div>
@@ -706,9 +854,9 @@ footer {
 <div class="band">
 <section id="contact" class="cta-section section-reveal">
   <div class="section-label">// Get Started</div>
-  <div class="section-title">Ready for a Different Approach?</div>
+  <div class="section-title">Ready for a Different Standard?</div>
   <div class="section-divider" style="margin: 0 auto 2rem;"></div>
-  <p class="section-text">We begin every relationship with a confidential conversation to understand your goals, concerns, and expectations. No obligations. No sales pitch. Just a candid assessment of whether Xenith Capital is the right fit.</p>
+  <p class="section-text">We begin every relationship with a confidential conversation to understand your goals, concerns, and expectations. No obligations. No sales pitch. Just a candid assessment of whether Xenith Capital is the right fit. We maintain a deliberately limited number of client relationships to ensure every portfolio receives the focused attention it deserves.</p>
   <div class="cta-buttons">
     <a href="mailto:advisory@xenithcap.io" class="cta-primary">Schedule a Consultation</a>
     <a href="tel:+1" class="cta-secondary">Call Direct</a>
@@ -724,7 +872,7 @@ footer {
       <div class="footer-tagline">Technology-Enhanced Wealth Management</div>
     </div>
     <div class="footer-links">
-      <a href="#philosophy">Philosophy</a>
+      <a href="#approach">Approach</a>
       <a href="#technology">Technology</a>
       <a href="#founder">Founder</a>
       <a href="#services">Services</a>
@@ -734,6 +882,7 @@ footer {
   <div class="footer-compliance">
     <p><strong>Important Disclosures:</strong> Investing involves risk, including the potential loss of principal. Past performance is not indicative of future results. The information provided on this website is for informational purposes only and does not constitute investment advice or a recommendation to purchase or sell any specific security.</p>
     <p>Xenith Capital is a registered investment advisor with the State of Texas. Registration does not imply a certain level of skill or training. References to technology, research systems, and monitoring tools describe internal processes used to support investment decision-making and do not guarantee any particular investment outcome. All investment decisions are made by the firm's investment professionals, not by automated systems.</p>
+    <p>Industry statistics referenced on this website are sourced from public research reports including Cerulli Associates and Morningstar. These figures are provided for educational context and are subject to change. The characterization of industry practices reflects general trends and does not describe any specific firm or advisor.</p>
     <p>Market conditions and tax laws are subject to change. Investments are not FDIC insured, not bank guaranteed, and may lose value. Each investor should evaluate their ability to invest long-term, especially during periods of downturn in the market. Please consult with qualified professionals before making any investment decisions.</p>
     <p>The firm's ADV Part 2A brochure and Form CRS are available upon request and contain important information about advisory services, fees, and potential conflicts of interest.</p>
   </div>
@@ -762,6 +911,64 @@ footer {
     });
   }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
   sections.forEach(function(s) { observer.observe(s); });
+})();
+
+// Animated counters
+(function() {
+  var animated = new Set();
+  function animateCounter(el) {
+    var target = parseInt(el.getAttribute('data-target'));
+    var prefix = el.parentElement.getAttribute('data-prefix') || el.getAttribute('data-prefix') || '';
+    var suffix = el.parentElement.getAttribute('data-suffix') || el.getAttribute('data-suffix') || '';
+    var duration = 1500;
+    var startTime = null;
+
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      var progress = Math.min((timestamp - startTime) / duration, 1);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var current = Math.floor(eased * target);
+      el.textContent = prefix + current + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+      else el.textContent = prefix + target + suffix;
+    }
+    requestAnimationFrame(step);
+  }
+
+  // Revelation stats
+  var revStats = document.querySelectorAll('.rev-stat-num');
+  var revObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && !animated.has(entry.target)) {
+        animated.add(entry.target);
+        animateCounter(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  revStats.forEach(function(s) { revObserver.observe(s); });
+
+  // Differentiator counters
+  var counters = document.querySelectorAll('.counter');
+  var counterObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && !animated.has(entry.target)) {
+        animated.add(entry.target);
+        var target = parseInt(entry.target.getAttribute('data-target'));
+        var duration = 800;
+        var startTime = null;
+        function step(timestamp) {
+          if (!startTime) startTime = timestamp;
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          var eased = 1 - Math.pow(1 - progress, 3);
+          entry.target.textContent = Math.floor(eased * target);
+          if (progress < 1) requestAnimationFrame(step);
+          else entry.target.textContent = target;
+        }
+        requestAnimationFrame(step);
+      }
+    });
+  }, { threshold: 0.5 });
+  counters.forEach(function(c) { counterObserver.observe(c); });
 })();
 
 // Mobile nav close on link click
