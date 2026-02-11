@@ -598,9 +598,489 @@ footer {
   .footer-links { flex-direction: column; gap: 0.75rem; }
   .footer-bottom { flex-direction: column; text-align: center; }
 }
+
+/* ── STAGGER ANIMATIONS ────────────────────── */
+.section-reveal.visible .tech-grid .tech-card,
+.section-reveal.visible .services-grid .service-card,
+.section-reveal.visible .philosophy-grid .philosophy-item,
+.section-reveal.visible .diff-grid .diff-item {
+  transform: translateY(15px);
+  animation: staggerSlide 0.6s ease forwards;
+}
+.section-reveal.visible .tech-grid .tech-card:nth-child(1),
+.section-reveal.visible .services-grid .service-card:nth-child(1),
+.section-reveal.visible .philosophy-grid .philosophy-item:nth-child(1),
+.section-reveal.visible .diff-grid .diff-item:nth-child(1) { animation-delay: 0.1s; }
+.section-reveal.visible .tech-grid .tech-card:nth-child(2),
+.section-reveal.visible .services-grid .service-card:nth-child(2),
+.section-reveal.visible .philosophy-grid .philosophy-item:nth-child(2),
+.section-reveal.visible .diff-grid .diff-item:nth-child(2) { animation-delay: 0.2s; }
+.section-reveal.visible .tech-grid .tech-card:nth-child(3),
+.section-reveal.visible .services-grid .service-card:nth-child(3),
+.section-reveal.visible .philosophy-grid .philosophy-item:nth-child(3),
+.section-reveal.visible .diff-grid .diff-item:nth-child(3) { animation-delay: 0.3s; }
+.section-reveal.visible .services-grid .service-card:nth-child(4),
+.section-reveal.visible .philosophy-grid .philosophy-item:nth-child(4) { animation-delay: 0.4s; }
+.section-reveal.visible .services-grid .service-card:nth-child(5) { animation-delay: 0.5s; }
+.section-reveal.visible .services-grid .service-card:nth-child(6) { animation-delay: 0.6s; }
+@keyframes staggerSlide { to { transform: translateY(0); } }
+
+/* ── CREDENTIAL LIST STAGGER ────────────────── */
+.section-reveal.visible .founder-credentials li {
+  opacity: 0;
+  transform: translateX(-10px);
+  animation: credReveal 0.4s ease forwards;
+}
+.section-reveal.visible .founder-credentials li:nth-child(1) { animation-delay: 0.15s; }
+.section-reveal.visible .founder-credentials li:nth-child(2) { animation-delay: 0.25s; }
+.section-reveal.visible .founder-credentials li:nth-child(3) { animation-delay: 0.35s; }
+.section-reveal.visible .founder-credentials li:nth-child(4) { animation-delay: 0.45s; }
+.section-reveal.visible .founder-credentials li:nth-child(5) { animation-delay: 0.55s; }
+.section-reveal.visible .founder-credentials li:nth-child(6) { animation-delay: 0.65s; }
+.section-reveal.visible .founder-credentials li:nth-child(7) { animation-delay: 0.75s; }
+@keyframes credReveal {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ── VALUE STATEMENT ──────────────────────── */
+.value-statement {
+  margin-top: 2.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.value-statement span {
+  opacity: 0;
+  animation: valueReveal 0.5s ease forwards;
+  position: relative;
+}
+.value-statement span:nth-child(1) { animation-delay: 1s; }
+.value-statement span:nth-child(2) { animation-delay: 1.4s; color: var(--cyan); }
+.value-statement span:nth-child(3) { animation-delay: 1.8s; }
+.value-statement span:not(:last-child)::after {
+  content: '//';
+  position: absolute;
+  right: -1.25rem;
+  color: var(--border-light);
+  font-size: 0.55rem;
+}
+@keyframes valueReveal {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── DOSSIER FRAME ─────────────────────────── */
+.dossier-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  max-width: 260px;
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.03), rgba(201, 168, 76, 0.02));
+  border: 1px solid var(--cyan-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+.dossier-frame::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.4), transparent);
+  animation: dossierScanV 4s ease-in-out infinite;
+}
+@keyframes dossierScanV {
+  0% { top: 0; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+.dossier-frame::after {
+  content: '';
+  position: absolute;
+  top: 6px; left: 6px; right: 6px; bottom: 6px;
+  border: 1px solid rgba(0, 229, 255, 0.05);
+  pointer-events: none;
+}
+.dossier-corners { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
+.dossier-corners span { position: absolute; width: 14px; height: 14px; }
+.dossier-corners span:nth-child(1) { top: 3px; left: 3px; border-top: 1px solid var(--cyan); border-left: 1px solid var(--cyan); opacity: 0.6; }
+.dossier-corners span:nth-child(2) { top: 3px; right: 3px; border-top: 1px solid var(--cyan); border-right: 1px solid var(--cyan); opacity: 0.6; }
+.dossier-corners span:nth-child(3) { bottom: 3px; left: 3px; border-bottom: 1px solid var(--cyan); border-left: 1px solid var(--cyan); opacity: 0.6; }
+.dossier-corners span:nth-child(4) { bottom: 3px; right: 3px; border-bottom: 1px solid var(--cyan); border-right: 1px solid var(--cyan); opacity: 0.6; }
+.dossier-content { text-align: center; position: relative; z-index: 1; }
+.dossier-sigil {
+  width: 48px; height: 48px;
+  margin: 0 auto 1.25rem;
+  position: relative;
+}
+.dossier-sigil::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 48px; height: 48px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+}
+.dossier-sigil::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 32px; height: 32px;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  border-radius: 50%;
+}
+.dossier-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  opacity: 0.5;
+  margin-bottom: 0.5rem;
+}
+.dossier-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: 2px;
+}
+
+/* ── HERO AMBIENT ──────────────────────────── */
+.hero-ambient {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 600px;
+  pointer-events: none;
+}
+.hero-ambient .ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 229, 255, 0.04);
+}
+.hero-ambient .ring:nth-child(1) {
+  width: 100%; height: 100%;
+  top: 0; left: 0;
+  animation: radarExpand 8s ease-out infinite;
+}
+.hero-ambient .ring:nth-child(2) {
+  width: 65%; height: 65%;
+  top: 17.5%; left: 17.5%;
+  animation: radarExpand 8s ease-out 2.5s infinite;
+}
+.hero-ambient .ring:nth-child(3) {
+  width: 35%; height: 35%;
+  top: 32.5%; left: 32.5%;
+  animation: radarExpand 8s ease-out 5s infinite;
+}
+@keyframes radarExpand {
+  0% { transform: scale(0.7); opacity: 0; }
+  15% { opacity: 0.6; }
+  100% { transform: scale(1.3); opacity: 0; }
+}
+
+/* ── CLEARANCE CALLOUT GLOW ─────────────────── */
+.clearance-callout { animation: calloutGlow 4s ease-in-out infinite; }
+@keyframes calloutGlow {
+  0%, 100% { box-shadow: inset 2px 0 8px -4px rgba(0, 229, 255, 0.2); }
+  50% { box-shadow: inset 2px 0 12px -2px rgba(0, 229, 255, 0.4); }
+}
+
+@media (max-width: 768px) {
+  .dossier-frame { max-width: 200px; margin: 0 auto 2rem; }
+  .value-statement { gap: 1rem; }
+  .hero-ambient { width: 300px; height: 300px; }
+}
+
+/* ── BOOT SEQUENCE ─────────────────────────── */
+.boot-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg-deep);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease, visibility 0.8s;
+}
+.boot-overlay.done {
+  opacity: 0;
+  visibility: hidden;
+}
+.boot-content {
+  text-align: center;
+  width: 420px;
+  max-width: 90vw;
+}
+.boot-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  color: var(--gold);
+  letter-spacing: 6px;
+  margin-bottom: 2rem;
+  opacity: 0;
+  animation: bootLogoIn 0.4s ease 0.2s forwards;
+}
+@keyframes bootLogoIn {
+  from { opacity: 0; letter-spacing: 12px; }
+  to { opacity: 1; letter-spacing: 6px; }
+}
+.boot-terminal {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--cyan);
+  text-align: left;
+  min-height: 80px;
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+  line-height: 2;
+}
+.boot-terminal .line {
+  opacity: 0;
+  animation: bootLineIn 0.1s ease forwards;
+}
+@keyframes bootLineIn {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 0.6; transform: translateX(0); }
+}
+.boot-terminal .line.success {
+  color: var(--gold);
+  animation: bootLineIn 0.2s ease forwards;
+}
+.boot-progress {
+  height: 1px;
+  background: var(--border);
+  width: 100%;
+  overflow: hidden;
+}
+.boot-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--gold));
+  width: 0%;
+  transition: width 0.12s linear;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+}
+
+/* ── SCROLL PROGRESS ───────────────────────── */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--gold));
+  z-index: 10001;
+  width: 0%;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+  transition: width 0.05s linear;
+}
+
+/* ── CONTRAST SLIDE ────────────────────────── */
+.section-reveal .contrast-col.industry {
+  transform: translateX(-30px);
+}
+.section-reveal .contrast-col.xenith {
+  transform: translateX(30px);
+}
+.section-reveal.visible .contrast-col.industry {
+  animation: slideFromLeft 0.7s ease forwards;
+}
+.section-reveal.visible .contrast-col.xenith {
+  animation: slideFromRight 0.7s ease 0.15s forwards;
+}
+@keyframes slideFromLeft { to { transform: translateX(0); } }
+@keyframes slideFromRight { to { transform: translateX(0); } }
+
+/* ── 3D CARD TILT ──────────────────────────── */
+.tech-card, .service-card {
+  transform-style: preserve-3d;
+}
+.tech-card .tech-card-shine,
+.service-card .service-card-shine {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(0, 229, 255, 0.06) 0%, transparent 60%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.tech-card:hover .tech-card-shine,
+.service-card:hover .service-card-shine {
+  opacity: 1;
+}
+
+/* ── CURSOR GLOW ───────────────────────────── */
+#cursorGlow {
+  position: fixed;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 229, 255, 0.04) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+/* ── MAGNETIC BUTTONS ──────────────────────── */
+.hero-cta, .cta-primary, .cta-secondary, .nav-cta {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ═══ v5 IMMERSIVE EFFECTS ═══════════════════ */
+
+/* Fade CSS grid for WebGL shader underneath */
+body::before { opacity: 0.35; }
+
+/* Enhanced section reveal — camera focus effect */
+.section-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  filter: blur(2px);
+  transition: opacity 0.8s ease, transform 0.8s ease, filter 0.5s ease 0.1s;
+}
+.section-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* Film grain overlay */
+.grain-overlay {
+  position: fixed;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  z-index: 998;
+  pointer-events: none;
+  opacity: 0.022;
+  animation: grainShift 0.3s steps(3) infinite;
+}
+@keyframes grainShift {
+  0% { transform: translate(0, 0); }
+  33% { transform: translate(-5%, 5%); }
+  66% { transform: translate(3%, -7%); }
+}
+
+/* Classified watermark */
+.classified-watermark {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotate(-35deg);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12vw;
+  color: rgba(0, 229, 255, 0.012);
+  letter-spacing: 2vw;
+  text-transform: uppercase;
+  pointer-events: none;
+  z-index: 2;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* Redacted text */
+.redacted {
+  color: var(--cyan);
+  background: rgba(0, 229, 255, 0.08);
+  padding: 0 0.15em;
+  transition: all 0.4s;
+  cursor: default;
+  display: inline;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+.redacted.revealing {
+  color: var(--text-primary);
+  background: rgba(0, 229, 255, 0.04);
+}
+.redacted.revealed {
+  color: var(--gold);
+  background: transparent;
+  font-weight: 500;
+}
+
+/* Classified stamp */
+.clearance-callout { position: relative; overflow: visible; }
+.stamp {
+  position: absolute;
+  top: 50%; right: 1rem;
+  transform: translateY(-50%) rotate(-12deg) scale(1.8);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(0, 229, 255, 0);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border: 2px solid rgba(0, 229, 255, 0);
+  padding: 0.25rem 0.7rem;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.clearance-callout.stamped .stamp {
+  color: rgba(0, 229, 255, 0.2);
+  border-color: rgba(0, 229, 255, 0.2);
+  transform: translateY(-50%) rotate(-12deg) scale(1);
+}
+
+/* Button scan effect */
+.hero-cta, .cta-primary { position: relative; overflow: hidden; }
+.hero-cta::after, .cta-primary::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -60%; width: 40%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  pointer-events: none;
+}
+.hero-cta:hover::after, .cta-primary:hover::after {
+  animation: btnScan 0.7s ease;
+}
+@keyframes btnScan { from { left: -60%; } to { left: 120%; } }
+
+/* Boot classification line */
+.boot-terminal .classification {
+  color: var(--red-text);
+  opacity: 0.8 !important;
+  border-bottom: 1px solid var(--red-border);
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.3rem;
+}
+
+/* v5 mobile overrides */
+@media (max-width: 768px) {
+  .classified-watermark { font-size: 20vw; letter-spacing: 3vw; opacity: 0.008; }
+  .grain-overlay { opacity: 0.015; }
+  .stamp { display: none; }
+  .section-reveal { filter: none; }
+  .section-reveal.visible { filter: none; }
+  .redacted { background: rgba(0, 229, 255, 0.06); }
+}
 </style>
 </head>
 <body>
+
+<!-- ── BOOT SEQUENCE ──────────────────────────── -->
+<div class="boot-overlay" id="bootOverlay">
+  <div class="boot-content">
+    <div class="boot-logo">XENITH CAPITAL</div>
+    <div class="boot-terminal" id="bootTerminal"></div>
+    <div class="boot-progress"><div class="boot-bar" id="bootBar"></div></div>
+  </div>
+</div>
+<div id="cursorGlow"></div>
+<div class="grain-overlay" id="grainOverlay" aria-hidden="true"></div>
+<div class="classified-watermark" aria-hidden="true">CLASSIFIED</div>
+<div class="scroll-progress" id="scrollProgress"></div>
 
 <!-- ── NAV ─────────────────────────────────── -->
 <nav>
@@ -611,17 +1091,23 @@ footer {
     <li><a href="#technology">Technology</a></li>
     <li><a href="#founder">Founder</a></li>
     <li><a href="#services">Services</a></li>
-    <li><a href="#contact" class="nav-cta">Schedule a Consultation</a></li>
+    <li><a href="#contact" class="nav-cta">Request a Briefing</a></li>
   </ul>
 </nav>
 
 <!-- ── HERO ────────────────────────────────── -->
 <section class="hero">
+  <div class="hero-ambient" aria-hidden="true"><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
   <div class="hero-content">
     <div class="hero-badge">Technology-Enhanced Wealth Management</div>
     <h1>Your Portfolio Should Be Built by an <em>Analyst</em>, Not Assembled from a <span class="accent-cyan">Template</span></h1>
     <p class="hero-sub">Xenith Capital combines an intelligence-trained analytical background with proprietary research systems to deliver custom-built wealth strategies. No model portfolios. No outsourced decisions. Every position selected with conviction.</p>
-    <a href="#contact" class="hero-cta">Begin the Conversation</a>
+    <a href="#contact" class="hero-cta">Request a Private Briefing</a>
+    <div class="value-statement">
+      <span>Intelligence-Trained</span>
+      <span>Technology-Armed</span>
+      <span>Independently Built</span>
+    </div>
   </div>
   <div class="hero-scroll">Explore</div>
 </section>
@@ -732,22 +1218,22 @@ footer {
   <div class="section-label">// The Xenith Edge</div>
   <div class="section-title">Institutional-Grade Technology, Boutique-Scale Focus</div>
   <div class="section-divider"></div>
-  <p class="section-text">We've built proprietary technology infrastructure that enhances every stage of our investment process &mdash; from research and monitoring to risk management and reporting. Human judgment drives every decision. Technology ensures nothing is missed.</p>
+  <p class="section-text">Our proprietary systems process thousands of data points across markets, economic indicators, and company fundamentals &mdash; surfacing actionable intelligence in hours that traditional analysts need weeks to compile. Your portfolio benefits from institutional-caliber analytical coverage with the focused attention of a boutique firm. Human judgment drives every decision. Technology ensures nothing is missed.</p>
   <div class="tech-grid">
     <div class="tech-card">
       <div class="tech-icon">[ SYS.01 ]</div>
       <h3>Continuous Market Surveillance</h3>
-      <p>Automated monitoring systems track portfolio positions, sector rotations, macroeconomic signals, and earnings events around the clock. We surface what matters and filter the noise.</p>
+      <p>Our monitoring infrastructure ingests real-time data across portfolio positions, sector rotations, macroeconomic indicators, and corporate events. Proprietary pattern recognition filters surface emerging trends and anomalies &mdash; separating signal from noise so your portfolio stays ahead of the curve.</p>
     </div>
     <div class="tech-card">
       <div class="tech-icon">[ SYS.02 ]</div>
       <h3>Systematic Research Pipeline</h3>
-      <p>Our research framework aggregates data from multiple sources, applies systematic filters, and generates structured analysis. This enables deeper due diligence than traditional manual processes allow.</p>
+      <p>A multi-stage research framework aggregates fundamental data from dozens of sources, screens securities against proprietary quantitative criteria, and generates structured analytical reports. Every investment thesis is stress-tested against rigorous benchmarks before a single dollar moves.</p>
     </div>
     <div class="tech-card">
       <div class="tech-icon">[ SYS.03 ]</div>
       <h3>Intelligent Risk Monitoring</h3>
-      <p>Real-time portfolio analytics track correlation drift, concentration risk, and scenario exposure. Alerts trigger automatically when portfolios deviate from defined risk parameters.</p>
+      <p>Real-time portfolio analytics track correlation drift, concentration exposure, and scenario outcomes across multiple time horizons. Automated early-warning systems trigger when positions approach defined risk parameters &mdash; allowing us to act decisively before markets force our hand.</p>
     </div>
   </div>
 </section>
@@ -761,25 +1247,35 @@ footer {
   <div class="section-divider"></div>
   <div class="founder-layout">
     <div class="founder-sidebar">
+      <div class="dossier-frame">
+        <div class="dossier-corners"><span></span><span></span><span></span><span></span></div>
+        <div class="dossier-content">
+          <div class="dossier-sigil"></div>
+          <div class="dossier-label">Founder &amp; CIO</div>
+          <div class="dossier-name">Logan Jackson</div>
+        </div>
+      </div>
       <ul class="founder-credentials">
-        <li><span class="cred-marker"></span>FINRA Series 7, 65, &amp; 66 Licensed</li>
-        <li><span class="cred-marker"></span>Former Law Enforcement Officer</li>
         <li><span class="cred-marker"></span>Former Military Intelligence Analyst</li>
         <li><span class="cred-marker"></span>U.S. Top Secret / SCI Clearance</li>
+        <li><span class="cred-marker"></span>FINRA Series 7, 65, &amp; 66 Licensed</li>
         <li><span class="cred-marker"></span>HNW Strategy Lead &mdash; Major Wirehouse</li>
         <li><span class="cred-marker"></span>5-Branch High-Net-Worth Oversight</li>
         <li><span class="cred-marker"></span>Proprietary Technology Infrastructure</li>
+        <li><span class="cred-marker"></span>Former Law Enforcement Officer</li>
       </ul>
     </div>
     <div class="founder-text">
-      <p>Logan Jackson's career began in law enforcement, where he developed the investigative discipline and pattern recognition that would define his analytical approach. From there, he transitioned to military intelligence, where the stakes of a wrong conclusion aren't measured in quarterly performance &mdash; they're measured in lives. That environment instilled a permanent bias toward evidence over narrative, verification over assumption, and decisive action over comfortable consensus.</p>
+      <p>Logan Jackson's analytical foundation was forged in the highest-stakes environment the U.S. government offers. As a <span class="redacted">Military Intelligence Analyst</span> with a <span class="redacted">Top Secret / SCI</span> security clearance, he operated where the consequences of a wrong conclusion aren't measured in quarterly performance &mdash; they're measured in lives. That environment installed a permanent operating discipline: evidence over narrative, verification over assumption, and decisive action over comfortable consensus.</p>
 
       <div class="clearance-callout">
+        <span class="stamp">VERIFIED</span>
         <strong>Top Secret / SCI Security Clearance</strong> &mdash; One of the highest levels of U.S. government trust, requiring up to 15 months of comprehensive background investigation. Financial history, personal integrity, and judgment are rigorously evaluated. The same standard of trust and discretion applies to every client relationship at Xenith Capital.
       </div>
 
       <p>Logan entered the financial industry at a major wirehouse, where he led high-net-worth investment strategies across five branch offices. It was there he saw the industry's structural problem firsthand: advisors trained in sales, not analysis. Portfolios assembled from templates, not research. Investment decisions made by committees and outsourced managers, not by the person sitting across from the client.</p>
-      <p>Xenith Capital was built to reverse that equation. Logan combines an analytical foundation &mdash; forged in intelligence work, not a business program &mdash; with proprietary technology systems built in-house. Every portfolio is constructed from the ground up. Every investment decision is made by the same person you speak with. The result is the kind of focused, evidence-driven wealth management that the standard industry model structurally cannot deliver.</p>
+      <p>Xenith Capital exists because that equation needed to be reversed. Logan combines an analytical foundation &mdash; forged in intelligence work and law enforcement, not a business program &mdash; with proprietary technology systems designed and built in-house. Every portfolio is constructed from the ground up. Every investment decision is made by the same person you speak with. The result is the kind of focused, evidence-driven wealth management that the standard industry model is structurally incapable of delivering.</p>
+      <p>Before intelligence work, Logan served as a <span class="redacted">Law Enforcement Officer</span> &mdash; developing the investigative rigor, behavioral pattern recognition, and uncompromising integrity that became the bedrock of everything that followed. These aren't credentials on a wall. They represent a fundamentally different way of evaluating risk, reading situations others miss, and earning the kind of trust that can't be manufactured.</p>
     </div>
   </div>
 </section>
@@ -835,12 +1331,12 @@ footer {
     <div class="diff-item">
       <div class="diff-stat"><span class="counter" data-target="3">0</span></div>
       <div class="diff-label">Disciplines</div>
-      <div class="diff-desc">Law enforcement, military intelligence, and institutional finance. An analytical foundation that is exceptionally rare in wealth management.</div>
+      <div class="diff-desc">Military intelligence, law enforcement, and institutional finance. An analytical foundation that is exceptionally rare in wealth management.</div>
     </div>
     <div class="diff-item">
       <div class="diff-stat">24/7</div>
       <div class="diff-label">Market Monitoring</div>
-      <div class="diff-desc">Proprietary technology systems provide continuous surveillance of portfolio positions, market conditions, and risk parameters.</div>
+      <div class="diff-desc">Proprietary computational systems provide continuous surveillance of portfolio positions, market conditions, and risk parameters &mdash; processing data at a speed and scale that manual analysis cannot match.</div>
     </div>
     <div class="diff-item">
       <div class="diff-stat"><span class="counter" data-target="1">0</span>:1</div>
@@ -853,12 +1349,13 @@ footer {
 <!-- ── CTA ─────────────────────────────────── -->
 <div class="band">
 <section id="contact" class="cta-section section-reveal">
-  <div class="section-label">// Get Started</div>
-  <div class="section-title">Ready for a Different Standard?</div>
+  <div class="section-label">// Begin</div>
+  <div class="section-title">Request a Private Briefing</div>
   <div class="section-divider" style="margin: 0 auto 2rem;"></div>
-  <p class="section-text">We begin every relationship with a confidential conversation to understand your goals, concerns, and expectations. No obligations. No sales pitch. Just a candid assessment of whether Xenith Capital is the right fit. We maintain a deliberately limited number of client relationships to ensure every portfolio receives the focused attention it deserves.</p>
+  <p class="section-text">Every client relationship starts with a confidential, one-on-one strategy discussion tailored to your specific situation. No sales pitch. No obligations. Just a candid assessment of whether our approach aligns with your objectives. We maintain a deliberately limited number of client relationships to ensure the depth of attention your portfolio demands.</p>
   <div class="cta-buttons">
-    <a href="mailto:advisory@xenithcap.io" class="cta-primary">Schedule a Consultation</a>
+    <a href="mailto:advisory@xenithcap.io" class="cta-primary">Request a Private Briefing</a>
+    <a href="tel:+1" class="cta-secondary">Schedule a Strategy Call</a>
   </div>
 </section>
 </div>
@@ -892,89 +1389,422 @@ footer {
 </footer>
 
 <script>
-// Nav scroll effect
+// ═══════════════════════════════════════════════
+// XENITH CAPITAL — IMMERSIVE ENGINE v5.0
+// 21 animation systems. Zero dependencies.
+// ═══════════════════════════════════════════════
+
+var isMobile = window.innerWidth < 768 || 'ontouchstart' in window;
+
+// ── 1. BOOT SEQUENCE (CINEMATIC) ──────────────
 (function() {
-  var nav = document.querySelector('nav');
-  window.addEventListener('scroll', function() {
-    nav.classList.toggle('scrolled', window.scrollY > 50);
+  var overlay = document.getElementById('bootOverlay');
+  var terminal = document.getElementById('bootTerminal');
+  var bar = document.getElementById('bootBar');
+  // Initial glitch
+  setTimeout(function() {
+    overlay.style.filter = 'hue-rotate(90deg) brightness(1.3)';
+    overlay.style.transform = 'translate(2px,-1px)';
+    setTimeout(function() { overlay.style.filter = ''; overlay.style.transform = ''; }, 100);
+  }, 150);
+  var lines = [
+    { t: '\u2588 CLASSIFICATION: TOP SECRET // SCI', c: 'classification' },
+    { t: '> XENITH CAPITAL SECURE SYSTEMS v5.0', c: '' },
+    { t: '> Encrypted channel.................... ESTABLISHED', c: '' },
+    { t: '> Market surveillance grid.............. ONLINE', c: '' },
+    { t: '> Analytical engine..................... ARMED', c: '' },
+    { t: '> Risk protocols....................... ACTIVE', c: '' },
+    { t: '> Integrity verification............... PASSED', c: '' },
+    { t: '> ACCESS GRANTED', c: 'success' }
+  ];
+  lines.forEach(function(line, i) {
+    setTimeout(function() {
+      var el = document.createElement('div');
+      el.className = 'line' + (line.c ? ' ' + line.c : '');
+      el.textContent = line.t;
+      terminal.appendChild(el);
+      bar.style.width = ((i + 1) / lines.length * 100) + '%';
+      if (i === lines.length - 1) {
+        setTimeout(function() {
+          overlay.style.filter = 'brightness(1.4) hue-rotate(15deg)';
+          overlay.style.transform = 'translate(-2px,1px)';
+          setTimeout(function() {
+            overlay.style.filter = ''; overlay.style.transform = '';
+            overlay.classList.add('done');
+            setTimeout(function() { overlay.remove(); }, 800);
+          }, 80);
+        }, 350);
+      }
+    }, 400 + i * 155);
   });
 })();
 
-// Section reveal
+// ── 2. NAV SCROLL ─────────────────────────────
+(function() {
+  var nav = document.querySelector('nav');
+  window.addEventListener('scroll', function() { nav.classList.toggle('scrolled', window.scrollY > 50); });
+})();
+
+// ── 3. SCROLL PROGRESS BAR ────────────────────
+(function() {
+  var bar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', function() {
+    bar.style.width = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100) + '%';
+  });
+})();
+
+// ── 4. SECTION REVEAL (CAMERA FOCUS) ──────────
 (function() {
   var sections = document.querySelectorAll('.section-reveal');
   if (!sections.length) return;
-  var observer = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+  var obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
     });
   }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-  sections.forEach(function(s) { observer.observe(s); });
+  sections.forEach(function(s) { obs.observe(s); });
 })();
 
-// Animated counters
+// ── 5. WEBGL SHADER BACKGROUND ────────────────
 (function() {
-  var animated = new Set();
-  function animateCounter(el) {
-    var target = parseInt(el.getAttribute('data-target'));
-    var prefix = el.parentElement.getAttribute('data-prefix') || el.getAttribute('data-prefix') || '';
-    var suffix = el.parentElement.getAttribute('data-suffix') || el.getAttribute('data-suffix') || '';
-    var duration = 1500;
-    var startTime = null;
-
-    function step(timestamp) {
-      if (!startTime) startTime = timestamp;
-      var progress = Math.min((timestamp - startTime) / duration, 1);
-      var eased = 1 - Math.pow(1 - progress, 3);
-      var current = Math.floor(eased * target);
-      el.textContent = prefix + current + suffix;
-      if (progress < 1) requestAnimationFrame(step);
-      else el.textContent = prefix + target + suffix;
-    }
-    requestAnimationFrame(step);
+  if (isMobile) return;
+  var c = document.createElement('canvas');
+  c.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;';
+  document.body.insertBefore(c, document.body.firstChild);
+  var gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+  if (!gl) return;
+  function resize() { c.width = window.innerWidth; c.height = window.innerHeight; gl.viewport(0, 0, c.width, c.height); }
+  resize(); window.addEventListener('resize', resize);
+  function mk(type, src) {
+    var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+    return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : (gl.deleteShader(s), null);
   }
-
-  // Revelation stats
-  var revStats = document.querySelectorAll('.rev-stat-num');
-  var revObserver = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting && !animated.has(entry.target)) {
-        animated.add(entry.target);
-        animateCounter(entry.target);
-      }
-    });
-  }, { threshold: 0.5 });
-  revStats.forEach(function(s) { revObserver.observe(s); });
-
-  // Differentiator counters
-  var counters = document.querySelectorAll('.counter');
-  var counterObserver = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting && !animated.has(entry.target)) {
-        animated.add(entry.target);
-        var target = parseInt(entry.target.getAttribute('data-target'));
-        var duration = 800;
-        var startTime = null;
-        function step(timestamp) {
-          if (!startTime) startTime = timestamp;
-          var progress = Math.min((timestamp - startTime) / duration, 1);
-          var eased = 1 - Math.pow(1 - progress, 3);
-          entry.target.textContent = Math.floor(eased * target);
-          if (progress < 1) requestAnimationFrame(step);
-          else entry.target.textContent = target;
-        }
-        requestAnimationFrame(step);
-      }
-    });
-  }, { threshold: 0.5 });
-  counters.forEach(function(c) { counterObserver.observe(c); });
+  var vs = mk(gl.VERTEX_SHADER, 'attribute vec2 a;void main(){gl_Position=vec4(a,0,1);}');
+  var fs = mk(gl.FRAGMENT_SHADER, [
+    'precision mediump float;',
+    'uniform float T;uniform vec2 R;uniform vec2 M;uniform float S;',
+    'vec2 H(vec2 p){p=vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));return-1.+2.*fract(sin(p)*43758.5453);}',
+    'float N(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);',
+    'return mix(mix(dot(H(i),f),dot(H(i+vec2(1,0)),f-vec2(1,0)),u.x),',
+    'mix(dot(H(i+vec2(0,1)),f-vec2(0,1)),dot(H(i+vec2(1,1)),f-vec2(1,1)),u.x),u.y);}',
+    'float F(vec2 p){float v=0.,a=.5;mat2 r=mat2(.87,.48,-.48,.87);',
+    'for(int i=0;i<5;i++){v+=a*N(p);p=r*p*2.;a*=.5;}return v;}',
+    'void main(){vec2 uv=gl_FragCoord.xy/R;float A=R.x/R.y;vec2 p=vec2(uv.x*A,uv.y);',
+    'float t=T*.06,sc=S*.0002;',
+    'float n1=F(p*2.5+vec2(t,t*.7+sc));',
+    'float n2=F(p*1.8-vec2(t*.6,t*.9)+vec2(n1*.4));',
+    'float w=F(p*2.+vec2(n1,n2)*.5);',
+    'vec2 mU=M/R;mU.x*=A;float mg=smoothstep(.5,.0,length(p-mU))*.1;',
+    'vec3 c=vec3(.02,.035,.065);',
+    'c+=vec3(0.,.9,1.)*(w*.04+mg);',
+    'c+=vec3(.79,.66,.3)*n2*.02;',
+    'c+=vec3(0.,.9,1.)*mg*.5;',
+    'c*=smoothstep(0.,.7,1.-length((uv-.5)*vec2(1.3,1.6)));',
+    'gl_FragColor=vec4(c,1.);}'
+  ].join('\n'));
+  if (!vs || !fs) return;
+  var prog = gl.createProgram(); gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+  gl.useProgram(prog);
+  var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+  var aL = gl.getAttribLocation(prog, 'a'); gl.enableVertexAttribArray(aL); gl.vertexAttribPointer(aL, 2, gl.FLOAT, false, 0, 0);
+  var uT = gl.getUniformLocation(prog, 'T'), uR = gl.getUniformLocation(prog, 'R'),
+      uM = gl.getUniformLocation(prog, 'M'), uS = gl.getUniformLocation(prog, 'S');
+  var mx = 0, my = 0;
+  document.addEventListener('mousemove', function(e) { mx = e.clientX; my = c.height - e.clientY; });
+  var t0 = Date.now();
+  (function render() {
+    gl.uniform1f(uT, (Date.now() - t0) * .001); gl.uniform2f(uR, c.width, c.height);
+    gl.uniform2f(uM, mx, my); gl.uniform1f(uS, window.scrollY);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); requestAnimationFrame(render);
+  })();
 })();
 
-// Mobile nav close on link click
+// ── 6. PARTICLE CONSTELLATION + MOUSE TRAIL ───
 (function() {
-  var links = document.querySelectorAll('.nav-links a');
-  var navLinks = document.querySelector('.nav-links');
-  links.forEach(function(link) { link.addEventListener('click', function() { navLinks.classList.remove('open'); }); });
+  var cv = document.createElement('canvas');
+  cv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;';
+  document.body.appendChild(cv);
+  var ctx = cv.getContext('2d'), particles = [], mouse = { x: -9999, y: -9999 }, trail = [];
+  var count = isMobile ? 20 : 50, cDist = isMobile ? 100 : 140;
+  function resize() { cv.width = window.innerWidth; cv.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  if (!isMobile) {
+    document.addEventListener('mousemove', function(e) {
+      mouse.x = e.clientX; mouse.y = e.clientY;
+      trail.push({ x: e.clientX, y: e.clientY }); if (trail.length > 18) trail.shift();
+    });
+  }
+  for (var i = 0; i < count; i++) {
+    particles.push({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight,
+      vx: (Math.random() - .5) * .2, vy: (Math.random() - .5) * .2,
+      sz: Math.random() * 1.5 + .5, op: Math.random() * .2 + .06, ph: Math.random() * Math.PI * 2 });
+  }
+  (function anim() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    var time = Date.now() * .001;
+    // Mouse trail
+    if (!isMobile && trail.length > 1) {
+      for (var t = 1; t < trail.length; t++) {
+        ctx.beginPath(); ctx.moveTo(trail[t-1].x, trail[t-1].y); ctx.lineTo(trail[t].x, trail[t].y);
+        ctx.strokeStyle = 'rgba(0,229,255,' + (t / trail.length * .12) + ')'; ctx.lineWidth = 1; ctx.stroke();
+      }
+    }
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < -10) p.x = cv.width + 10; if (p.x > cv.width + 10) p.x = -10;
+      if (p.y < -10) p.y = cv.height + 10; if (p.y > cv.height + 10) p.y = -10;
+      if (!isMobile) {
+        var dx = p.x - mouse.x, dy = p.y - mouse.y, dist = Math.sqrt(dx*dx+dy*dy);
+        if (dist < 180) { var f = (180-dist)/180*.012; p.vx += dx/dist*f; p.vy += dy/dist*f; }
+      }
+      p.vx *= .996; p.vy *= .996;
+      var op = p.op + Math.sin(time + p.ph) * .05;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.sz, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(0,229,255,' + op + ')'; ctx.fill();
+      for (var j = i+1; j < particles.length; j++) {
+        var q = particles[j], ddx = p.x-q.x, ddy = p.y-q.y, d = ddx*ddx+ddy*ddy;
+        if (d < cDist*cDist) {
+          ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y);
+          ctx.strokeStyle = 'rgba(0,229,255,' + ((1-Math.sqrt(d)/cDist)*.06) + ')';
+          ctx.lineWidth = .5; ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(anim);
+  })();
+})();
+
+// ── 7. CURSOR GLOW ────────────────────────────
+(function() {
+  if (isMobile) return;
+  var g = document.getElementById('cursorGlow');
+  document.addEventListener('mousemove', function(e) {
+    requestAnimationFrame(function() { g.style.left = e.clientX+'px'; g.style.top = e.clientY+'px'; g.style.opacity = '1'; });
+  });
+  document.addEventListener('mouseleave', function() { g.style.opacity = '0'; });
+})();
+
+// ── 8. TEXT SCRAMBLE / DECODE ──────────────────
+(function() {
+  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*<>';
+  var done = new Set();
+  function scramble(el) {
+    var orig = el.textContent, len = orig.length, iter = 0;
+    var iv = setInterval(function() {
+      el.textContent = orig.split('').map(function(ch, idx) {
+        if (idx < iter) return orig[idx];
+        if (ch === ' ' || ch === '\u2014' || ch === ',') return ch;
+        return chars[Math.floor(Math.random() * chars.length)];
+      }).join('');
+      iter += .5;
+      if (iter >= len) { el.textContent = orig; clearInterval(iv); }
+    }, 20);
+  }
+  var obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting && !done.has(e.target)) { done.add(e.target); setTimeout(function() { scramble(e.target); }, 300); }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.section-title').forEach(function(t) { obs.observe(t); });
+})();
+
+// ── 9. NUMBER DECODE ──────────────────────────
+(function() {
+  var done = new Set(), dig = '0123456789';
+  function decode(el) {
+    var tgt = parseInt(el.getAttribute('data-target')), pre = el.getAttribute('data-prefix')||'',
+        suf = el.getAttribute('data-suffix')||'', ts = String(tgt), sD = 500, rD = 600, st = null;
+    (function step(now) {
+      if (!st) st = now; var e = now - st;
+      if (e < sD) {
+        var s = ''; for (var i = 0; i < ts.length; i++) s += dig[Math.floor(Math.random()*10)];
+        el.textContent = pre+s+suf; requestAnimationFrame(step);
+      } else if (e < sD+rD) {
+        var p = (e-sD)/rD, r = Math.floor(p*ts.length), t = '';
+        for (var i = 0; i < ts.length; i++) t += i<=r ? ts[i] : dig[Math.floor(Math.random()*10)];
+        el.textContent = pre+t+suf; requestAnimationFrame(step);
+      } else { el.textContent = pre+tgt+suf; }
+    })(performance.now());
+  }
+  document.querySelectorAll('.rev-stat-num').forEach(function(el) {
+    new IntersectionObserver(function(en) { en.forEach(function(e) {
+      if (e.isIntersecting && !done.has(e.target)) { done.add(e.target); decode(e.target); }
+    }); }, { threshold: .5 }).observe(el);
+  });
+  document.querySelectorAll('.counter').forEach(function(el) {
+    new IntersectionObserver(function(en) { en.forEach(function(e) {
+      if (e.isIntersecting && !done.has(e.target)) {
+        done.add(e.target);
+        var tgt = parseInt(e.target.getAttribute('data-target')), dur = 800, st = null;
+        (function s(ts) {
+          if (!st) st = ts; var p = Math.min((ts-st)/dur, 1);
+          e.target.textContent = Math.floor((1-Math.pow(1-p,3))*tgt);
+          if (p < 1) requestAnimationFrame(s); else e.target.textContent = tgt;
+        })(performance.now());
+      }
+    }); }, { threshold: .5 }).observe(el);
+  });
+})();
+
+// ── 10. REDACTED TEXT REVEAL ──────────────────
+(function() {
+  var els = document.querySelectorAll('.redacted');
+  if (!els.length) return;
+  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\u2588\u2593\u2592\u2591';
+  var revealed = new Set();
+  // Redact on load
+  els.forEach(function(el) {
+    el.setAttribute('data-text', el.textContent);
+    el.textContent = el.textContent.replace(/[^\s]/g, '\u2588');
+  });
+  function reveal(el) {
+    var text = el.getAttribute('data-text'), len = text.length, i = 0;
+    el.classList.add('revealing');
+    var iv = setInterval(function() {
+      var r = '';
+      for (var j = 0; j < len; j++) {
+        if (j < i) r += text[j];
+        else if (j < i + 3 && text[j] !== ' ') r += chars[Math.floor(Math.random()*chars.length)];
+        else if (text[j] === ' ') r += ' ';
+        else r += '\u2588';
+      }
+      el.textContent = r; i++;
+      if (i > len + 3) { el.textContent = text; el.classList.remove('revealing'); el.classList.add('revealed'); clearInterval(iv); }
+    }, 35);
+  }
+  var obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting && !revealed.has(e.target)) { revealed.add(e.target); setTimeout(function() { reveal(e.target); }, 600); }
+    });
+  }, { threshold: .5 });
+  els.forEach(function(el) { obs.observe(el); });
+})();
+
+// ── 11. CLASSIFIED STAMP ──────────────────────
+(function() {
+  var callout = document.querySelector('.clearance-callout');
+  if (!callout) return;
+  var stamped = false;
+  new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting && !stamped) { stamped = true; setTimeout(function() { callout.classList.add('stamped'); }, 800); }
+    });
+  }, { threshold: .5 }).observe(callout);
+})();
+
+// ── 12. 3D CARD TILT + SHINE ──────────────────
+(function() {
+  if (isMobile) return;
+  document.querySelectorAll('.tech-card, .service-card').forEach(function(card) {
+    var shine = document.createElement('div');
+    shine.className = card.classList.contains('tech-card') ? 'tech-card-shine' : 'service-card-shine';
+    card.appendChild(shine);
+    card.addEventListener('mousemove', function(e) {
+      var r = card.getBoundingClientRect(), x = e.clientX-r.left, y = e.clientY-r.top;
+      card.style.transform = 'perspective(800px) rotateX(' + ((y-r.height/2)/r.height*-4) + 'deg) rotateY(' + ((x-r.width/2)/r.width*4) + 'deg) translateY(-4px)';
+      card.style.setProperty('--mouse-x', (x/r.width*100)+'%');
+      card.style.setProperty('--mouse-y', (y/r.height*100)+'%');
+    });
+    card.addEventListener('mouseleave', function() { card.style.transform = ''; });
+    card.addEventListener('animationend', function() { card.style.animation = 'none'; });
+  });
+})();
+
+// ── 13. MAGNETIC BUTTONS ──────────────────────
+(function() {
+  if (isMobile) return;
+  document.querySelectorAll('.hero-cta, .cta-primary, .cta-secondary').forEach(function(btn) {
+    btn.addEventListener('mousemove', function(e) {
+      var r = btn.getBoundingClientRect();
+      btn.style.transform = 'translate(' + ((e.clientX-r.left-r.width/2)*.25) + 'px,' + ((e.clientY-r.top-r.height/2)*.25) + 'px)';
+    });
+    btn.addEventListener('mouseleave', function() { btn.style.transform = ''; });
+  });
+})();
+
+// ── 14. CHROMATIC GLITCH ──────────────────────
+(function() {
+  if (isMobile) return;
+  var h1 = document.querySelector('.hero h1'), logo = document.querySelector('.nav-logo');
+  function glitch(el, px) {
+    el.style.textShadow = (-px)+'px 0 rgba(0,229,255,.4),'+px+'px 0 rgba(201,168,76,.4)';
+    setTimeout(function() {
+      el.style.textShadow = (px/2)+'px 0 rgba(0,229,255,.2),'+(-px/2)+'px 0 rgba(201,168,76,.2)';
+      setTimeout(function() { el.style.textShadow = ''; }, 60);
+    }, 80);
+  }
+  function schedule() {
+    setTimeout(function() {
+      if (h1) glitch(h1, 2);
+      if (logo && Math.random() > .5) setTimeout(function() { glitch(logo, 1); }, 100);
+      schedule();
+    }, 6000 + Math.random() * 12000);
+  }
+  setTimeout(schedule, 4000);
+})();
+
+// ── 15. FILM GRAIN ────────────────────────────
+(function() {
+  var g = document.getElementById('grainOverlay');
+  if (!g) return;
+  var c = document.createElement('canvas'); c.width = c.height = 256;
+  var ctx = c.getContext('2d'), img = ctx.createImageData(256, 256);
+  for (var i = 0; i < img.data.length; i += 4) {
+    var v = Math.random() * 255;
+    img.data[i] = img.data[i+1] = img.data[i+2] = v; img.data[i+3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  g.style.backgroundImage = 'url(' + c.toDataURL() + ')'; g.style.backgroundSize = '256px';
+})();
+
+// ── 16. RADAR SWEEP ───────────────────────────
+(function() {
+  if (isMobile) return;
+  var line = document.createElement('div');
+  line.style.cssText = 'position:fixed;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,255,.12),transparent);z-index:3;pointer-events:none;opacity:0;';
+  document.body.appendChild(line);
+  function pulse() {
+    line.style.top = '0'; line.style.opacity = '1';
+    var st = Date.now();
+    (function move() {
+      var p = (Date.now() - st) / 2000;
+      if (p > 1) { line.style.opacity = '0'; return; }
+      line.style.top = (p * 100) + '%'; requestAnimationFrame(move);
+    })();
+    setTimeout(pulse, 15000 + Math.random() * 20000);
+  }
+  setTimeout(pulse, 8000);
+})();
+
+// ── 17. PARALLAX GRID ─────────────────────────
+(function() {
+  if (isMobile) return;
+  window.addEventListener('scroll', function() {
+    document.body.style.setProperty('--scroll-y', (-window.scrollY * .03) + 'px');
+  });
+  var s = document.createElement('style');
+  s.textContent = 'body::before{background-position:0 var(--scroll-y,0px);}';
+  document.head.appendChild(s);
+})();
+
+// ── 18. MOBILE NAV ────────────────────────────
+(function() {
+  document.querySelectorAll('.nav-links a').forEach(function(l) {
+    l.addEventListener('click', function() { document.querySelector('.nav-links').classList.remove('open'); });
+  });
+})();
+
+// ── 19. SMOOTH ANCHOR SCROLLING ───────────────
+(function() {
+  document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      var t = document.querySelector(this.getAttribute('href'));
+      if (t) { e.preventDefault(); window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' }); }
+    });
+  });
 })();
 </script>
 
