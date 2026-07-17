@@ -1,0 +1,2129 @@
+/* ==========================================================================
+   XENITH CAPITAL — CYBERPUNK VISUAL SYSTEM
+   assets/xenith.css — Agent A (visual systems)
+   Owns every selector in the contract DOM inventory.
+   Vanilla CSS, zero build. Fonts loaded via Google Fonts in index.html.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. DESIGN TOKENS
+   -------------------------------------------------------------------------- */
+:root {
+  --x-void: #04060a;        /* page bg */
+  --x-panel: #0a0f16;       /* card/panel bg */
+  --x-cyan: #00f0ff;        /* primary neon */
+  --x-magenta: #ff2d78;     /* secondary neon */
+  --x-amber: #ffb000;       /* warning/accent */
+  --x-text: #d7e3ee;        /* body text */
+  --x-dim: #5c7086;         /* muted text */
+  --x-line: rgba(0, 240, 255, .14); /* hairlines */
+  --x-font-d: 'Space Grotesk', system-ui, sans-serif;
+  --x-font-m: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* derived helpers */
+  --x-cyan-dim: rgba(0, 240, 255, .55);
+  --x-cyan-faint: rgba(0, 240, 255, .08);
+  --x-magenta-faint: rgba(255, 45, 120, .08);
+  --x-glow-cyan: 0 0 18px rgba(0, 240, 255, .35);
+  --x-glow-magenta: 0 0 18px rgba(255, 45, 120, .3);
+  --x-maxw: 1200px;
+  --x-pad-x: clamp(1.25rem, 4vw, 3rem);
+  --x-ease-out: cubic-bezier(.22, 1, .36, 1);
+}
+
+/* --------------------------------------------------------------------------
+   2. BASE RESET
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 240, 255, .3) var(--x-void);
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(55% 38% at 72% -4%, rgba(0, 240, 255, .055), transparent 62%),
+    radial-gradient(45% 32% at 12% 104%, rgba(255, 45, 120, .05), transparent 62%),
+    var(--x-void);
+  color: var(--x-text);
+  font-family: var(--x-font-d);
+  font-weight: 400;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+}
+
+code {
+  font-family: var(--x-font-m);
+  font-size: .92em;
+  color: var(--x-cyan);
+}
+
+a:focus-visible,
+input:focus-visible {
+  outline: 1px solid var(--x-cyan);
+  outline-offset: 3px;
+}
+
+/* text selection: cyan wash, dark glyph */
+::selection {
+  background: var(--x-cyan);
+  color: var(--x-void);
+}
+::-moz-selection {
+  background: var(--x-cyan);
+  color: var(--x-void);
+}
+
+/* thin neon scrollbar (webkit) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--x-void);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, .22);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 240, 255, .45);
+}
+
+/* --------------------------------------------------------------------------
+   3. FIXED ATMOSPHERE LAYERS
+   -------------------------------------------------------------------------- */
+#fx-bg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  display: block;
+  background: transparent;
+}
+
+/* CRT scanline film + vignette. Purely decorative, never intercepts input. */
+.x-scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 82% 62% at 50% 42%, transparent 58%, rgba(2, 4, 8, .55) 100%),
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px);
+  background-position: 0 0, 0 0;
+  animation: x-scanlines 7s linear infinite;
+}
+
+@keyframes x-scanlines {
+  from { background-position: 0 0, 0 0; }
+  to   { background-position: 0 0, 0 3px; } /* exactly one tile: seamless loop */
+}
+
+/* all real content sits above canvas + scanlines */
+main,
+header#x-nav,
+footer#x-footer {
+  position: relative;
+  z-index: 2;
+}
+
+/* --------------------------------------------------------------------------
+   4. CUSTOM CURSOR (positioned by main.js)
+   -------------------------------------------------------------------------- */
+#x-cursor,
+#x-cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  display: none;
+}
+
+#x-cursor {
+  width: 6px;
+  height: 6px;
+  /* centered via inline transform from main.js — no margins here */
+  background: var(--x-cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 240, 255, .85);
+  z-index: 9999;
+}
+
+#x-cursor-ring {
+  width: 34px;
+  height: 34px;
+  /* centered via inline transform from main.js — no margins here */
+  border: 1px solid rgba(0, 240, 255, .5);
+  border-radius: 50%;
+  z-index: 9998;
+}
+
+/* only with JS on a precise pointer; never on touch/coarse */
+@media (hover: hover) and (pointer: fine) {
+  html.js #x-cursor,
+  html.js #x-cursor-ring {
+    display: block;
+  }
+  html.js body {
+    cursor: none;
+  }
+  html.js.x-no-cursor #x-cursor,
+  html.js.x-no-cursor #x-cursor-ring {
+    display: none;
+  }
+  html.js.x-no-cursor body {
+    cursor: auto;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   5. NAV — sticky command bar
+   -------------------------------------------------------------------------- */
+#x-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--x-line);
+  background: linear-gradient(to bottom, rgba(4, 6, 10, .72), rgba(4, 6, 10, .45));
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  transition: background .35s ease, border-color .35s ease;
+}
+
+#x-nav.is-scrolled {
+  background: rgba(4, 6, 10, .92);
+  border-bottom-color: rgba(0, 240, 255, .22);
+}
+
+.x-nav-inner {
+  max-width: var(--x-maxw);
+  margin: 0 auto;
+  padding: 1.05rem var(--x-pad-x);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  transition: padding .35s ease;
+}
+
+#x-nav.is-scrolled .x-nav-inner {
+  padding-top: .55rem;
+  padding-bottom: .55rem;
+}
+
+/* brand: hex-X mark + wordmark */
+.x-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  flex: none;
+}
+
+.x-brand .x-mark {
+  width: 26px;
+  height: 26px;
+  color: var(--x-cyan);
+  filter: drop-shadow(0 0 6px rgba(0, 240, 255, .55));
+}
+
+.x-brand span {
+  font-family: var(--x-font-d);
+  font-weight: 700;
+  font-size: .82rem;
+  letter-spacing: .22em;
+  color: var(--x-text);
+  white-space: nowrap;
+}
+
+.x-brand em {
+  font-style: normal;
+  color: var(--x-magenta);
+  margin-left: .3em;
+  letter-spacing: .22em;
+}
+
+/* primary links: mono micro-labels with hover glow */
+.x-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 2.4vw, 2rem);
+}
+
+.x-links a {
+  position: relative;
+  font-family: var(--x-font-m);
+  font-size: .64rem;
+  letter-spacing: .2em;
+  color: var(--x-dim);
+  padding: .4rem 0;
+  transition: color .25s ease, text-shadow .25s ease;
+}
+
+.x-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 1px;
+  background: var(--x-cyan);
+  box-shadow: 0 0 8px rgba(0, 240, 255, .7);
+  transition: width .3s var(--x-ease-out);
+}
+
+.x-links a:hover {
+  color: var(--x-cyan);
+  text-shadow: 0 0 12px rgba(0, 240, 255, .65);
+}
+
+.x-links a:hover::after {
+  width: 100%;
+}
+
+/* status readout with pulsing dot */
+.x-nav-status {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-family: var(--x-font-m);
+  font-size: .6rem;
+  letter-spacing: .22em;
+  color: var(--x-dim);
+  white-space: nowrap;
+}
+
+.x-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--x-cyan);
+  box-shadow: 0 0 8px rgba(0, 240, 255, .9);
+  animation: x-dot-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes x-dot-pulse {
+  0%, 100% { opacity: 1;   box-shadow: 0 0 5px rgba(0, 240, 255, .9); }
+  50%      { opacity: .35; box-shadow: 0 0 14px rgba(0, 240, 255, .4); }
+}
+
+/* --------------------------------------------------------------------------
+   6. HERO
+   -------------------------------------------------------------------------- */
+.x-hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding: 7rem var(--x-pad-x) 6rem;
+}
+
+.x-hero-inner {
+  width: 100%;
+  max-width: var(--x-maxw);
+  margin: 0 auto;
+}
+
+.x-hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  font-family: var(--x-font-m);
+  font-size: .68rem;
+  letter-spacing: .38em;
+  color: var(--x-cyan);
+  text-shadow: 0 0 14px rgba(0, 240, 255, .45);
+  margin-bottom: 1.6rem;
+}
+
+.x-hero-eyebrow::before {
+  content: "";
+  width: 36px;
+  height: 1px;
+  background: var(--x-cyan);
+  box-shadow: 0 0 8px rgba(0, 240, 255, .8);
+  flex: none;
+}
+
+.x-hero-title {
+  font-family: var(--x-font-d);
+  font-weight: 700;
+  font-size: clamp(2.6rem, 7vw, 6.5rem);
+  line-height: 1.02;
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  text-shadow: 0 0 42px rgba(0, 240, 255, .12);
+  margin-bottom: 1.5rem;
+}
+
+/* typewriter caret */
+.x-typer-caret {
+  display: inline-block;
+  width: 3px;
+  height: .82em;
+  margin-left: .12em;
+  vertical-align: -.06em;
+  background: var(--x-cyan);
+  box-shadow: 0 0 12px rgba(0, 240, 255, .85);
+  animation: x-caret 1.05s steps(1, end) infinite;
+}
+
+@keyframes x-caret {
+  0%, 55%   { opacity: 1; }
+  56%, 100% { opacity: 0; }
+}
+
+.x-hero-sub {
+  max-width: 56ch;
+  color: var(--x-dim);
+  font-size: clamp(1rem, 1.4vw, 1.14rem);
+  font-weight: 300;
+  line-height: 1.78;
+  margin-bottom: 2.6rem;
+}
+
+.x-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* --- buttons ---------------------------------------------------------- */
+.x-btn {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  padding: .95rem 1.8rem;
+  font-family: var(--x-font-m);
+  font-size: .7rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--x-void);
+  background: var(--x-cyan);
+  border: 1px solid var(--x-cyan);
+  box-shadow: var(--x-glow-cyan);
+  transition: transform .3s var(--x-ease-out), box-shadow .3s ease,
+              background .3s ease, color .3s ease, border-color .3s ease;
+}
+
+/* light sweep that crosses the face on hover */
+.x-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -85%;
+  width: 55%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .4), transparent);
+  transform: skewX(-20deg);
+  transition: left .55s ease;
+  pointer-events: none;
+}
+
+.x-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 34px rgba(0, 240, 255, .55);
+}
+
+.x-btn:hover::before {
+  left: 135%;
+}
+
+.x-btn:active {
+  transform: translateY(0);
+}
+
+/* ghost variant: outlined magenta, fills on hover */
+.x-btn-ghost {
+  color: var(--x-magenta);
+  background: transparent;
+  border-color: rgba(255, 45, 120, .6);
+  box-shadow: none;
+}
+
+.x-btn-ghost::before {
+  background: linear-gradient(100deg, transparent, rgba(255, 45, 120, .28), transparent);
+}
+
+.x-btn-ghost:hover {
+  color: var(--x-magenta);
+  background: rgba(255, 45, 120, .12);
+  border-color: var(--x-magenta);
+  box-shadow: 0 0 28px rgba(255, 45, 120, .35);
+  text-shadow: 0 0 10px rgba(255, 45, 120, .6);
+}
+
+/* --- HUD readout panel ------------------------------------------------- */
+.x-hud {
+  position: absolute;
+  right: var(--x-pad-x);
+  bottom: clamp(4.5rem, 11vh, 7.5rem);
+  width: 252px;
+  padding: 1rem 1.2rem;
+  background: rgba(10, 15, 22, .62);
+  border: 1px solid var(--x-line);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+/* HUD corner brackets (top-left / bottom-right) */
+.x-hud::before,
+.x-hud::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--x-cyan);
+  pointer-events: none;
+}
+
+.x-hud::before {
+  top: -1px;
+  left: -1px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.x-hud::after {
+  bottom: -1px;
+  right: -1px;
+  border-left: none;
+  border-top: none;
+}
+
+.x-hud-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .5rem 0;
+  border-bottom: 1px solid rgba(0, 240, 255, .08);
+}
+
+.x-hud-item:last-child {
+  border-bottom: none;
+}
+
+.x-hud-k {
+  font-family: var(--x-font-m);
+  font-size: .58rem;
+  letter-spacing: .22em;
+  color: var(--x-dim);
+}
+
+.x-hud-v {
+  font-family: var(--x-font-m);
+  font-size: .64rem;
+  letter-spacing: .1em;
+  color: var(--x-text);
+  text-align: right;
+}
+
+.x-hud-live {
+  display: inline-flex;
+  align-items: center;
+  color: var(--x-cyan);
+  text-shadow: 0 0 10px rgba(0, 240, 255, .5);
+  animation: x-live 2.4s ease-in-out infinite;
+}
+
+.x-hud-live::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--x-cyan);
+  box-shadow: 0 0 8px rgba(0, 240, 255, .9);
+  margin-right: .5em;
+  animation: x-dot-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes x-live {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .55; }
+}
+
+/* --- scroll cue --------------------------------------------------------- */
+.x-scroll-cue {
+  position: absolute;
+  bottom: 1.7rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--x-font-m);
+  font-size: .56rem;
+  letter-spacing: .42em;
+  color: var(--x-dim);
+  text-align: center;
+}
+
+.x-scroll-cue span {
+  position: relative;
+  display: block;
+  width: 1px;
+  height: 52px;
+  margin: .7rem auto 0;
+  overflow: hidden;
+  background: rgba(0, 240, 255, .15);
+}
+
+.x-scroll-cue span::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -40%;
+  width: 100%;
+  height: 40%;
+  background: var(--x-cyan);
+  box-shadow: 0 0 8px rgba(0, 240, 255, .8);
+  animation: x-cue 1.9s var(--x-ease-out) infinite;
+}
+
+@keyframes x-cue {
+  0%       { top: -40%; }
+  60%, 100% { top: 110%; }
+}
+
+/* --------------------------------------------------------------------------
+   7. SECTIONS
+   -------------------------------------------------------------------------- */
+.x-section {
+  position: relative;
+  max-width: var(--x-maxw);
+  margin: 0 auto;
+  padding: clamp(5rem, 10vw, 8.5rem) var(--x-pad-x);
+  border-top: 1px solid var(--x-line);
+  scroll-margin-top: 84px;
+}
+
+/* cyan tick riding the hairline separator */
+.x-section::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: var(--x-pad-x);
+  width: 68px;
+  height: 1px;
+  background: var(--x-cyan);
+  box-shadow: 0 0 10px rgba(0, 240, 255, .7);
+  pointer-events: none;
+}
+
+/* oversized ghost index, cinematic HUD backdrop */
+.x-section::before {
+  content: attr(data-index);
+  position: absolute;
+  top: clamp(3.4rem, 7.5vw, 6rem);
+  right: var(--x-pad-x);
+  font-family: var(--x-font-d);
+  font-weight: 700;
+  font-size: clamp(4rem, 9vw, 8rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(0, 240, 255, .08);
+  pointer-events: none;
+  user-select: none;
+}
+
+.x-section-head {
+  margin-bottom: 1.5rem;
+}
+
+.x-index {
+  display: block;
+  font-family: var(--x-font-m);
+  font-size: .66rem;
+  letter-spacing: .32em;
+  color: var(--x-cyan);
+  text-shadow: 0 0 12px rgba(0, 240, 255, .4);
+  margin-bottom: 1.1rem;
+}
+
+.x-title {
+  font-family: var(--x-font-d);
+  font-weight: 700;
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  line-height: 1.08;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  max-width: 24ch;
+}
+
+/* --- glitch-on-hover for section titles --------------------------------- */
+.x-glitch {
+  position: relative;
+  text-shadow: 0 0 30px rgba(0, 240, 255, .08);
+}
+
+.x-glitch::before,
+.x-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.x-glitch:hover::before {
+  opacity: .85;
+  color: var(--x-cyan);
+  animation: x-glitch-a .38s steps(2, end) infinite;
+}
+
+.x-glitch:hover::after {
+  opacity: .85;
+  color: var(--x-magenta);
+  animation: x-glitch-b .46s steps(2, end) infinite;
+}
+
+@keyframes x-glitch-a {
+  0%   { clip-path: inset(8% 0 76% 0);  transform: translate(-3px, -1px); }
+  20%  { clip-path: inset(52% 0 30% 0); transform: translate(3px, 1px); }
+  40%  { clip-path: inset(24% 0 58% 0); transform: translate(-2px, 0); }
+  60%  { clip-path: inset(68% 0 12% 0); transform: translate(2px, 1px); }
+  80%  { clip-path: inset(38% 0 44% 0); transform: translate(-3px, -1px); }
+  100% { clip-path: inset(6% 0 80% 0);  transform: translate(2px, 0); }
+}
+
+@keyframes x-glitch-b {
+  0%   { clip-path: inset(62% 0 18% 0); transform: translate(3px, 1px); }
+  20%  { clip-path: inset(14% 0 70% 0); transform: translate(-3px, 0); }
+  40%  { clip-path: inset(44% 0 38% 0); transform: translate(2px, -1px); }
+  60%  { clip-path: inset(4% 0 84% 0);  transform: translate(-2px, 1px); }
+  80%  { clip-path: inset(56% 0 26% 0); transform: translate(3px, 0); }
+  100% { clip-path: inset(30% 0 54% 0); transform: translate(-2px, -1px); }
+}
+
+.x-lead {
+  max-width: 62ch;
+  color: var(--x-dim);
+  font-size: clamp(1.05rem, 1.6vw, 1.28rem);
+  font-weight: 300;
+  line-height: 1.78;
+}
+
+/* shared rhythm for content blocks under the head/lead */
+.x-grid-3,
+.x-grid-2,
+.x-pipeline {
+  margin-top: clamp(2.2rem, 4.5vw, 3.4rem);
+}
+
+/* --------------------------------------------------------------------------
+   8. GRID-3 — MODULE CARDS
+   -------------------------------------------------------------------------- */
+.x-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.x-card {
+  position: relative;
+  background: var(--x-panel);
+  border: 1px solid var(--x-line);
+  padding: 1.8rem 1.7rem 2.1rem;
+  transition: transform .35s var(--x-ease-out), border-color .35s ease,
+              box-shadow .35s ease;
+}
+
+.x-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(0, 240, 255, .5);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .45), 0 0 26px rgba(0, 240, 255, .12);
+}
+
+.x-card-tag {
+  display: inline-block;
+  font-family: var(--x-font-m);
+  font-size: .6rem;
+  letter-spacing: .28em;
+  color: var(--x-magenta);
+  border: 1px solid rgba(255, 45, 120, .35);
+  background: var(--x-magenta-faint);
+  padding: .3rem .6rem;
+  margin-bottom: 1.1rem;
+}
+
+.x-card h3 {
+  font-family: var(--x-font-d);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: .12em;
+  color: var(--x-text);
+  margin-bottom: .75rem;
+}
+
+.x-card p {
+  color: var(--x-dim);
+  font-size: .92rem;
+  line-height: 1.72;
+}
+
+/* gradient underline that grows across the card base on hover */
+.x-card-bar {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 2px;
+  width: 22%;
+  background: linear-gradient(90deg, var(--x-cyan), var(--x-magenta));
+  background-size: 200% 100%;
+  box-shadow: 0 0 12px rgba(0, 240, 255, .45);
+  transition: width .5s var(--x-ease-out);
+}
+
+.x-card:hover .x-card-bar {
+  width: 100%;
+  animation: x-bar-flow 2.4s linear infinite;
+}
+
+@keyframes x-bar-flow {
+  to { background-position: -200% 0; }
+}
+
+/* --------------------------------------------------------------------------
+   9. PIPELINE — RESEARCH ENGINE
+   -------------------------------------------------------------------------- */
+.x-pipeline {
+  display: flex;
+  align-items: stretch;
+}
+
+.x-pipe-step {
+  flex: 1;
+  position: relative;
+  background: var(--x-panel);
+  border: 1px solid var(--x-line);
+  padding: 1.5rem 1.4rem;
+  transition: transform .35s var(--x-ease-out), border-color .35s ease,
+              box-shadow .35s ease;
+}
+
+.x-pipe-step:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 240, 255, .45);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .4), 0 0 22px rgba(0, 240, 255, .1);
+}
+
+.x-pipe-num {
+  display: block;
+  font-family: var(--x-font-m);
+  font-size: .62rem;
+  letter-spacing: .26em;
+  color: var(--x-cyan);
+  text-shadow: 0 0 10px rgba(0, 240, 255, .45);
+  margin-bottom: .9rem;
+}
+
+.x-pipe-name {
+  display: block;
+  font-family: var(--x-font-d);
+  font-weight: 700;
+  font-size: .92rem;
+  letter-spacing: .14em;
+  color: var(--x-text);
+  margin-bottom: .65rem;
+}
+
+.x-pipe-desc {
+  color: var(--x-dim);
+  font-size: .85rem;
+  line-height: 1.68;
+}
+
+/* dashed connector with flowing signal */
+.x-pipe-link {
+  flex: 0 0 44px;
+  align-self: center;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, var(--x-cyan) 0 6px, transparent 6px 12px);
+  opacity: .5;
+  animation: x-dash-h 1s linear infinite;
+}
+
+@keyframes x-dash-h {
+  to { background-position: 12px 0; } /* one tile width: seamless flow */
+}
+
+/* --------------------------------------------------------------------------
+   10. GRID-2 — PANELS, LISTS, METERS
+   -------------------------------------------------------------------------- */
+.x-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.x-panel {
+  background: var(--x-panel);
+  border: 1px solid var(--x-line);
+  padding: 1.8rem 1.7rem;
+}
+
+.x-panel-head {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  font-family: var(--x-font-m);
+  font-size: .64rem;
+  letter-spacing: .26em;
+  color: var(--x-cyan);
+  text-shadow: 0 0 10px rgba(0, 240, 255, .4);
+  border-bottom: 1px solid var(--x-line);
+  padding-bottom: .85rem;
+  margin-bottom: 1.3rem;
+}
+
+.x-panel-head::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--x-cyan);
+  box-shadow: 0 0 8px rgba(0, 240, 255, .8);
+  flex: none;
+}
+
+.x-panel p {
+  color: var(--x-dim);
+  font-size: .95rem;
+  line-height: 1.75;
+  margin-bottom: 1rem;
+}
+
+.x-panel p:last-of-type {
+  margin-bottom: 0;
+}
+
+/* doctrine list with square markers */
+.x-list li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: .85rem;
+  color: var(--x-dim);
+  font-size: .95rem;
+  line-height: 1.65;
+}
+
+.x-list li:last-child {
+  margin-bottom: 0;
+}
+
+.x-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .48em;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--x-cyan);
+  box-shadow: 0 0 6px rgba(0, 240, 255, .35);
+  transition: background .25s ease;
+}
+
+.x-list li:hover::before {
+  background: var(--x-cyan);
+}
+
+/* telemetry meters */
+.x-meter-widget {
+  display: grid;
+  gap: .35rem;
+}
+
+.x-meter-row {
+  display: grid;
+  grid-template-columns: minmax(130px, 175px) 1fr 48px;
+  align-items: center;
+  gap: 1rem;
+  padding: .55rem 0;
+}
+
+.x-meter-label {
+  font-family: var(--x-font-m);
+  font-size: .6rem;
+  letter-spacing: .18em;
+  color: var(--x-dim);
+}
+
+.x-meter {
+  height: 3px;
+  background: rgba(0, 240, 255, .1);
+}
+
+.x-meter-fill {
+  display: block;
+  height: 100%;
+  width: var(--fill, 0%);
+  background: linear-gradient(90deg, rgba(0, 240, 255, .35), var(--x-cyan));
+  box-shadow: 0 0 10px rgba(0, 240, 255, .5);
+  transition: width 1.1s var(--x-ease-out);
+}
+
+.x-meter-fill-warn {
+  background: linear-gradient(90deg, rgba(255, 176, 0, .3), var(--x-amber));
+  box-shadow: 0 0 10px rgba(255, 176, 0, .45);
+}
+
+.x-meter-val {
+  font-family: var(--x-font-m);
+  font-size: .68rem;
+  letter-spacing: .08em;
+  color: var(--x-cyan);
+  text-align: right;
+}
+
+.x-panel-note {
+  margin-top: 1.3rem;
+  color: var(--x-dim);
+  font-size: .84rem;
+  font-style: italic;
+  line-height: 1.65;
+}
+
+/* founder signature */
+.x-sig {
+  margin-top: 1.5rem;
+  font-family: var(--x-font-m);
+  font-size: .72rem;
+  letter-spacing: .26em;
+  color: var(--x-magenta);
+  text-shadow: 0 0 12px rgba(255, 45, 120, .45);
+}
+
+/* --------------------------------------------------------------------------
+   11. FACTS — 2x2 hairline grid
+   -------------------------------------------------------------------------- */
+.x-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--x-line);
+  border: 1px solid var(--x-line);
+  align-self: start;
+}
+
+.x-fact {
+  background: var(--x-panel);
+  padding: 1.7rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: .6rem;
+}
+
+.x-fact-num {
+  display: block;
+  font-family: var(--x-font-d);
+  font-weight: 700;
+  font-size: clamp(2.3rem, 4vw, 3.4rem);
+  line-height: 1;
+  letter-spacing: -.01em;
+  color: var(--x-cyan);
+  text-shadow: 0 0 26px rgba(0, 240, 255, .38);
+}
+
+.x-fact-word {
+  white-space: nowrap;
+}
+
+.x-fact-label {
+  font-family: var(--x-font-m);
+  font-size: .6rem;
+  letter-spacing: .24em;
+  color: var(--x-dim);
+}
+
+/* --------------------------------------------------------------------------
+   12. MANDATE TERMINAL
+   -------------------------------------------------------------------------- */
+#x-terminal {
+  background: #05080d;
+  border: 1px solid var(--x-line);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .5), 0 0 42px rgba(0, 240, 255, .06);
+  display: flex;
+  flex-direction: column;
+}
+
+.x-term-head {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .7rem 1rem;
+  border-bottom: 1px solid var(--x-line);
+  background: rgba(255, 255, 255, .02);
+}
+
+.x-term-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.x-term-dot:nth-child(1) {
+  background: var(--x-magenta);
+  box-shadow: 0 0 8px rgba(255, 45, 120, .6);
+}
+
+.x-term-dot:nth-child(2) {
+  background: var(--x-amber);
+  box-shadow: 0 0 8px rgba(255, 176, 0, .55);
+}
+
+.x-term-dot:nth-child(3) {
+  background: var(--x-cyan);
+  box-shadow: 0 0 8px rgba(0, 240, 255, .6);
+}
+
+.x-term-title {
+  margin-left: .6rem;
+  font-family: var(--x-font-m);
+  font-size: .62rem;
+  letter-spacing: .2em;
+  color: var(--x-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.x-term-body {
+  font-family: var(--x-font-m);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--x-text);
+  min-height: 260px;
+  max-height: 340px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
+  padding: 1.1rem 1.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 240, 255, .3) transparent;
+}
+
+.x-term-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.x-term-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.x-term-body a {
+  color: var(--x-cyan);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.x-term-form-row {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .85rem 1.25rem;
+  border-top: 1px solid var(--x-line);
+  transition: background .25s ease;
+}
+
+.x-term-form-row:focus-within {
+  background: rgba(0, 240, 255, .04);
+}
+
+.x-term-prompt {
+  font-family: var(--x-font-m);
+  font-size: 14px;
+  color: var(--x-cyan);
+  text-shadow: 0 0 10px rgba(0, 240, 255, .6);
+  flex: none;
+}
+
+.x-term-form {
+  flex: 1;
+  display: flex;
+}
+
+#x-term-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  font-family: var(--x-font-m);
+  font-size: 14px;
+  color: var(--x-cyan);
+  caret-color: var(--x-cyan);
+  text-shadow: 0 0 8px rgba(0, 240, 255, .35);
+}
+
+#x-term-input::placeholder {
+  color: rgba(92, 112, 134, .55);
+}
+
+/* --------------------------------------------------------------------------
+   13. CONTACT CHANNEL
+   -------------------------------------------------------------------------- */
+.x-contact-row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--x-line);
+}
+
+.x-contact-row:last-child {
+  border-bottom: none;
+}
+
+.x-contact-k {
+  font-family: var(--x-font-m);
+  font-size: .6rem;
+  letter-spacing: .24em;
+  color: var(--x-dim);
+}
+
+.x-contact-row span:not(.x-contact-k) {
+  font-size: .95rem;
+  color: var(--x-text);
+}
+
+.x-contact a {
+  color: var(--x-cyan);
+  font-family: var(--x-font-m);
+  font-size: .88rem;
+  border-bottom: 1px solid rgba(0, 240, 255, .35);
+  padding-bottom: 2px;
+  transition: text-shadow .25s ease, border-color .25s ease;
+}
+
+.x-contact a:hover {
+  text-shadow: 0 0 14px rgba(0, 240, 255, .75);
+  border-bottom-color: var(--x-cyan);
+}
+
+/* --------------------------------------------------------------------------
+   14. FOOTER
+   -------------------------------------------------------------------------- */
+#x-footer {
+  border-top: 1px solid var(--x-line);
+  padding: 3.5rem 0 3rem;
+}
+
+.x-foot-grid {
+  max-width: var(--x-maxw);
+  margin: 0 auto;
+  padding: 0 var(--x-pad-x);
+  display: grid;
+  gap: 1.7rem;
+}
+
+.x-brand-foot .x-mark {
+  width: 22px;
+  height: 22px;
+}
+
+.x-brand-foot span {
+  font-size: .74rem;
+}
+
+.x-disc {
+  max-width: 68ch;
+  color: var(--x-dim);
+  font-size: .8rem;
+  line-height: 1.78;
+}
+
+.x-copy {
+  font-family: var(--x-font-m);
+  font-size: .58rem;
+  letter-spacing: .3em;
+  color: var(--x-dim);
+}
+
+/* --------------------------------------------------------------------------
+   15. REVEAL SYSTEM (JS-gated) + PRELOAD GUARD
+   -------------------------------------------------------------------------- */
+html.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+
+html.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* per-item stagger inside grids and the hero stack */
+html.js .x-hero-inner > [data-reveal]:nth-child(2),
+html.js .x-grid-3 > [data-reveal]:nth-child(2),
+html.js .x-grid-2 > [data-reveal]:nth-child(2) {
+  transition-delay: .1s;
+}
+
+html.js .x-hero-inner > [data-reveal]:nth-child(3),
+html.js .x-grid-3 > [data-reveal]:nth-child(3) {
+  transition-delay: .2s;
+}
+
+html.js .x-hero-inner > [data-reveal]:nth-child(4) {
+  transition-delay: .3s;
+}
+
+html.js .x-hero > [data-reveal].x-hud {
+  transition-delay: .45s;
+}
+
+/* main.js strips x-preload on window load; until then nothing transitions */
+body.x-preload *,
+body.x-preload *::before,
+body.x-preload *::after {
+  transition: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   16. RESPONSIVE
+   -------------------------------------------------------------------------- */
+@media (max-width: 1100px) {
+  .x-links {
+    gap: 1rem;
+  }
+
+  .x-links a {
+    font-size: .6rem;
+    letter-spacing: .14em;
+  }
+
+  .x-pipe-link {
+    flex-basis: 30px;
+  }
+
+  .x-hud {
+    width: 232px;
+  }
+}
+
+@media (max-width: 860px) {
+  .x-hud {
+    display: none;
+  }
+
+  .x-grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .x-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  /* pipeline folds vertical: connectors become vertical dashes */
+  .x-pipeline {
+    flex-direction: column;
+  }
+
+  .x-pipe-link {
+    flex: none;
+    width: 1px;
+    height: 34px;
+    margin-left: 1.4rem;
+    background: repeating-linear-gradient(180deg, var(--x-cyan) 0 6px, transparent 6px 12px);
+    animation: x-dash-v 1s linear infinite;
+  }
+
+  @keyframes x-dash-v {
+    to { background-position: 0 12px; }
+  }
+
+  .x-section::before {
+    font-size: clamp(3rem, 10vw, 4.5rem);
+  }
+
+  .x-meter-row {
+    grid-template-columns: minmax(110px, 145px) 1fr 44px;
+    gap: .8rem;
+  }
+
+  .x-hero {
+    padding-top: 6rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .x-nav-inner {
+    gap: .8rem;
+    padding-top: .8rem;
+    padding-bottom: .8rem;
+  }
+
+  .x-brand .x-mark {
+    width: 20px;
+    height: 20px;
+  }
+
+  .x-brand span {
+    font-size: .68rem;
+    letter-spacing: .14em;
+  }
+
+  .x-links {
+    gap: .65rem;
+  }
+
+  .x-links a {
+    font-size: .54rem;
+    letter-spacing: .1em;
+  }
+
+  .x-nav-status {
+    display: none;
+  }
+
+  .x-hero {
+    padding-top: 5.5rem;
+    padding-bottom: 5rem;
+  }
+
+  .x-hero-title {
+    font-size: clamp(1.9rem, 9.5vw, 2.6rem);
+    letter-spacing: -.01em;
+  }
+
+  .x-hero-eyebrow {
+    font-size: .58rem;
+    letter-spacing: .26em;
+  }
+
+  .x-cta-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .x-btn {
+    text-align: center;
+  }
+
+  .x-section {
+    padding-top: 4.5rem;
+    padding-bottom: 4.5rem;
+  }
+
+  .x-section::before {
+    font-size: 2.8rem;
+    top: 3rem;
+  }
+
+  .x-card,
+  .x-panel,
+  .x-pipe-step {
+    padding: 1.5rem 1.3rem;
+  }
+
+  .x-meter-row {
+    grid-template-columns: minmax(92px, 120px) 1fr 40px;
+    gap: .6rem;
+  }
+
+  .x-meter-label {
+    font-size: .54rem;
+    letter-spacing: .12em;
+  }
+
+  .x-fact {
+    padding: 1.4rem 1.1rem;
+  }
+
+  .x-term-body {
+    min-height: 220px;
+    max-height: 300px;
+  }
+
+  .x-contact-row {
+    grid-template-columns: 96px 1fr;
+    gap: .8rem;
+  }
+
+  .x-scroll-cue {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   17. REDUCED MOTION — neutralize every animation path
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    transition-delay: 0s !important;
+  }
+
+  /* revealed content must end visible, never stuck hidden */
+  html.js [data-reveal],
+  html.js [data-reveal].is-visible {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* hold indicators in their on-state */
+  .x-scanlines,
+  .x-typer-caret,
+  .x-dot,
+  .x-hud-live,
+  .x-hud-live::before,
+  .x-scroll-cue span::before,
+  .x-card:hover .x-card-bar,
+  .x-pipe-link {
+    animation: none !important;
+  }
+
+  .x-typer-caret,
+  .x-dot,
+  .x-hud-live {
+    opacity: 1 !important;
+  }
+
+  .x-scroll-cue span {
+    background: rgba(0, 240, 255, .45);
+  }
+
+  /* static chromatic slices serve no one: drop them */
+  .x-glitch:hover::before,
+  .x-glitch:hover::after {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   V2 — INTENSITY PASS (Lane 1: visual systems)
+   Sections 18-25 extend the system for the v2 DOM. Every v1 rule in
+   sections 1-17 above is preserved intact; v2 rules only append or,
+   where noted, deliberately deepen an existing state from later in the
+   cascade at equal specificity.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   18. BOOT OVERLAY — #x-boot preloader (boot.js types, then .is-done)
+   -------------------------------------------------------------------------- */
+#x-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 10000; /* topmost layer: above cursor, nav, drawer */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(58% 42% at 50% 38%, rgba(0, 240, 255, .05), transparent 70%),
+    linear-gradient(rgba(0, 240, 255, .04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, .04) 1px, transparent 1px),
+    var(--x-void);
+  background-size: 100% 100%, 44px 44px, 44px 44px, 100% 100%;
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity .5s ease, transform .5s ease;
+}
+
+#x-boot.is-done {
+  opacity: 0;
+  transform: scale(1.03);
+  pointer-events: none;
+}
+
+.x-boot-inner {
+  width: min(560px, 88vw);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.x-boot-brand {
+  font-family: var(--x-font-d);
+  font-weight: 700;
+  font-size: clamp(1.3rem, 3.6vw, 1.9rem);
+  letter-spacing: .42em;
+  text-indent: .42em; /* optically recenter letterspaced caps */
+  text-align: center;
+  color: var(--x-cyan);
+  text-shadow: 0 0 18px rgba(0, 240, 255, .65), 0 0 46px rgba(0, 240, 255, .28);
+}
+
+#x-boot-log {
+  width: 100%;
+  min-height: 7em;
+  font-family: var(--x-font-m);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--x-dim);
+  overflow: hidden;
+}
+
+.x-boot-bar {
+  width: 100%;
+  height: 2px;
+  background: rgba(0, 240, 255, .12);
+  overflow: hidden;
+}
+
+#x-boot-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--x-cyan);
+  box-shadow: 0 0 12px rgba(0, 240, 255, .85), 0 0 26px rgba(0, 240, 255, .4);
+  transition: width .2s linear;
+}
+
+.x-boot-pct {
+  align-self: flex-end;
+  font-family: var(--x-font-m);
+  font-size: .72rem;
+  letter-spacing: .22em;
+  color: var(--x-magenta);
+  text-shadow: 0 0 12px rgba(255, 45, 120, .5);
+}
+
+/* --------------------------------------------------------------------------
+   19. SIDE RAIL — section dots + scroll progress spine (main.js drives)
+   -------------------------------------------------------------------------- */
+#x-rail {
+  position: fixed;
+  left: 1.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: .9rem;
+}
+
+/* dim full-height spine behind the dots */
+#x-rail::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 50%;
+  width: 1px;
+  margin-left: -.5px;
+  background: rgba(0, 240, 255, .08);
+  pointer-events: none;
+}
+
+#x-rail a[data-rail] {
+  position: relative;
+  z-index: 1; /* dots paint above the spine + progress line */
+  width: 8px;
+  height: 8px;
+  flex: none;
+  background: var(--x-void);
+  border: 1px solid rgba(0, 240, 255, .38);
+  transition: background .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+
+#x-rail a[data-rail]:hover {
+  border-color: var(--x-cyan);
+  box-shadow: 0 0 8px rgba(0, 240, 255, .45);
+}
+
+#x-rail a[data-rail].is-active {
+  background: var(--x-cyan);
+  border-color: var(--x-cyan);
+  box-shadow: 0 0 12px rgba(0, 240, 255, .85);
+}
+
+/* mono label revealed to the right of the dot */
+#x-rail a[data-rail]::after {
+  content: attr(data-rail);
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%) translateX(-5px);
+  font-family: var(--x-font-m);
+  font-size: .56rem;
+  letter-spacing: .26em;
+  color: var(--x-dim);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease, color .25s ease;
+}
+
+#x-rail a[data-rail]:hover::after,
+#x-rail a[data-rail].is-active::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+#x-rail a[data-rail].is-active::after {
+  color: var(--x-cyan);
+  text-shadow: 0 0 10px rgba(0, 240, 255, .5);
+}
+
+/* scroll progress: main.js sets an inline height % on this element */
+#x-rail-progress {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  width: 1px;
+  height: 0;
+  margin-left: -.5px;
+  background: linear-gradient(to bottom, var(--x-cyan), rgba(0, 240, 255, .5));
+  box-shadow: 0 0 8px rgba(0, 240, 255, .6);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   20. SIGNAL TAPE — seamless marquee (main.js clones track children once)
+   -------------------------------------------------------------------------- */
+.x-tape {
+  overflow: hidden;
+  padding: .7rem 0;
+  margin-top: -1px;
+  border-top: 1px solid var(--x-line);
+  border-bottom: 1px solid var(--x-line);
+  background: rgba(6, 10, 16, .55);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+}
+
+#x-tape-track {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 2.2rem;
+  width: max-content;
+  /* padding-right == gap: translateX(-50%) lands exactly on the clone, no jump */
+  padding-right: 2.2rem;
+  animation: x-tape-marquee 28s linear infinite;
+}
+
+@keyframes x-tape-marquee {
+  to { transform: translateX(-50%); }
+}
+
+.x-tape:hover #x-tape-track {
+  animation-play-state: paused;
+}
+
+.x-tape-item {
+  flex: none;
+  font-family: var(--x-font-m);
+  font-size: .68rem;
+  letter-spacing: .24em;
+  color: var(--x-dim);
+  white-space: nowrap;
+}
+
+.x-tape-sep {
+  flex: none;
+  font-family: var(--x-font-m);
+  font-size: .68rem;
+  color: var(--x-magenta);
+  text-shadow: 0 0 10px rgba(255, 45, 120, .45);
+  user-select: none;
+}
+
+/* --------------------------------------------------------------------------
+   21. TITLE INTENSIFICATION
+       main.js splits .x-title into .xl spans carrying a --i index;
+       IO then adds .is-visible to the title.
+   -------------------------------------------------------------------------- */
+.x-title .xw {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.x-title .xl {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(.5em);
+}
+
+.x-title.is-visible .xl {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity .5s cubic-bezier(.22, 1, .36, 1),
+              transform .5s cubic-bezier(.22, 1, .36, 1);
+  transition-delay: calc(var(--i) * 22ms);
+}
+
+/* one-shot shine sweep: the clip lives only inside the keyframes, so the
+   title renders with its normal v1 color before and after the sweep.
+   Delay (1.15s) lets the letter cascade land before the band ignites it. */
+.x-title.is-visible {
+  animation: x-title-shine 1.5s var(--x-ease-out) 1.15s 1;
+}
+
+@keyframes x-title-shine {
+  0% {
+    background-image: linear-gradient(105deg, var(--x-text) 42%, #eafdff 49%, rgba(0, 240, 255, .95) 51%, var(--x-text) 58%);
+    background-size: 240% 100%;
+    background-repeat: no-repeat;
+    background-position: 0% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+  100% {
+    background-image: linear-gradient(105deg, var(--x-text) 42%, #eafdff 49%, rgba(0, 240, 255, .95) 51%, var(--x-text) 58%);
+    background-size: 240% 100%;
+    background-repeat: no-repeat;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* hero idle glitch: rare 2px RGB-split flicker inside long quiet intervals */
+.x-hero-title {
+  animation: x-hero-idle 9s linear infinite;
+}
+
+@keyframes x-hero-idle {
+  0%, 91.9%, 93.4%, 96.7%, 97.2%, 100% {
+    text-shadow: 0 0 42px rgba(0, 240, 255, .12);
+  }
+  92% {
+    text-shadow: -2px 0 rgba(255, 45, 120, .5), 2px 0 rgba(0, 240, 255, .5),
+                 0 0 42px rgba(0, 240, 255, .12);
+  }
+  96.8% {
+    text-shadow: 2px 0 rgba(255, 45, 120, .42), -2px 0 rgba(0, 240, 255, .42),
+                 0 0 42px rgba(0, 240, 255, .12);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   22. TILT + MAGNETIC STATES (main.js sets inline transforms; .is-tilting)
+   -------------------------------------------------------------------------- */
+/* deeper card hover glow — extends the v1 hover; v1 transform preserved */
+.x-card:hover {
+  border-color: rgba(0, 240, 255, .6);
+  box-shadow: 0 22px 48px rgba(0, 0, 0, .55), 0 0 38px rgba(0, 240, 255, .17),
+              inset 0 0 26px rgba(0, 240, 255, .04);
+}
+
+/* faster transform follow while tilting + deepest neon border glow.
+   Listed after :hover so it wins while both match (pointer is over card). */
+.x-card.is-tilting,
+.x-pipe-step.is-tilting {
+  transition: transform .18s ease-out, border-color .35s ease, box-shadow .35s ease;
+  border-color: rgba(0, 240, 255, .7);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, .6), 0 0 46px rgba(0, 240, 255, .22),
+              inset 0 0 30px rgba(0, 240, 255, .05);
+}
+
+/* magnetic buttons: snappier transform response (extends v1 transition) */
+.x-btn {
+  transition: transform .15s ease-out, box-shadow .3s ease,
+              background .3s ease, color .3s ease, border-color .3s ease;
+}
+
+/* --------------------------------------------------------------------------
+   23. DISCLOSURES DRAWER — #x-disc (drawer.js toggles hidden / .is-open)
+   -------------------------------------------------------------------------- */
+#x-disc[hidden] {
+  display: none !important;
+}
+
+#x-disc {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  background: rgba(4, 6, 10, .72);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+
+#x-disc.is-open {
+  opacity: 1;
+}
+
+.x-disc-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(480px, 92vw);
+  display: flex;
+  flex-direction: column;
+  background: var(--x-panel);
+  border-left: 1px solid var(--x-line);
+  box-shadow: -32px 0 90px rgba(0, 0, 0, .55), -1px 0 24px rgba(0, 240, 255, .08);
+  transform: translateX(100%);
+  transition: transform .45s cubic-bezier(.22, 1, .36, 1);
+}
+
+#x-disc.is-open .x-disc-panel {
+  transform: translateX(0);
+}
+
+/* header bar mirroring the mandate terminal head (dots reuse .x-term-dot) */
+.x-disc-head {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .8rem 1.1rem;
+  border-bottom: 1px solid var(--x-line);
+  background: rgba(255, 255, 255, .02);
+  flex: none;
+}
+
+#x-disc-title {
+  flex: 1;
+  margin-left: .6rem;
+  font-family: var(--x-font-m);
+  font-size: .62rem;
+  letter-spacing: .2em;
+  color: var(--x-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#x-disc-close {
+  flex: none;
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: var(--x-font-m);
+  font-size: .6rem;
+  letter-spacing: .16em;
+  color: var(--x-amber);
+  background: transparent;
+  border: 1px solid rgba(255, 176, 0, .4);
+  padding: .35rem .55rem;
+  cursor: pointer;
+  transition: border-color .25s ease, box-shadow .25s ease, text-shadow .25s ease;
+}
+
+#x-disc-close:hover {
+  border-color: var(--x-amber);
+  box-shadow: 0 0 16px rgba(255, 176, 0, .35);
+  text-shadow: 0 0 10px rgba(255, 176, 0, .75);
+}
+
+.x-disc-body {
+  padding: 1.6rem;
+  font-family: var(--x-font-m);
+  font-size: .92rem;
+  line-height: 1.8;
+  color: var(--x-dim);
+  overflow-y: auto;
+}
+
+.x-disc-body p {
+  margin-bottom: 1.1rem;
+}
+
+.x-disc-lead {
+  font-family: var(--x-font-m);
+  color: var(--x-magenta);
+  letter-spacing: .06em;
+  text-shadow: 0 0 12px rgba(255, 45, 120, .45);
+}
+
+.x-disc-links {
+  display: grid;
+  gap: .8rem;
+  margin: 1.4rem 0;
+}
+
+a.x-disc-doc {
+  display: block;
+  border: 1px solid var(--x-line);
+  padding: .9rem 1rem;
+  background: rgba(255, 255, 255, .015);
+  transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
+}
+
+a.x-disc-doc:hover {
+  border-color: rgba(0, 240, 255, .6);
+  background: rgba(0, 240, 255, .035);
+  box-shadow: 0 0 24px rgba(0, 240, 255, .14), inset 0 0 18px rgba(0, 240, 255, .05);
+}
+
+.x-disc-doc-k {
+  display: block;
+  font-family: var(--x-font-m);
+  font-size: .72rem;
+  letter-spacing: .24em;
+  color: var(--x-cyan);
+  text-shadow: 0 0 10px rgba(0, 240, 255, .4);
+  margin-bottom: .3rem;
+}
+
+.x-disc-doc-v {
+  display: block;
+  font-size: .8rem;
+  line-height: 1.6;
+  color: var(--x-dim);
+}
+
+.x-disc-note {
+  font-size: .68rem;
+  letter-spacing: .1em;
+  color: var(--x-dim);
+  opacity: .8;
+}
+
+/* footer trigger button + footer row layout */
+.x-disc-btn {
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: var(--x-font-m);
+  font-size: .62rem;
+  letter-spacing: .24em;
+  color: var(--x-cyan);
+  background: transparent;
+  border: 1px solid rgba(0, 240, 255, .35);
+  padding: .75rem 1.15rem;
+  cursor: pointer;
+  transition: border-color .25s ease, box-shadow .25s ease,
+              background .25s ease, text-shadow .25s ease;
+}
+
+.x-disc-btn:hover {
+  border-color: var(--x-cyan);
+  background: rgba(0, 240, 255, .06);
+  box-shadow: 0 0 22px rgba(0, 240, 255, .28);
+  text-shadow: 0 0 12px rgba(0, 240, 255, .65);
+}
+
+.x-foot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+}
+
+/* focus parity for v2 buttons with the v1 link/input focus style */
+button:focus-visible {
+  outline: 1px solid var(--x-cyan);
+  outline-offset: 3px;
+}
+
+/* scroll lock while the drawer is open */
+body.x-disc-lock {
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   24. V2 RESPONSIVE
+   -------------------------------------------------------------------------- */
+@media (max-width: 1100px) {
+  #x-rail {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .x-tape-item,
+  .x-tape-sep {
+    font-size: .6rem;
+  }
+
+  .x-boot-brand {
+    letter-spacing: .3em;
+    text-indent: .3em;
+  }
+
+  /* drawer goes full width on small screens */
+  .x-disc-panel {
+    width: 100vw;
+    border-left: none;
+  }
+
+  .x-disc-body {
+    padding: 1.2rem;
+    font-size: .85rem;
+  }
+
+  .x-foot-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   25. V2 REDUCED MOTION — neutralize every new animation path
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  /* boot fade becomes instant (boot.js also drops the overlay at once) */
+  #x-boot {
+    transition: none !important;
+  }
+
+  /* tape holds static */
+  #x-tape-track {
+    animation: none !important;
+  }
+
+  /* no idle glitch, no shine sweep */
+  .x-hero-title,
+  .x-title.is-visible {
+    animation: none !important;
+  }
+
+  /* letters land revealed even if splitting ever runs */
+  .x-title .xl {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* drawer opens/closes instantly */
+  #x-disc,
+  .x-disc-panel {
+    transition-duration: .01ms !important;
+  }
+
+  /* rail labels appear without motion */
+  #x-rail a[data-rail]::after {
+    transition: none !important;
+  }
+}

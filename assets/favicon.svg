@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <clipPath id="frame">
+      <rect width="64" height="64" rx="14"/>
+    </clipPath>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  </defs>
+
+  <!-- tile -->
+  <rect width="64" height="64" rx="14" fill="#04060a"/>
+  <rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="#00f0ff" stroke-opacity="0.14"/>
+
+  <g clip-path="url(#frame)">
+    <!-- faint cyan glow: blurred duplicate hexagon beneath the mark -->
+    <path d="M32 4 L58 19 V45 L32 60 L6 45 V19 Z" fill="none" stroke="#00f0ff"
+          stroke-width="3" stroke-linejoin="round" filter="url(#glow)" opacity="0.55"/>
+
+    <!-- chromatic depth: magenta X shadow offset down-right -->
+    <path d="M20 20 L44 44 M44 20 L20 44" fill="none" stroke="#ff2d78" stroke-width="4"
+          stroke-linecap="round" opacity="0.5" transform="translate(1.5 1.5)"/>
+
+    <!-- core mark: neon hex-X -->
+    <path d="M32 4 L58 19 V45 L32 60 L6 45 V19 Z" fill="none" stroke="#00f0ff"
+          stroke-width="3" stroke-linejoin="round"/>
+    <path d="M20 20 L44 44 M44 20 L20 44" fill="none" stroke="#00f0ff" stroke-width="4"
+          stroke-linecap="round"/>
+  </g>
+</svg>

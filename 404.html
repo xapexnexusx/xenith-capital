@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 // SIGNAL LOST — XENITH CAPITAL</title>
+<meta name="description" content="The requested coordinate does not exist on this grid. Return to Xenith Capital.">
+<meta name="theme-color" content="#04060a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --x-void:#04060a;
+  --x-panel:#0a0f16;
+  --x-cyan:#00f0ff;
+  --x-magenta:#ff2d78;
+  --x-text:#d7e3ee;
+  --x-dim:#5c7086;
+  --x-line:rgba(0,240,255,.14);
+  --x-font-d:'Space Grotesk',system-ui,sans-serif;
+  --x-font-m:'JetBrains Mono',ui-monospace,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{
+  min-height:100vh;
+  min-height:100svh;
+  display:flex;
+  flex-direction:column;
+  background:
+    radial-gradient(55% 45% at 50% 40%, rgba(0,240,255,.055) 0%, transparent 70%),
+    radial-gradient(130% 100% at 50% 50%, transparent 58%, rgba(0,0,0,.55) 100%),
+    var(--x-void);
+  color:var(--x-text);
+  font-family:var(--x-font-d);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:10;
+  pointer-events:none;
+  background:repeating-linear-gradient(0deg, rgba(0,240,255,.028) 0 1px, transparent 1px 3px);
+}
+::selection{background:rgba(0,240,255,.28);color:#ffffff}
+.stage{
+  position:relative;
+  z-index:1;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:3rem 1.5rem;
+}
+.mark{
+  width:44px;
+  height:44px;
+  color:var(--x-cyan);
+  opacity:.92;
+  margin-bottom:2.25rem;
+  filter:drop-shadow(0 0 10px rgba(0,240,255,.35));
+}
+.eyebrow{
+  font-family:var(--x-font-m);
+  font-size:.72rem;
+  font-weight:500;
+  letter-spacing:.42em;
+  text-indent:.42em;
+  color:var(--x-cyan);
+  text-shadow:0 0 12px rgba(0,240,255,.45);
+  margin-bottom:1.4rem;
+}
+h1{
+  font-family:var(--x-font-d);
+  font-weight:700;
+  font-size:clamp(3rem,10vw,7rem);
+  line-height:1.04;
+  letter-spacing:.01em;
+  text-wrap:balance;
+  color:var(--x-text);
+  text-shadow:0 0 18px rgba(0,240,255,.32), 0 0 70px rgba(0,240,255,.14);
+  margin-bottom:1.5rem;
+}
+h1 .sep{color:var(--x-cyan)}
+.subline{
+  font-family:var(--x-font-m);
+  font-size:.82rem;
+  letter-spacing:.08em;
+  color:var(--x-dim);
+  margin-bottom:3rem;
+}
+.btn{
+  display:inline-block;
+  font-family:var(--x-font-m);
+  font-size:.8rem;
+  font-weight:500;
+  letter-spacing:.28em;
+  text-indent:.28em;
+  text-decoration:none;
+  color:var(--x-cyan);
+  padding:1.05rem 2.4rem;
+  border:1px solid rgba(0,240,255,.55);
+  background:rgba(0,240,255,.04);
+  transition:background .22s ease, border-color .22s ease, box-shadow .22s ease, text-shadow .22s ease;
+}
+.btn:hover{
+  background:rgba(0,240,255,.1);
+  border-color:var(--x-cyan);
+  box-shadow:0 0 26px rgba(0,240,255,.28), inset 0 0 14px rgba(0,240,255,.1);
+  text-shadow:0 0 10px rgba(0,240,255,.65);
+}
+.btn:focus-visible{
+  outline:1px dashed var(--x-cyan);
+  outline-offset:5px;
+  background:rgba(0,240,255,.1);
+  box-shadow:0 0 26px rgba(0,240,255,.28);
+}
+.btn:active{transform:translateY(1px)}
+.foot{
+  position:relative;
+  z-index:1;
+  width:100%;
+  border-top:1px solid var(--x-line);
+  padding:1.15rem 1.5rem;
+  text-align:center;
+  font-family:var(--x-font-m);
+  font-size:.62rem;
+  letter-spacing:.3em;
+  text-indent:.3em;
+  color:var(--x-dim);
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<main class="stage">
+  <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+    <path d="M16 2 L29 9.5 V22.5 L16 30 L3 22.5 V9.5 Z" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M10 10 L22 22 M22 10 L10 22" stroke="currentColor" stroke-width="2"/>
+  </svg>
+  <p class="eyebrow">ROUTE NOT FOUND</p>
+  <h1>404 <span class="sep">//</span> SIGNAL LOST</h1>
+  <p class="subline">the requested coordinate does not exist on this grid</p>
+  <a class="btn" href="/">RETURN TO BASE</a>
+</main>
+<footer class="foot">XENITH CAPITAL // EST 2021</footer>
+</body>
+</html>

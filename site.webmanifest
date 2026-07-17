@@ -1,0 +1,16 @@
+{
+  "name": "Xenith Capital",
+  "short_name": "XENITH",
+  "start_url": ".",
+  "display": "browser",
+  "theme_color": "#04060a",
+  "background_color": "#04060a",
+  "icons": [
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
