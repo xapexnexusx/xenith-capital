@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>404 // SIGNAL LOST — XENITH CAPITAL</title>
-<meta name="description" content="The requested coordinate does not exist on this grid. Return to Xenith Capital.">
+<title>GAME OVER // 404 — XENITH CAPITAL</title>
+<meta name="description" content="Signal lost: the requested coordinate does not exist on this grid. Return to Xenith Capital.">
 <meta name="theme-color" content="#04060a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +16,7 @@
   --x-cyan:#00f0ff;
   --x-magenta:#ff2d78;
   --x-text:#d7e3ee;
-  --x-dim:#5c7086;
+  --x-dim:#8fa8c4;
   --x-line:rgba(0,240,255,.14);
   --x-font-d:'Space Grotesk',system-ui,sans-serif;
   --x-font-m:'JetBrains Mono',ui-monospace,monospace;
@@ -87,27 +87,43 @@ h1{
   text-shadow:0 0 18px rgba(0,240,255,.32), 0 0 70px rgba(0,240,255,.14);
   margin-bottom:1.5rem;
 }
-h1 .sep{color:var(--x-cyan)}
 .subline{
   font-family:var(--x-font-m);
   font-size:.82rem;
   letter-spacing:.08em;
   color:var(--x-dim);
-  margin-bottom:3rem;
+  margin-bottom:2.75rem;
+}
+.continue{
+  font-family:var(--x-font-m);
+  font-size:.78rem;
+  font-weight:500;
+  letter-spacing:.5em;
+  text-indent:.5em;
+  color:var(--x-magenta);
+  text-shadow:0 0 14px rgba(255,45,120,.5);
+  margin-bottom:1.6rem;
+}
+.actions{
+  display:flex;
+  justify-content:center;
+  align-items:stretch;
+  gap:1rem;
+  flex-wrap:wrap;
 }
 .btn{
   display:inline-block;
   font-family:var(--x-font-m);
   font-size:.8rem;
   font-weight:500;
-  letter-spacing:.28em;
-  text-indent:.28em;
+  letter-spacing:.24em;
+  text-indent:.24em;
   text-decoration:none;
   color:var(--x-cyan);
-  padding:1.05rem 2.4rem;
+  padding:1.05rem 2.2rem;
   border:1px solid rgba(0,240,255,.55);
   background:rgba(0,240,255,.04);
-  transition:background .22s ease, border-color .22s ease, box-shadow .22s ease, text-shadow .22s ease;
+  transition:background .22s ease, border-color .22s ease, box-shadow .22s ease, text-shadow .22s ease, transform .12s ease;
 }
 .btn:hover{
   background:rgba(0,240,255,.1);
@@ -122,6 +138,18 @@ h1 .sep{color:var(--x-cyan)}
   box-shadow:0 0 26px rgba(0,240,255,.28);
 }
 .btn:active{transform:translateY(1px)}
+.btn-ghost{
+  color:var(--x-text);
+  border-color:rgba(143,168,196,.42);
+  background:transparent;
+}
+.btn-ghost:hover{
+  color:var(--x-cyan);
+  border-color:var(--x-cyan);
+  background:rgba(0,240,255,.06);
+  box-shadow:0 0 26px rgba(0,240,255,.22), inset 0 0 14px rgba(0,240,255,.08);
+  text-shadow:0 0 10px rgba(0,240,255,.55);
+}
 .foot{
   position:relative;
   z-index:1;
@@ -135,6 +163,10 @@ h1 .sep{color:var(--x-cyan)}
   text-indent:.3em;
   color:var(--x-dim);
 }
+@media (max-width:560px){
+  .actions{flex-direction:column;width:100%;max-width:340px}
+  .btn{width:100%}
+}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
@@ -146,10 +178,14 @@ h1 .sep{color:var(--x-cyan)}
     <path d="M16 2 L29 9.5 V22.5 L16 30 L3 22.5 V9.5 Z" stroke="currentColor" stroke-width="1.5"/>
     <path d="M10 10 L22 22 M22 10 L10 22" stroke="currentColor" stroke-width="2"/>
   </svg>
-  <p class="eyebrow">ROUTE NOT FOUND</p>
-  <h1>404 <span class="sep">//</span> SIGNAL LOST</h1>
+  <p class="eyebrow">SIGNAL LOST // 404</p>
+  <h1>GAME OVER</h1>
   <p class="subline">the requested coordinate does not exist on this grid</p>
-  <a class="btn" href="/">RETURN TO BASE</a>
+  <p class="continue">CONTINUE?</p>
+  <div class="actions">
+    <a class="btn" href="/">&gt; RETURN TO BASE</a>
+    <a class="btn btn-ghost" href="/#architecture">&gt; VIEW THE DOCTRINE</a>
+  </div>
 </main>
 <footer class="foot">XENITH CAPITAL // EST 2021</footer>
 </body>

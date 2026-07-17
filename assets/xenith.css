@@ -15,7 +15,7 @@
   --x-magenta: #ff2d78;     /* secondary neon */
   --x-amber: #ffb000;       /* warning/accent */
   --x-text: #d7e3ee;        /* body text */
-  --x-dim: #5c7086;         /* muted text */
+  --x-dim: #8fa8c4;         /* muted text (v3: raised to the legibility floor) */
   --x-line: rgba(0, 240, 255, .14); /* hairlines */
   --x-font-d: 'Space Grotesk', system-ui, sans-serif;
   --x-font-m: 'JetBrains Mono', ui-monospace, monospace;
@@ -140,7 +140,8 @@ input:focus-visible {
     radial-gradient(ellipse 82% 62% at 50% 42%, transparent 58%, rgba(2, 4, 8, .55) 100%),
     repeating-linear-gradient(to bottom, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px);
   background-position: 0 0, 0 0;
-  animation: x-scanlines 7s linear infinite;
+  /* v3: a second 7s animation layers the tiny CRT opacity flicker (keyframes in §26) */
+  animation: x-scanlines 7s linear infinite, x-crt-flicker 7s linear infinite;
 }
 
 @keyframes x-scanlines {
@@ -185,6 +186,12 @@ footer#x-footer {
   border: 1px solid rgba(0, 240, 255, .5);
   border-radius: 50%;
   z-index: 9998;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+#x-cursor-ring.is-hover {
+  border-color: rgba(0, 240, 255, .95);
+  box-shadow: 0 0 16px rgba(0, 240, 255, .4), inset 0 0 8px rgba(0, 240, 255, .15);
 }
 
 /* only with JS on a precise pointer; never on touch/coarse */
@@ -377,8 +384,9 @@ footer#x-footer {
 .x-hero-title {
   font-family: var(--x-font-d);
   font-weight: 700;
-  font-size: clamp(2.6rem, 7vw, 6.5rem);
+  font-size: clamp(2.3rem, 5.2vw, 4.6rem); /* v3: stabilized clamp */
   line-height: 1.02;
+  min-height: 1.04em; /* v3: reserve one line while the typewriter cycles */
   letter-spacing: -.02em;
   text-transform: uppercase;
   text-wrap: balance;
@@ -405,7 +413,7 @@ footer#x-footer {
 
 .x-hero-sub {
   max-width: 56ch;
-  color: var(--x-dim);
+  color: #b7c9dd; /* v3: lifted above the dim token */
   font-size: clamp(1rem, 1.4vw, 1.14rem);
   font-weight: 300;
   line-height: 1.78;
@@ -728,7 +736,7 @@ footer#x-footer {
 
 .x-lead {
   max-width: 62ch;
-  color: var(--x-dim);
+  color: #b7c9dd; /* v3: lifted above the dim token */
   font-size: clamp(1.05rem, 1.6vw, 1.28rem);
   font-weight: 300;
   line-height: 1.78;
@@ -1123,7 +1131,7 @@ footer#x-footer {
   font-family: var(--x-font-m);
   font-size: 14px;
   line-height: 1.7;
-  color: var(--x-text);
+  color: #c9d9ea; /* v3: brighter terminal body text */
   min-height: 260px;
   max-height: 340px;
   overflow-y: auto;
@@ -1188,7 +1196,7 @@ footer#x-footer {
 }
 
 #x-term-input::placeholder {
-  color: rgba(92, 112, 134, .55);
+  color: var(--x-dim); /* v3: was rgba(92,112,134,.55) — below the legibility floor */
 }
 
 /* --------------------------------------------------------------------------
@@ -1336,6 +1344,11 @@ body.x-preload *::after {
 }
 
 @media (max-width: 860px) {
+  /* v3: phrases wrap to two lines here — reserve both, zero layout shift */
+  .x-hero-title {
+    min-height: 2.1em;
+  }
+
   .x-hud {
     display: none;
   }
@@ -1415,8 +1428,8 @@ body.x-preload *::after {
     padding-bottom: 5rem;
   }
 
+  /* v3: the single contract clamp now governs all widths; keep the tracking tweak */
   .x-hero-title {
-    font-size: clamp(1.9rem, 9.5vw, 2.6rem);
     letter-spacing: -.01em;
   }
 
@@ -2008,7 +2021,7 @@ a.x-disc-doc:hover {
   font-size: .68rem;
   letter-spacing: .1em;
   color: var(--x-dim);
-  opacity: .8;
+  /* v3: opacity .8 dropped — it dragged regulatory text under the floor */
 }
 
 /* footer trigger button + footer row layout */
@@ -2125,5 +2138,254 @@ body.x-disc-lock {
   /* rail labels appear without motion */
   #x-rail a[data-rail]::after {
     transition: none !important;
+  }
+}
+
+/* ==========================================================================
+   V3 — VIDEOGAME TRANSFORMATION (Lane 1: contrast + game chrome)
+   Sections 26-29 append the v3 chrome. v1/v2 rules are preserved; the few
+   v3-mandated value changes were made in place above and tagged "v3":
+   --x-dim token, .x-hero-sub/.x-lead/.x-term-body colors, terminal
+   placeholder, .x-disc-note opacity, .x-hero-title clamp + min-height
+   (and its 860px/640px media rules), and the .x-scanlines animation line.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   26. CRT GAME CHROME — flicker, breathing vignette, boss-zone tint
+       All three effects live on the fixed .x-scanlines film (z-index 1,
+       pointer-events none) so they never touch layout or input.
+   -------------------------------------------------------------------------- */
+
+/* tiny-amplitude opacity flicker riding beside the v1 stripe scroll.
+   Irregular dip offsets keep the 7s loop from reading as a metronome. */
+@keyframes x-crt-flicker {
+  0%, 5.5%    { opacity: 1; }
+  6.5%        { opacity: .93; }
+  8%, 31%     { opacity: 1; }
+  32.5%       { opacity: .96; }
+  34%, 52%    { opacity: 1; }
+  53.5%       { opacity: .94; }
+  55%, 76%    { opacity: 1; }
+  77%         { opacity: .97; }
+  78.5%, 100% { opacity: 1; }
+}
+
+/* breathing vignette: a second, soft radial darkening whose opacity slowly
+   inhales/exhales over the constant v1 vignette */
+.x-scanlines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 84% 64% at 50% 42%, transparent 56%, rgba(2, 4, 8, .5) 100%);
+  opacity: .3;
+  animation: x-vignette-breathe 9s ease-in-out infinite;
+}
+
+@keyframes x-vignette-breathe {
+  0%, 100% { opacity: .28; }
+  50%      { opacity: .62; }
+}
+
+/* boss-zone tint: main.js toggles body.x-boss-zone on #mandate; the wash
+   fades in/out via opacity so the shift never pops */
+.x-scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 46%, rgba(255, 45, 120, .05), transparent 62%),
+    linear-gradient(rgba(255, 45, 120, .035), rgba(255, 45, 120, .035));
+  opacity: 0;
+  transition: opacity .7s ease;
+}
+
+body.x-boss-zone .x-scanlines::after {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   27. STATUS CHROME — sealed channel, rail clears, konami flash
+   -------------------------------------------------------------------------- */
+
+/* sealed contact channel: amber mono with a pulsing dot.
+   Specificity matches .x-contact-row span:not(.x-contact-k) (§13) and wins
+   by source order from here down. */
+.x-contact-row span.x-contact-sealed {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--x-font-m);
+  font-size: .78rem;
+  letter-spacing: .16em;
+  color: var(--x-amber);
+  text-shadow: 0 0 12px rgba(255, 176, 0, .45);
+}
+
+.x-contact-sealed::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: none;
+  margin-right: .65em;
+  background: var(--x-amber);
+  box-shadow: 0 0 8px rgba(255, 176, 0, .85);
+  animation: x-sealed-pulse 1.9s ease-in-out infinite;
+}
+
+@keyframes x-sealed-pulse {
+  0%, 100% { opacity: 1;   box-shadow: 0 0 6px rgba(255, 176, 0, .9); }
+  50%      { opacity: .35; box-shadow: 0 0 13px rgba(255, 176, 0, .4); }
+}
+
+/* rail cleared state: hollow check — cyan outline + dim inner dot, static
+   (no animation) so a cleared level reads at a glance. Distinct from
+   .is-active, which stays the solid filled cyan beacon; when both classes
+   land on one dot, active keeps its look. */
+#x-rail a[data-rail].is-cleared:not(.is-active) {
+  border-color: rgba(0, 240, 255, .6);
+}
+
+#x-rail a[data-rail].is-cleared::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--x-cyan-dim);
+}
+
+#x-rail a[data-rail].is-cleared:not(.is-active)::after {
+  color: var(--x-cyan-dim);
+}
+
+/* konami invert flash: a fixed white overlay in difference blend mode
+   inverts the whole page in hard strobes. One-shot 2s; main.js adds
+   body.x-konami for exactly that window. Blend overlay avoids filter on
+   body, which would re-root every fixed layer. */
+body.x-konami::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 10001; /* above boot (10000) and cursor layers */
+  background: #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  opacity: 0;
+  animation: x-konami-flash 2s steps(1, end) 1;
+}
+
+@keyframes x-konami-flash {
+  0%   { opacity: 1; }
+  9%   { opacity: 0; }
+  16%  { opacity: 1; }
+  27%  { opacity: 0; }
+  38%  { opacity: 1; }
+  52%  { opacity: 0; }
+  66%  { opacity: .65; }
+  80%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   28. TERMINAL GAME STYLES — CLEARANCE PROTOCOL widgets (terminal.js)
+   -------------------------------------------------------------------------- */
+
+/* block progress bar (TRIAL 2 // THE HOLD).
+   Markup contract: <div class="xt-bar"><span style="width:42%"></span></div>
+   — the track paints empty block slots, the child carries the inline width%
+   cyan fill. Blocks are 8px monochrome tiles with a 2px gap. */
+.xt-bar {
+  display: block;
+  height: 14px;
+  margin: .45rem 0 .6rem;
+  padding: 1px;
+  border: 1px solid rgba(0, 240, 255, .35);
+  background: repeating-linear-gradient(90deg, rgba(0, 240, 255, .06) 0 8px, transparent 8px 10px);
+}
+
+.xt-bar > *,
+.xt-bar-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: repeating-linear-gradient(90deg, var(--x-cyan) 0 8px, transparent 8px 10px);
+  box-shadow: 0 0 10px rgba(0, 240, 255, .35);
+  transition: width .18s linear;
+}
+
+/* success block (CLEARANCE GRANTED): double hairline cyan border via
+   border + offset outline, magenta corner ticks, soft outer/inner glow */
+.xt-win {
+  position: relative;
+  margin: .9rem 0 1.1rem;
+  padding: .85rem 1.05rem;
+  color: var(--x-cyan);
+  letter-spacing: .12em;
+  text-shadow: 0 0 12px rgba(0, 240, 255, .5);
+  border: 1px solid var(--x-cyan);
+  outline: 1px solid rgba(0, 240, 255, .32);
+  outline-offset: 3px;
+  box-shadow: 0 0 24px rgba(0, 240, 255, .16), inset 0 0 20px rgba(0, 240, 255, .05);
+}
+
+.xt-win::before,
+.xt-win::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--x-magenta);
+  pointer-events: none;
+}
+
+.xt-win::before {
+  top: -5px;
+  left: -5px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.xt-win::after {
+  bottom: -5px;
+  right: -5px;
+  border-left: none;
+  border-top: none;
+}
+
+/* trial header lines (TRIAL 1/2/3 banners): magenta mono */
+.xt-trial-head {
+  font-family: var(--x-font-m);
+  color: var(--x-magenta);
+  letter-spacing: .2em;
+  text-shadow: 0 0 12px rgba(255, 45, 120, .5);
+  margin: .35rem 0;
+}
+
+/* --------------------------------------------------------------------------
+   29. V3 REDUCED MOTION — neutralize every new animation path
+       The v1 block (§17) already stills .x-scanlines itself, which covers
+       x-crt-flicker, and its global .01ms transition clamp covers the
+       boss-tint fade and the .xt-bar fill. What remains is listed here.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  /* breathing vignette holds at a static mid value */
+  .x-scanlines::before {
+    animation: none !important;
+    opacity: .4 !important;
+  }
+
+  /* sealed dot holds its on-state */
+  .x-contact-sealed::before {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
+  /* konami strobe never fires — the overlay stays invisible */
+  body.x-konami::after {
+    animation: none !important;
+    opacity: 0 !important;
   }
 }

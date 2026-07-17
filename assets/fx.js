@@ -1,5 +1,5 @@
 /* ==========================================================================
-   XENITH CAPITAL — ambient canvas engine (fx.js) v2
+   XENITH CAPITAL — ambient canvas engine (fx.js) v3
    Renders into #fx-bg (fixed, full-viewport, z-index 0). Layers per frame:
      1. perspective neon grid floor (lower ~45%, horizon glow, scroll parallax)
      2. starfield sky (upper ~55%, phase-offset twinkle, scroll parallax)
@@ -8,6 +8,19 @@
      5. click shockwaves (additive expanding rings, max 3 concurrent)
      6. edge vignette
      7. glitch tear post-pass (random 9–14s timer or on demand, ~120ms)
+   v3 additions:
+     8. BOSS-ZONE PALETTE — MutationObserver on body.x-boss-zone; while active,
+        eases (smoothstep, ~0.4s ramp) the scene toward a boss palette:
+        rain columns migrate cyan→magenta until ~60/40 magenta-dominant
+        (per-column tint seed crossing a lerped mix threshold — columns flip
+        individually, no sprite re-bakes, no extra draw calls), grid fan lines
+        lerp toward amber, grid rows + horizon rule toward magenta, horizon
+        glow + pointer glow cross-fade to pre-baked amber/magenta variants.
+     9. SCROLL-VELOCITY SURGE — EMA of |scrollY velocity| (~0.2 smoothing at
+        60fps, frame-rate independent) scales rain fall speed by
+        1 + min(vel*0.004, 1.5); decays back to 1 when idle.
+    10. CRT SHIMMER — full-frame alpha dip ≤0.03 at ~8Hz, composited last;
+        never in the static frame, never under prefers-reduced-motion.
    Vanilla JS, zero dependencies. Public API: window.XENITH_FX
    ({ start, stop, setIntensity, burst }).
    ========================================================================== */
@@ -68,6 +81,18 @@
   var BOOST_GAIN = 0.6;      /* +60% alpha at the pointer column, falls to 0 at radius */
   var TAU = 6.2832;
 
+  /* ---------- v3 tuning ---------- */
+  var BOSS_RAMP = 0.4;       /* boss palette lerp duration, seconds, both directions */
+  var RAIN_MAGENTA_MIX = 0.6;/* boss-active column mix → ~60/40 magenta-dominant */
+  var VEL_EMA_BASE = 0.8;    /* per-frame EMA retention at 60fps → ~0.2 smoothing */
+  var SURGE_GAIN = 0.004;    /* rain speed gain per px/s of smoothed scroll velocity */
+  var SURGE_CAP = 1.5;       /* surge bound → total rain speed cap 2.5x */
+  var SHIMMER_AMP = 0.03;    /* CRT shimmer peak frame-alpha modulation */
+  var SHIMMER_OMEGA = TAU * 8; /* ~8Hz */
+  /* boss palette endpoints: fan lines cyan→amber, rows/horizon cyan→magenta */
+  var FAN_R = 255, FAN_G = 176, FAN_B = 0;     /* amber */
+  var ROW_R = 255, ROW_G = 45, ROW_B = 120;    /* magenta */
+
   var GLYPHS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '%', '$', '▲', '▼'];
   var TICKERS = ['SPX', 'BTC', 'ETH', 'GOLD', 'OIL', 'VIX', 'NAS'];
 
@@ -80,8 +105,9 @@
   var columns = [];
   var activeCols = 0;
   var px = 0, py = 0, tx = 0, ty = 0, pointerReady = false;
-  var horizonGlow = null, vignette = null, glowSprite = null;
-  var sprites = { trail: [], ticker: [], headCyan: [], headMagenta: [] };
+  var horizonGlow = null, horizonGlowBoss = null, vignette = null;
+  var glowSprite = null, glowSpriteBoss = null;
+  var sprites = { trail: [], trailMag: [], ticker: [], tickerMag: [], headCyan: [], headMagenta: [] };
   var measureCtx = document.createElement('canvas').getContext('2d');
   var mq = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
   var reduced = mq ? mq.matches : false;
@@ -89,7 +115,7 @@
   /* v2 state: starfield split into two fixed-tint batches so the frame loop
      only touches globalAlpha (no per-star style string work) */
   var starsC = [], starsM = [];
-  var tNow = 0;              /* accumulated loop time, drives star twinkle */
+  var tNow = 0;              /* accumulated loop time, drives star twinkle + shimmer */
   var targetScroll = 0;      /* raw scrollY target, set by the scroll listener */
   var parY = 0;              /* smoothed scroll position */
   var gridShift = 0;         /* clamped grid parallax offset, css px */
@@ -100,10 +126,21 @@
   var bands = [];            /* preallocated tear-band pool (BAND_MAX) */
   var rings = [];            /* preallocated shockwave pool (RING_MAX) */
 
+  /* v3 state */
+  var bossT = 0;             /* eased-position ramp 0..1 toward bossTarget */
+  var bossTarget = 0;        /* 1 while body.x-boss-zone is present */
+  var rainMix = 0;           /* lerped magenta column mix (0 at rest, 0.6 in boss) */
+  var scrollVel = 0;         /* EMA of |scrollY velocity|, px/s */
+  var lastScrollY = 0;       /* previous frame's raw scrollY */
+  var rainSurge = 1;         /* rain speed multiplier from scroll surge */
+
   for (var bi = 0; bi < BAND_MAX; bi++) bands.push({ on: false, y: 0, h: 10, dx: 10 });
   for (var ri = 0; ri < RING_MAX; ri++) rings.push({ on: false, x: 0, y: 0, t: 0 });
 
   function rand(a, b) { return a + Math.random() * (b - a); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  /* smoothstep of the linear ramp: ease-in-out, still exactly BOSS_RAMP seconds */
+  function bossEase() { return bossT * bossT * (3 - 2 * bossT); }
 
   burstIn = rand(BURST_MIN, BURST_MAX);
 
@@ -140,16 +177,22 @@
   function buildSprites() {
     var i;
     sprites.trail.length = 0;
+    sprites.trailMag.length = 0;
     sprites.ticker.length = 0;
+    sprites.tickerMag.length = 0;
     sprites.headCyan.length = 0;
     sprites.headMagenta.length = 0;
+    /* v3: dual tint sets are baked once here; the frame loop only picks a set,
+       so boss transitions cost zero extra draws and zero re-bakes */
     for (i = 0; i < GLYPHS.length; i++) {
       sprites.trail.push(makeSprite(GLYPHS[i], CYAN, null, 400));
+      sprites.trailMag.push(makeSprite(GLYPHS[i], MAGENTA, null, 400));
       sprites.headCyan.push(makeSprite(GLYPHS[i], HEAD_CYAN, CYAN, 700));
       sprites.headMagenta.push(makeSprite(GLYPHS[i], HEAD_MAGENTA, MAGENTA, 700));
     }
     for (i = 0; i < TICKERS.length; i++) {
       sprites.ticker.push(makeSprite(TICKERS[i], CYAN, null, 700));
+      sprites.tickerMag.push(makeSprite(TICKERS[i], MAGENTA, null, 700));
     }
   }
 
@@ -167,6 +210,20 @@
     g.fillStyle = grad;
     g.fillRect(0, 0, S, S);
     glowSprite = c;
+
+    /* v3 boss variant: magenta core, pink mid, amber fringe (matches grid shift) */
+    var c2 = document.createElement('canvas');
+    c2.width = S;
+    c2.height = S;
+    var g2 = c2.getContext('2d');
+    var grad2 = g2.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+    grad2.addColorStop(0, 'rgba(255,45,120,0.50)');
+    grad2.addColorStop(0.35, 'rgba(255,95,150,0.22)');
+    grad2.addColorStop(0.7, 'rgba(255,176,0,0.08)');
+    grad2.addColorStop(1, 'rgba(255,176,0,0)');
+    g2.fillStyle = grad2;
+    g2.fillRect(0, 0, S, S);
+    glowSpriteBoss = c2;
   }
 
   /* ---------- starfield (v2) ---------- */
@@ -230,6 +287,7 @@
     col.len = 7 + ((Math.random() * (MAX_TRAIL - 7)) | 0);
     col.alpha = rand(0.10, 0.26);
     col.headMag = Math.random() < MAGENTA_HEAD_PROB;
+    col.tintSeed = Math.random(); /* v3: stable per-column boss-tint threshold */
     col.y = initial ? rand(-H * 0.5, H) : -rand(30, H * 0.3);
     col.mutateT = rand(0.05, 0.3);
     col.cells.length = 0;
@@ -248,7 +306,7 @@
     var pool = Math.min(MAX_POOL, Math.max(8, Math.round(W / COL_SPACING) * MAX_INTENSITY));
     columns.length = 0;
     for (var i = 0; i < pool; i++) {
-      var col = { x: 0, y: 0, speed: 60, size: 12, rowH: 14, alpha: 0.15, len: 10, cells: [], headMag: false, mutateT: 0.1 };
+      var col = { x: 0, y: 0, speed: 60, size: 12, rowH: 14, alpha: 0.15, len: 10, cells: [], headMag: false, tintSeed: 1, mutateT: 0.1 };
       resetColumn(col, true);
       columns.push(col);
     }
@@ -256,9 +314,10 @@
   }
 
   function updateRain(dt) {
+    var fall = rainSurge * dt; /* v3: scroll-velocity surge scales fall speed */
     for (var i = 0; i < activeCols; i++) {
       var col = columns[i];
-      col.y += col.speed * dt;
+      col.y += col.speed * fall;
       col.mutateT -= dt;
       if (col.mutateT <= 0) {
         col.mutateT = rand(0.08, 0.3);
@@ -270,10 +329,13 @@
   }
 
   function drawRain() {
-    var scale, col, i, y, id, sp, fade, dw, dh, dxp, boost;
+    var scale, col, i, y, id, sp, fade, dw, dh, dxp, boost, magCol;
     for (var k = 0; k < activeCols; k++) {
       col = columns[k];
       scale = col.size / GLYPH_BASE;
+      /* v3: whole column rides the magenta set once the lerped mix passes its
+         tint seed — as rainMix sweeps 0→0.6, columns migrate one by one */
+      magCol = col.tintSeed < rainMix;
       /* v2: columns within ~200px horizontal of the pointer glow up to +60% alpha */
       dxp = col.x - px;
       if (dxp < 0) dxp = -dxp;
@@ -282,7 +344,9 @@
         y = col.y - i * col.rowH;
         if (y < -40 || y > H + 40) continue;
         id = col.cells[i];
-        sp = id < 100 ? sprites.trail[id] : sprites.ticker[id - 100];
+        sp = id < 100
+          ? (magCol ? sprites.trailMag[id] : sprites.trail[id])
+          : (magCol ? sprites.tickerMag[id - 100] : sprites.ticker[id - 100]);
         fade = 1 - i / col.len;
         ctx.globalAlpha = col.alpha * boost * (0.2 + 0.8 * fade * fade);
         dw = sp.w * scale;
@@ -294,13 +358,13 @@
         id = col.cells[0];
         ctx.globalAlpha = Math.min(0.85, col.alpha * 3.4 * boost);
         if (id < 100) {
-          sp = col.headMag ? sprites.headMagenta[id] : sprites.headCyan[id];
+          sp = (magCol || col.headMag) ? sprites.headMagenta[id] : sprites.headCyan[id];
           dw = sp.w * scale;
           dh = sp.h * scale;
           ctx.drawImage(sp.c, col.x - dw / 2, y - dh / 2, dw, dh);
         } else {
           /* ticker at the head position: brighten it additively in place of a baked halo */
-          sp = sprites.ticker[id - 100];
+          sp = magCol ? sprites.tickerMag[id - 100] : sprites.ticker[id - 100];
           dw = sp.w * scale;
           dh = sp.h * scale;
           ctx.globalCompositeOperation = 'lighter';
@@ -318,13 +382,28 @@
     var cx = W * 0.5;
     var a, f, r, z, yy, dist;
 
-    /* glow gradient is baked around the origin so it can travel with the horizon */
+    /* v3: lerped boss palette — fan toward amber, rows/horizon toward magenta */
+    var e = bossEase();
+    var fanRGB = ((lerp(0, FAN_R, e) + 0.5) | 0) + ',' + ((lerp(240, FAN_G, e) + 0.5) | 0) + ',' + ((lerp(255, FAN_B, e) + 0.5) | 0);
+    var rowRGB = ((lerp(0, ROW_R, e) + 0.5) | 0) + ',' + ((lerp(240, ROW_G, e) + 0.5) | 0) + ',' + ((lerp(255, ROW_B, e) + 0.5) | 0);
+
+    /* glow gradients are baked around the origin so they travel with the horizon;
+       the boss variant cross-fades in over the cyan disc (both pre-baked) */
     ctx.globalCompositeOperation = 'lighter';
     ctx.save();
     ctx.translate(cx, horizon);
-    ctx.fillStyle = horizonGlow;
-    ctx.fillRect(-gridGlowR, -gridGlowR, gridGlowR * 2, gridGlowR * 2);
+    if (e < 0.999) {
+      ctx.globalAlpha = 1 - e;
+      ctx.fillStyle = horizonGlow;
+      ctx.fillRect(-gridGlowR, -gridGlowR, gridGlowR * 2, gridGlowR * 2);
+    }
+    if (e > 0.001) {
+      ctx.globalAlpha = e;
+      ctx.fillStyle = horizonGlowBoss;
+      ctx.fillRect(-gridGlowR, -gridGlowR, gridGlowR * 2, gridGlowR * 2);
+    }
     ctx.restore();
+    ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
 
     ctx.lineWidth = 1;
@@ -332,7 +411,7 @@
     for (f = 0; f <= fanCount; f++) {
       dist = Math.abs(f / fanCount - 0.5) * 2;
       a = 0.10 * (1 - dist * 0.65);
-      ctx.strokeStyle = 'rgba(0,240,255,' + a.toFixed(3) + ')';
+      ctx.strokeStyle = 'rgba(' + fanRGB + ',' + a.toFixed(3) + ')';
       ctx.beginPath();
       ctx.moveTo(cx, horizon);
       ctx.lineTo(cx + (f / fanCount - 0.5) * W * 3, H);
@@ -343,14 +422,14 @@
       z = ((r + gridOffset) % GRID_ROWS) / GRID_ROWS;
       yy = horizon + (H - horizon) * Math.pow(z, 2.7);
       a = 0.05 + 0.15 * z;
-      ctx.strokeStyle = 'rgba(0,240,255,' + a.toFixed(3) + ')';
+      ctx.strokeStyle = 'rgba(' + rowRGB + ',' + a.toFixed(3) + ')';
       ctx.beginPath();
       ctx.moveTo(0, yy);
       ctx.lineTo(W, yy);
       ctx.stroke();
     }
 
-    ctx.strokeStyle = 'rgba(0,240,255,0.22)';
+    ctx.strokeStyle = 'rgba(' + rowRGB + ',0.220)';
     ctx.beginPath();
     ctx.moveTo(0, horizon + 0.5);
     ctx.lineTo(W, horizon + 0.5);
@@ -360,9 +439,16 @@
   /* ---------- pointer glow ---------- */
   function drawPointerGlow() {
     var d = Math.max(W, H) * 0.5;
+    var e = bossEase();
     ctx.globalCompositeOperation = 'lighter';
-    ctx.globalAlpha = 0.42;
-    ctx.drawImage(glowSprite, px - d / 2, py - d / 2, d, d);
+    if (e < 0.999) {
+      ctx.globalAlpha = 0.42 * (1 - e);
+      ctx.drawImage(glowSprite, px - d / 2, py - d / 2, d, d);
+    }
+    if (e > 0.001) {
+      ctx.globalAlpha = 0.42 * e;
+      ctx.drawImage(glowSpriteBoss, px - d / 2, py - d / 2, d, d);
+    }
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
   }
@@ -475,11 +561,19 @@
     drawRings();
     ctx.fillStyle = vignette;
     ctx.fillRect(0, 0, W, H);
+    /* v3: CRT refresh shimmer — a ≤3% full-frame alpha dip oscillating at ~8Hz.
+       One fillRect, no allocation; never runs in the static/reduced-motion frame
+       because the loop (and tNow) only advance while running. */
+    ctx.globalAlpha = SHIMMER_AMP * (0.5 + 0.5 * Math.sin(tNow * SHIMMER_OMEGA));
+    ctx.fillStyle = VOID;
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = 1;
   }
 
   function drawStatic() {
     /* reduced-motion frame: void + grid + static stars + vignette, no loop,
-       no parallax, no rain, no bursts, no shockwaves */
+       no parallax, no rain, no bursts, no shockwaves, no shimmer.
+       Boss tint still applies (snapped, not ramped) so the floor stays truthful. */
     gridShift = 0;
     starShiftMod = 0;
     renderBase();
@@ -506,6 +600,24 @@
     var zoneH = H * HORIZON;
     var sm = (parY * PAR_STAR) % zoneH;
     starShiftMod = sm < 0 ? sm + zoneH : sm;
+
+    /* v3: boss palette ramp — linear progress over BOSS_RAMP seconds in
+       whichever direction bossTarget points; easing applied at read time */
+    if (bossT !== bossTarget) {
+      var dB = dt / BOSS_RAMP;
+      bossT = bossTarget > bossT
+        ? Math.min(bossTarget, bossT + dB)
+        : Math.max(bossTarget, bossT - dB);
+    }
+    rainMix = RAIN_MAGENTA_MIX * bossEase();
+
+    /* v3: scroll-velocity surge — EMA (~0.2/frame at 60fps, frame-rate
+       independent) of |scrollY velocity|; idle frames feed 0 so it decays */
+    var inst = dt > 0 ? Math.abs(targetScroll - lastScrollY) / dt : 0;
+    lastScrollY = targetScroll;
+    var vk = 1 - Math.pow(VEL_EMA_BASE, dt * 60);
+    scrollVel += (inst - scrollVel) * vk;
+    rainSurge = 1 + Math.min(scrollVel * SURGE_GAIN, SURGE_CAP);
 
     /* v2: glitch scheduler — a burst every 9–14s of live loop time */
     if (burstT > 0) {
@@ -550,6 +662,11 @@
     horizonGlow.addColorStop(0, 'rgba(0,240,255,0.16)');
     horizonGlow.addColorStop(0.45, 'rgba(0,240,255,0.055)');
     horizonGlow.addColorStop(1, 'rgba(0,240,255,0)');
+    /* v3 boss variant: amber core bleeding into magenta before falloff */
+    horizonGlowBoss = ctx.createRadialGradient(0, 0, 0, 0, 0, gridGlowR);
+    horizonGlowBoss.addColorStop(0, 'rgba(255,150,30,0.16)');
+    horizonGlowBoss.addColorStop(0.45, 'rgba(255,45,120,0.055)');
+    horizonGlowBoss.addColorStop(1, 'rgba(255,45,120,0)');
     vignette = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.38, W / 2, H / 2, Math.max(W, H) * 0.72);
     vignette.addColorStop(0, 'rgba(2,4,8,0)');
     vignette.addColorStop(1, 'rgba(2,4,8,0.55)');
@@ -579,11 +696,37 @@
     if (tx > W) tx = W;
     if (ty > H) ty = H;
     syncScroll();
-    parY = targetScroll; /* snap on resize so parallax never drifts after reflow */
+    parY = targetScroll;     /* snap on resize so parallax never drifts after reflow */
+    lastScrollY = targetScroll; /* v3: no phantom surge spike from a reflow jump */
     buildGradients();
     buildColumns();
     buildStars();
     if (reduced) drawStatic();
+  }
+
+  /* ---------- v3: boss-zone observation ---------- */
+  function readBossClass() {
+    bossTarget = (document.body && document.body.classList.contains('x-boss-zone')) ? 1 : 0;
+  }
+
+  function onBossClass() {
+    readBossClass();
+    if (reduced) {
+      /* no loop under reduced motion: snap and repaint the static frame */
+      bossT = bossTarget;
+      rainMix = RAIN_MAGENTA_MIX * bossEase();
+      drawStatic();
+    }
+  }
+
+  function initBossObserver() {
+    readBossClass();
+    bossT = bossTarget;
+    rainMix = RAIN_MAGENTA_MIX * bossEase();
+    if (window.MutationObserver && document.body) {
+      var mo = new MutationObserver(onBossClass);
+      mo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
   }
 
   /* ---------- public API / lifecycle ---------- */
@@ -629,6 +772,8 @@
     reduced = mq ? mq.matches : false;
     if (reduced) {
       stop();
+      bossT = bossTarget; /* static frame shows the settled palette, no ramp */
+      rainMix = RAIN_MAGENTA_MIX * bossEase();
       drawStatic();
     } else {
       start();
@@ -638,6 +783,7 @@
   function init() {
     buildSprites();
     buildGlowSprite();
+    initBossObserver();
     resize();
     window.addEventListener('resize', resize);
     window.addEventListener('scroll', syncScroll, { passive: true });

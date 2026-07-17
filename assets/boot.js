@@ -1,9 +1,10 @@
 /* ============================================================================
    XENITH CAPITAL — assets/boot.js
-   Boot preloader sequence (Agent F, v2 lane 6). Vanilla JS, zero dependencies,
-   single IIFE. Owns: the #x-boot overlay lifecycle — mono log typing, progress
-   bar/pct sync, completion gating on BOTH the typed sequence and window load,
-   skip interactions, reduced-motion bypass, and a hard runtime failsafe.
+   Boot preloader sequence (v3, Lane 5 — PRESS START). Vanilla JS, zero
+   dependencies, single IIFE. Owns: the #x-boot overlay lifecycle — game boot
+   log typing, progress bar/pct sync, blinking PRESS ENTER prompt gated on BOTH
+   the typed sequence and window load, Enter/click/Escape finish, hard runtime
+   failsafe, reduced-motion bypass, and timer pause while the tab is hidden.
    Exposes nothing globally.
    ========================================================================== */
 (function () {
@@ -12,17 +13,26 @@
   /* ------------------------------ configuration -------------------------- */
 
   var LINES = [
-    '> initializing xenith core…',
-    '> loading research engine… OK',
-    '> risk doctrine… ARMED',
-    '> evidence coverage… 100%',
-    '> SYSTEM ONLINE'
+    '> loading LEVEL 01… OK',
+    '> loading LEVEL 02… OK',
+    '> loading LEVEL 03… OK',
+    '> loading LEVEL 04… OK',
+    '> loading FINAL LEVEL… LOCKED',
+    '> XENITH SYSTEM ONLINE'
   ];
 
-  var TYPE_MS = 10;      // per character while typing
-  var LINE_MS = 120;     // pause between completed lines
-  var DONE_MS = 600;     // .is-done transition window before node removal
-  var FAILSAFE_MS = 4000; // absolute cap on total runtime
+  var PROMPT_TEXT = 'PRESS ENTER TO INITIALIZE';
+
+  var TYPE_MS = 10;       // per character while typing
+  var LINE_MS = 120;      // pause between completed lines
+  var DONE_MS = 600;      // .is-done transition window before node removal
+  var FAILSAFE_MS = 8000; // absolute cap on total overlay lifetime
+
+  // One injected style, scoped to .xb-blink only (contract allowance).
+  var BLINK_CSS =
+    '.xb-blink{animation:xb-blink 1s steps(1,end) infinite}' +
+    '@keyframes xb-blink{0%{opacity:1}50%{opacity:0}100%{opacity:1}}' +
+    '@media (prefers-reduced-motion:reduce){.xb-blink{animation:none}}';
 
   var reduceMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -46,12 +56,6 @@
     var fill = document.getElementById('x-boot-fill');
     var pct = document.getElementById('x-boot-pct');
 
-    // Reduced motion: no typing, no sequence — drop the overlay immediately.
-    if (reduceMotionMQ.matches) {
-      detach();
-      return;
-    }
-
     /* ------------------------------ state -------------------------------- */
 
     var totalChars = 0;
@@ -59,22 +63,70 @@
 
     var typedDone = false;
     var loadDone = document.readyState === 'complete';
+    var promptShown = false;
     var finished = false;
 
     var lineIdx = 0;
     var charIdx = 0;
     var typedChars = 0;
     var currentLineEl = null;
+    var styleEl = null;
+
+    /* ------------------------ pausable timer pool ------------------------ */
+    // All boot timers live here so they freeze while the tab is hidden.
+    // Declared before every code path that can reach detach().
 
     var timers = [];
+    var timersPaused = false;
 
-    function later(fn, ms) {
-      timers.push(window.setTimeout(fn, ms));
+    // Reduced motion: no typing, no prompt — drop the overlay immediately.
+    if (reduceMotionMQ.matches) {
+      detach();
+      return;
     }
 
-    function clearTimers() {
-      for (var i = 0; i < timers.length; i++) window.clearTimeout(timers[i]);
+    // Inject the single scoped blink style (removed again on detach).
+    styleEl = document.createElement('style');
+    styleEl.textContent = BLINK_CSS;
+    document.head.appendChild(styleEl);
+
+    function later(fn, ms) {
+      var t = { id: 0, fn: fn, due: Date.now() + ms, msLeft: ms };
+      t.id = window.setTimeout(function () { runTimer(t); }, ms);
+      timers.push(t);
+      return t;
+    }
+
+    function runTimer(t) {
+      var i = timers.indexOf(t);
+      if (i !== -1) timers.splice(i, 1);
+      t.fn();
+    }
+
+    function cancelAllTimers() {
+      for (var i = 0; i < timers.length; i++) window.clearTimeout(timers[i].id);
       timers = [];
+    }
+
+    function pauseTimers() {
+      if (timersPaused) return;
+      timersPaused = true;
+      var now = Date.now();
+      for (var i = 0; i < timers.length; i++) {
+        window.clearTimeout(timers[i].id);
+        timers[i].msLeft = Math.max(0, timers[i].due - now);
+      }
+    }
+
+    function resumeTimers() {
+      if (!timersPaused) return;
+      timersPaused = false;
+      for (var i = 0; i < timers.length; i++) {
+        (function (t) {
+          t.due = Date.now() + t.msLeft;
+          t.id = window.setTimeout(function () { runTimer(t); }, t.msLeft);
+        })(timers[i]);
+      }
     }
 
     /* ------------------------------ progress ----------------------------- */
@@ -91,7 +143,7 @@
       if (finished) return;
       if (lineIdx >= LINES.length) {
         typedDone = true;
-        maybeFinish();
+        maybeShowPrompt();
         return;
       }
       var line = LINES[lineIdx];
@@ -123,60 +175,95 @@
       }
     }
 
-    /* ------------------------------- finish ------------------------------ */
+    /* -------------------------- PRESS ENTER prompt ----------------------- */
 
-    function maybeFinish() {
-      if (finished || !typedDone || !loadDone) return;
-      finish(false);
+    // Shown only once BOTH the typed sequence and window load have settled.
+    function maybeShowPrompt() {
+      if (finished || promptShown || !typedDone || !loadDone) return;
+      promptShown = true;
+      setProgress(1); // guarantee an exact 100% beside the prompt
+      if (!log) return;
+      var el = document.createElement('div');
+      el.className = 'xb-blink';
+      el.textContent = PROMPT_TEXT;
+      log.appendChild(el);
     }
 
-    function finish(skipped) {
+    /* ------------------------------- finish ------------------------------ */
+
+    function finish() {
       if (finished) return;
       finished = true;
-      clearTimers();
-      unbind();
-      if (skipped) {
+      cancelAllTimers(); // kills typing chain + failsafe
+      boot.classList.add('is-done'); // CSS owns the fade/scale-out
+      later(detach, DONE_MS);
+    }
+
+    // Enter/click/Escape and the failsafe finish immediately, ignoring gates.
+    function forceFinish() {
+      if (finished) return;
+      if (!typedDone) {
         dumpAllLines();
         setProgress(1);
       }
-      boot.classList.add('is-done'); // CSS owns the fade/slide-out
-      window.setTimeout(detach, DONE_MS);
+      finish();
     }
 
     function detach() {
+      cancelAllTimers();
+      unbind();
+      if (styleEl && styleEl.parentNode) styleEl.parentNode.removeChild(styleEl);
       if (boot.parentNode) boot.parentNode.removeChild(boot);
-    }
-
-    // Skip and the failsafe both finish immediately, ignoring the load gate.
-    function forceFinish() {
-      if (finished) return;
-      typedDone = true;
-      loadDone = true;
-      finish(true);
     }
 
     /* ------------------------------- events ------------------------------ */
 
     function onKeydown(e) {
-      if (e.key === 'Escape' || e.key === 'Enter') forceFinish();
+      if (e.key === 'Enter') {
+        e.preventDefault(); // consumed by the boot overlay, never the page
+        forceFinish();
+      } else if (e.key === 'Escape') {
+        forceFinish();
+      }
     }
 
     function onLoad() {
       loadDone = true;
-      maybeFinish();
+      maybeShowPrompt();
+    }
+
+    function onVisibility() {
+      if (document.hidden) pauseTimers();
+      else resumeTimers();
+    }
+
+    // Motion preference flipped to reduce mid-boot: remove overlay at once.
+    function onMotionPrefChange() {
+      if (reduceMotionMQ.matches) detach();
     }
 
     function unbind() {
       boot.removeEventListener('click', forceFinish);
       document.removeEventListener('keydown', onKeydown);
+      document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('load', onLoad);
+      if (reduceMotionMQ.removeEventListener) {
+        reduceMotionMQ.removeEventListener('change', onMotionPrefChange);
+      }
     }
 
     boot.addEventListener('click', forceFinish);
     document.addEventListener('keydown', onKeydown);
+    document.addEventListener('visibilitychange', onVisibility);
     if (!loadDone) window.addEventListener('load', onLoad, { once: true });
+    if (reduceMotionMQ.addEventListener) {
+      reduceMotionMQ.addEventListener('change', onMotionPrefChange);
+    }
 
-    later(forceFinish, FAILSAFE_MS); // never let the overlay outlive 4s
+    later(forceFinish, FAILSAFE_MS); // never let the overlay outlive 8s
     later(typeStep, TYPE_MS);
+
+    // Loaded into a background tab: hold the whole sequence until visible.
+    if (document.hidden) pauseTimers();
   }
 })();

@@ -8,6 +8,10 @@
    v2 (added): per-letter split titles (.xl / --i), signal-tape content clone,
    left scroll rail (active section dot + progress height), card tilt, and
    magnetic buttons.
+   v3 (added): anchor pre-reveal (nav clicks reveal the destination section
+   before the smooth scroll starts), boss-zone body class while #mandate is
+   in view, one-way rail level clears with x:level-cleared events, and the
+   Konami code (XENITH_FX.burst + 2s body.x-konami + x:konami event).
    Honors prefers-reduced-motion in every animation path and idles timed work
    while the tab is hidden (rAF paths idle automatically).
    ========================================================================== */
@@ -333,6 +337,17 @@
 
   /* --------------------------------- nav --------------------------------- */
 
+  // v3 ANCHOR PRE-REVEAL: smooth-scrolling into a section must never show a
+  // blank/hidden area, so every [data-reveal] inside the destination is
+  // revealed before the scroll starts (revealElement also flags any split
+  // .x-title it contains). The reveal IO stays live for natural scrolling;
+  // when it later fires on the same elements the class add is a no-op.
+  function preRevealSection(section) {
+    if (section.hasAttribute('data-reveal')) revealElement(section);
+    var els = section.querySelectorAll('[data-reveal]');
+    for (var i = 0; i < els.length; i++) revealElement(els[i]);
+  }
+
   function initNav() {
     var nav = document.getElementById('x-nav');
     if (nav) {
@@ -351,6 +366,7 @@
         var target = href.length > 1 ? document.getElementById(href.slice(1)) : null;
         if (!target) return; // let the browser handle anything unexpected
         e.preventDefault();
+        preRevealSection(target); // v3: reveal the destination before scrolling
         target.scrollIntoView({
           behavior: reduceMotionMQ.matches ? 'auto' : 'smooth',
           block: 'start'
@@ -470,6 +486,25 @@
     }
     var links = rail.querySelectorAll('a[data-nav]');
 
+    // v3 RAIL CLEARS: a section whose top scrolls above 40% of the viewport
+    // clears its level exactly once — the matching rail dot keeps .is-cleared
+    // forever and the first clear fires x:level-cleared on document for the
+    // achievement layer (Lane 6). One-way by design: never un-marked.
+    var cleared = {};
+    function markCleared(section) {
+      var id = section.id;
+      if (cleared[id]) return;
+      var link = rail.querySelector('a[href="#' + id + '"]');
+      if (!link) return;
+      cleared[id] = true;
+      link.classList.add('is-cleared');
+      if (id !== 'hero') { // hero starts cleared on arrival; its toast would be noise
+        document.dispatchEvent(new CustomEvent('x:level-cleared', {
+          detail: { id: id, label: link.getAttribute('data-rail') || id }
+        }));
+      }
+    }
+
     function setActive(id) {
       for (var i = 0; i < links.length; i++) {
         var on = links[i].getAttribute('href') === '#' + id;
@@ -498,6 +533,15 @@
       if (pct < 0) pct = 0;
       if (pct > 100) pct = 100;
       progress.style.height = pct + '%';
+
+      // v3: one-way level clears against the 40% viewport line.
+      var clearLine = window.innerHeight * 0.4;
+      for (var c = 0; c < sections.length; c++) {
+        if (!cleared[sections[c].id] &&
+            sections[c].getBoundingClientRect().top < clearLine) {
+          markCleared(sections[c]);
+        }
+      }
 
       // No-IO fallback: derive the active section from scroll position.
       if (!hasIO && sections.length > 0) {
@@ -680,6 +724,100 @@
     });
   }
 
+  /* ---------------------------- v3: boss zone ---------------------------- */
+  // While #mandate (the FINAL LEVEL) holds at least a quarter of the
+  // viewport, body carries .x-boss-zone; fx.js (palette) and CSS (chrome)
+  // react to the class. Pure decoration: without IntersectionObserver the
+  // class simply never toggles.
+  function initBossZone() {
+    var mandate = document.getElementById('mandate');
+    if (!mandate || !('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        document.body.classList.toggle('x-boss-zone', entry.isIntersecting);
+      });
+    }, { threshold: 0.25 });
+    io.observe(mandate);
+  }
+
+  /* ----------------------------- v3: konami ------------------------------ */
+  // Up Up Down Down Left Right Left Right B A: fx.js owns the particle burst
+  // (window.XENITH_FX.burst), CSS owns whatever body.x-konami styles, and an
+  // x:konami event goes out for any listener. When XENITH_FX.burst is absent
+  // the whole effect skips cleanly — an easter egg, never a dependency.
+  var KONAMI_SEQ = [
+    'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
+    'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight',
+    'b', 'a'
+  ];
+
+  function initKonami() {
+    var progress = 0;
+    var timer = null;
+
+    function stopChrome() {
+      if (timer !== null) {
+        window.clearTimeout(timer);
+        timer = null;
+      }
+      if (document.body) document.body.classList.remove('x-konami');
+    }
+
+    function fire() {
+      var fx = window.XENITH_FX;
+      if (!fx || typeof fx.burst !== 'function') return; // skip cleanly, no fx
+      try {
+        fx.burst();
+      } catch (err) {
+        // An fx failure must never take interactions down with it.
+      }
+      stopChrome(); // re-trigger inside the window: restart it cleanly
+      if (document.body) document.body.classList.add('x-konami');
+      timer = window.setTimeout(function () {
+        timer = null;
+        if (document.body) document.body.classList.remove('x-konami');
+      }, 2000); // body.x-konami lives for exactly 2s
+      document.dispatchEvent(new CustomEvent('x:konami'));
+    }
+
+    window.addEventListener('keydown', function (e) {
+      var key = e.key;
+      if (!key) return;
+      if (key.length === 1) key = key.toLowerCase(); // b/a, shift- and caps-proof
+      if (key === KONAMI_SEQ[progress]) {
+        progress += 1;
+      } else {
+        // Mismatch: the key can still open a fresh attempt (e.g. 3rd Up).
+        progress = key === KONAMI_SEQ[0] ? 1 : 0;
+      }
+      if (progress === KONAMI_SEQ.length) {
+        progress = 0;
+        fire();
+      }
+    }, { passive: true });
+
+    // Hidden tab: end the chrome instead of parking a live timer.
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stopChrome();
+    });
+  }
+
+  /* --------------------- v3: clearance channel unseal --------------------- */
+
+  // When the terminal grants clearance, unseal the contact panel row.
+  function initChannelUnseal() {
+    document.addEventListener('x:clearance-granted', function () {
+      var slot = document.querySelector('.x-contact-sealed');
+      if (!slot || slot.getAttribute('data-unsealed') === '1') return;
+      slot.setAttribute('data-unsealed', '1');
+      var a = document.createElement('a');
+      a.href = 'mailto:inquiry@xenithcap.io';
+      a.textContent = 'inquiry@xenithcap.io';
+      slot.textContent = '';
+      slot.appendChild(a);
+    });
+  }
+
   /* --------------------------------- boot -------------------------------- */
 
   function init() {
@@ -694,6 +832,10 @@
     initRail();
     initTilt();
     initMagnetic();
+    // v3 videogame pass
+    initBossZone();
+    initKonami();
+    initChannelUnseal();
   }
 
   if (document.readyState === 'loading') {
