@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>XENITH CAPITAL — Evidence-Directed Wealth Management</title>
-<meta name="description" content="Xenith Capital: research-driven, founder-led wealth management. Portfolio construction directed by evidence — verification over assumption.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>XENITH CAPITAL // SIGNAL TRIALS</title>
+<meta name="description" content="Xenith Capital: a research-driven, founder-led investment adviser. This is not a brochure — it is a five-level evaluation. Pass, and a direct channel opens.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -12,14 +12,14 @@
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="manifest" href="site.webmanifest">
 <meta name="theme-color" content="#04060a">
-<meta property="og:title" content="XENITH CAPITAL — Evidence-Directed Wealth Management">
-<meta property="og:description" content="Research-driven, founder-led. Portfolio construction directed by evidence — verification over assumption.">
+<meta property="og:title" content="XENITH CAPITAL // SIGNAL TRIALS">
+<meta property="og:description" content="Not a brochure. A five-level evaluation. Evidence is the edge.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xapexnexusx.github.io/xenith-capital/">
 <meta property="og:image" content="https://xapexnexusx.github.io/xenith-capital/assets/og.png">
 <script>document.documentElement.className += ' js';</script>
 </head>
-<body class="x-preload">
+<body class="x-preload x-locked">
 
 <div id="x-boot" aria-hidden="true">
   <div class="x-boot-inner">
@@ -35,232 +35,150 @@
 <div id="x-cursor" aria-hidden="true"></div>
 <div id="x-cursor-ring" aria-hidden="true"></div>
 
-<aside id="x-rail" aria-hidden="true">
-  <a href="#hero" data-nav data-rail="START"></a>
-  <a href="#architecture" data-nav data-rail="LV.01"></a>
-  <a href="#research" data-nav data-rail="LV.02"></a>
-  <a href="#risk" data-nav data-rail="LV.03"></a>
-  <a href="#firm" data-nav data-rail="LV.04"></a>
-  <a href="#mandate" data-nav data-rail="BOSS"></a>
-  <span id="x-rail-progress"></span>
-</aside>
+<a id="x-home" href="#" data-goto="0" aria-label="Xenith Capital — title screen">
+  <svg class="x-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+    <path d="M16 2 L29 9.5 V22.5 L16 30 L3 22.5 V9.5 Z" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M10 10 L22 22 M22 10 L10 22" stroke="currentColor" stroke-width="2"/>
+  </svg>
+  <span>XENITH</span>
+</a>
 
-<header id="x-nav">
-  <div class="x-nav-inner">
-    <a class="x-brand" href="#hero" data-nav>
-      <svg class="x-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-        <path d="M16 2 L29 9.5 V22.5 L16 30 L3 22.5 V9.5 Z" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M10 10 L22 22 M22 10 L10 22" stroke="currentColor" stroke-width="2"/>
-      </svg>
-      <span>XENITH<em>CAPITAL</em></span>
-    </a>
-    <nav class="x-links" aria-label="Primary">
-      <a href="#architecture" data-nav>ARCHITECTURE</a>
-      <a href="#research" data-nav>RESEARCH</a>
-      <a href="#risk" data-nav>RISK</a>
-      <a href="#firm" data-nav>FIRM</a>
-      <a href="#mandate" data-nav>MANDATE</a>
-    </nav>
-    <div class="x-nav-status" aria-hidden="true"><span class="x-dot"></span>SYS.ONLINE</div>
-  </div>
-</header>
+<nav id="x-pips" aria-label="Stage progress">
+  <button class="x-pip" data-stage="0" type="button">TITLE</button>
+  <button class="x-pip" data-stage="1" type="button" disabled>LV.01</button>
+  <button class="x-pip" data-stage="2" type="button" disabled>LV.02</button>
+  <button class="x-pip" data-stage="3" type="button" disabled>LV.03</button>
+  <button class="x-pip" data-stage="4" type="button" disabled>LV.04</button>
+  <button class="x-pip" data-stage="5" type="button" disabled>FINAL</button>
+  <button class="x-pip" data-stage="6" type="button" disabled>CLEAR</button>
+</nav>
 
-<main>
+<main id="x-stage-root">
 
-  <!-- ================= HERO ================= -->
-  <section id="hero" class="x-hero">
-    <div class="x-hero-inner">
-      <p class="x-hero-eyebrow" data-reveal>RESEARCH-DRIVEN&nbsp;&nbsp;//&nbsp;&nbsp;FOUNDER-LED</p>
-      <h1 class="x-hero-title" data-reveal>
-        <span id="x-typer" data-phrases='["EVIDENCE OVER NARRATIVE.","VERIFICATION OVER ASSUMPTION.","DISCIPLINE OVER NOISE."]'>EVIDENCE OVER NARRATIVE.</span><span class="x-typer-caret" aria-hidden="true"></span>
-      </h1>
-      <p class="x-hero-sub" data-reveal>
-        Xenith Capital constructs portfolios directed by evidence — disciplined discovery,
-        multi-source fundamental research, and portfolio-level risk analysis, engineered
-        around each client&rsquo;s objectives, constraints, and risk tolerance.
-      </p>
-      <div class="x-cta-row" data-reveal>
-        <a class="x-btn" href="#mandate" data-nav>ENTER THE PROTOCOL</a>
-        <a class="x-btn x-btn-ghost" href="#architecture" data-nav>INSPECT THE DOCTRINE</a>
-      </div>
+  <!-- ============ S0 · TITLE ============ -->
+  <section class="stage" data-stage="0" id="st-title">
+    <p class="st-eyebrow">XENITH CAPITAL // AUSTIN, TEXAS</p>
+    <h1 class="st-title st-title-xl">
+      <span id="x-typer" data-phrases='["EVIDENCE IS THE EDGE.","VERIFICATION OVER ASSUMPTION.","DISCIPLINE OVER NOISE.","SIGNAL SURVIVES. NOISE DIES."]'>EVIDENCE IS THE EDGE.</span><span class="x-typer-caret" aria-hidden="true"></span>
+    </h1>
+    <div class="st-body">
+      <p>A research-driven, founder-led registered investment adviser. Portfolios built the way
+      intelligence assessments are built: from verified evidence, under hard constraints,
+      against an adversarial world.</p>
+      <p class="st-hook">This is not a brochure. It is a five-level evaluation. Pass, and a direct
+      channel opens. Most players flame out at Level 3.</p>
     </div>
-    <aside class="x-hud" data-reveal aria-label="Firm status">
-      <div class="x-hud-item"><span class="x-hud-k">PLAYER</span><span class="x-hud-v">EVIDENCE-SEEKER</span></div>
-      <div class="x-hud-item"><span class="x-hud-k">REG</span><span class="x-hud-v">STATE RIA · EST 2021</span></div>
-      <div class="x-hud-item"><span class="x-hud-k">MODEL</span><span class="x-hud-v">EVIDENCE-DIRECTED</span></div>
-      <div class="x-hud-item"><span class="x-hud-k">STATUS</span><span class="x-hud-v x-hud-live">ACCEPTING MANDATES</span></div>
-    </aside>
-    <div class="x-scroll-cue" aria-hidden="true">SCROLL<span></span></div>
+    <button id="x-start-btn" class="x-btn" type="button">INSERT COIN // BEGIN</button>
+    <p class="st-hint">ENTER ↵ or tap to begin · ← → to revisit cleared stages</p>
   </section>
 
-  <!-- ================= SIGNAL TAPE ================= -->
-  <div class="x-tape" aria-hidden="true">
-    <div class="x-tape-track" id="x-tape-track">
-      <span class="x-tape-item">EVIDENCE-DIRECTED</span><span class="x-tape-sep">//</span>
-      <span class="x-tape-item">RESEARCH-DRIVEN</span><span class="x-tape-sep">//</span>
-      <span class="x-tape-item">FOUNDER-LED</span><span class="x-tape-sep">//</span>
-      <span class="x-tape-item">VERIFICATION OVER ASSUMPTION</span><span class="x-tape-sep">//</span>
-      <span class="x-tape-item">CONSTRAINTS BEFORE POSITIONS</span><span class="x-tape-sep">//</span>
-      <span class="x-tape-item">SIGNAL OVER NOISE</span><span class="x-tape-sep">//</span>
-      <span class="x-tape-item">DISCIPLINE COMPOUNDS</span><span class="x-tape-sep">//</span>
+  <!-- ============ S1 · LV.01 ASSEMBLE ============ -->
+  <section class="stage" data-stage="1" id="st-assemble">
+    <p class="st-eyebrow">LEVEL 01 // PORTFOLIO ARCHITECTURE</p>
+    <h2 class="st-title">CONSTRAINTS BEFORE POSITIONS.</h2>
+    <div class="st-body">
+      <p>Every mandate starts as a blank allocation. Fill it wrong and the system rejects it.
+      Distribute 100 units across four sleeves. Stay inside the constraints — the system
+      kills bad plans before the market can.</p>
     </div>
-  </div>
-
-  <!-- ================= 01 / PORTFOLIO ARCHITECTURE ================= -->
-  <section id="architecture" class="x-section" data-index="01">
-    <div class="x-section-head" data-reveal>
-      <span class="x-index">LEVEL 01 // PORTFOLIO ARCHITECTURE</span>
-      <h2 class="x-title x-glitch" data-text="PORTFOLIO CONSTRUCTION, DIRECTED BY EVIDENCE.">PORTFOLIO CONSTRUCTION, DIRECTED BY EVIDENCE.</h2>
-    </div>
-    <p class="x-lead" data-reveal>
-      Xenith combines disciplined discovery, multi-source fundamental research, and
-      portfolio-level risk analysis to construct portfolios around each client&rsquo;s
-      objectives, constraints, and risk tolerance. Evidence over narrative.
-      Verification over assumption. Professional judgment retains authority.
-    </p>
-    <div class="x-grid-3">
-      <article class="x-card" data-reveal>
-        <span class="x-card-tag">MODULE A</span>
-        <h3>DISCOVERY PROTOCOL</h3>
-        <p>Objectives, constraints, time horizon, and risk tolerance are mapped before any
-        position exists. The mandate defines the portfolio — never the reverse.</p>
-        <span class="x-card-bar" aria-hidden="true"></span>
-      </article>
-      <article class="x-card" data-reveal>
-        <span class="x-card-tag">MODULE B</span>
-        <h3>MULTI-SOURCE RESEARCH</h3>
-        <p>Theses are built from independent fundamental sources and tested against
-        disconfirming evidence. A position that cannot survive scrutiny is never sized.</p>
-        <span class="x-card-bar" aria-hidden="true"></span>
-      </article>
-      <article class="x-card" data-reveal>
-        <span class="x-card-tag">MODULE C</span>
-        <h3>RISK CONSTRAINTS</h3>
-        <p>Portfolio-level risk analysis governs construction: correlation, concentration,
-        and liquidity are constrained before return targets are set.</p>
-        <span class="x-card-bar" aria-hidden="true"></span>
-      </article>
-    </div>
-  </section>
-
-  <!-- ================= 02 / RESEARCH ENGINE ================= -->
-  <section id="research" class="x-section" data-index="02">
-    <div class="x-section-head" data-reveal>
-      <span class="x-index">LEVEL 02 // RESEARCH ENGINE</span>
-      <h2 class="x-title x-glitch" data-text="SIGNAL, SEPARATED FROM NOISE.">SIGNAL, SEPARATED FROM NOISE.</h2>
-    </div>
-    <p class="x-lead" data-reveal>
-      A disciplined pipeline converts raw information into sized positions.
-      Every stage is auditable. Nothing enters the portfolio on narrative alone.
-    </p>
-    <div class="x-pipeline" data-reveal>
-      <div class="x-pipe-step">
-        <span class="x-pipe-num">T-01</span>
-        <span class="x-pipe-name">SOURCES</span>
-        <p class="x-pipe-desc">Filings, transcripts, macro data, and primary documents. Independent inputs, cross-verified.</p>
+    <div class="st-game" id="alv-game">
+      <div class="alv-sleeve" data-sleeve="core">
+        <div class="alv-meta"><span class="alv-name">EQUITY CORE</span><span class="alv-desc">the compounding engine · 30–60</span></div>
+        <div class="alv-ctl"><button class="alv-minus" type="button" aria-label="decrease">−</button><span class="alv-val">0</span><button class="alv-plus" type="button" aria-label="increase">+</button></div>
       </div>
-      <span class="x-pipe-link" aria-hidden="true"></span>
-      <div class="x-pipe-step">
-        <span class="x-pipe-num">T-02</span>
-        <span class="x-pipe-name">SIGNALS</span>
-        <p class="x-pipe-desc">Theses scored against evidence, not headlines. Disconfirming data is weighted first.</p>
+      <div class="alv-sleeve" data-sleeve="asym">
+        <div class="alv-meta"><span class="alv-name">ASYMMETRIC SLEEVES</span><span class="alv-desc">convex bets · 10–40</span></div>
+        <div class="alv-ctl"><button class="alv-minus" type="button" aria-label="decrease">−</button><span class="alv-val">0</span><button class="alv-plus" type="button" aria-label="increase">+</button></div>
       </div>
-      <span class="x-pipe-link" aria-hidden="true"></span>
-      <div class="x-pipe-step">
-        <span class="x-pipe-num">T-03</span>
-        <span class="x-pipe-name">SYNTHESIS</span>
-        <p class="x-pipe-desc">Portfolio-level view: correlation, concentration, and constraint interaction across candidates.</p>
+      <div class="alv-sleeve" data-sleeve="cash">
+        <div class="alv-meta"><span class="alv-name">CASH BALLAST</span><span class="alv-desc">dry powder · at least 10</span></div>
+        <div class="alv-ctl"><button class="alv-minus" type="button" aria-label="decrease">−</button><span class="alv-val">0</span><button class="alv-plus" type="button" aria-label="increase">+</button></div>
       </div>
-      <span class="x-pipe-link" aria-hidden="true"></span>
-      <div class="x-pipe-step">
-        <span class="x-pipe-num">T-04</span>
-        <span class="x-pipe-name">POSITIONS</span>
-        <p class="x-pipe-desc">Sized by conviction within the risk budget. Professional judgment retains final authority.</p>
+      <div class="alv-sleeve" data-sleeve="hedge">
+        <div class="alv-meta"><span class="alv-name">TAIL HEDGES</span><span class="alv-desc">crash insurance · at least 5</span></div>
+        <div class="alv-ctl"><button class="alv-minus" type="button" aria-label="decrease">−</button><span class="alv-val">0</span><button class="alv-plus" type="button" aria-label="increase">+</button></div>
+      </div>
+      <div class="alv-footer">
+        <div class="alv-total-row"><span>TOTAL</span><span id="alv-total">0 / 100</span></div>
+        <div id="alv-meter"><span id="alv-meter-fill"></span></div>
+        <p id="alv-verdict">the budget is empty. allocate.</p>
+        <button id="alv-commit" class="x-btn" type="button" disabled>COMMIT THE ALLOCATION</button>
       </div>
     </div>
   </section>
 
-  <!-- ================= 03 / RISK DOCTRINE ================= -->
-  <section id="risk" class="x-section" data-index="03">
-    <div class="x-section-head" data-reveal>
-      <span class="x-index">LEVEL 03 // RISK DOCTRINE</span>
-      <h2 class="x-title x-glitch" data-text="CONSTRAINTS BEFORE POSITIONS.">CONSTRAINTS BEFORE POSITIONS.</h2>
+  <!-- ============ S2 · LV.02 SIGNAL OR NOISE ============ -->
+  <section class="stage" data-stage="2" id="st-quiz">
+    <p class="st-eyebrow">LEVEL 02 // RESEARCH ENGINE</p>
+    <h2 class="st-title">SIGNAL, OR NOISE.</h2>
+    <div class="st-body">
+      <p>Ninety percent of what reaches an investor is noise — feeds, group chats, headlines.
+      Five items. Classify fast. Four correct opens the door.</p>
     </div>
-    <div class="x-grid-2">
-      <div class="x-panel" data-reveal>
-        <div class="x-panel-head">DOCTRINE // NON-NEGOTIABLES</div>
-        <ul class="x-list">
-          <li>Risk budget is allocated before return targets are set.</li>
-          <li>Portfolio-level analysis governs every construction decision.</li>
-          <li>Drawdown awareness over return chasing — survival compounds.</li>
-          <li>No narrative leverage: a story is never a sizing input.</li>
-          <li>Liquidity and concentration limits are respected at all times.</li>
-        </ul>
+    <div class="st-game" id="qz-game">
+      <div id="qz-progress"><span class="qz-dot"></span><span class="qz-dot"></span><span class="qz-dot"></span><span class="qz-dot"></span><span class="qz-dot"></span></div>
+      <div id="qz-card"><p class="qz-item">press start.</p></div>
+      <p id="qz-streak">STREAK 0 · NEED 4/5</p>
+      <div class="qz-actions">
+        <button id="qz-signal" class="x-btn" type="button">SIGNAL</button>
+        <button id="qz-noise" class="x-btn x-btn-ghost" type="button">NOISE</button>
       </div>
-      <div class="x-panel" data-reveal>
-        <div class="x-panel-head">TELEMETRY // MANDATE DISCIPLINE</div>
-        <div class="x-meter-widget">
-          <div class="x-meter-row">
-            <span class="x-meter-label">EVIDENCE COVERAGE</span>
-            <div class="x-meter"><span class="x-meter-fill" style="--fill:100%"></span></div>
-            <span class="x-meter-val">100%</span>
-          </div>
-          <div class="x-meter-row">
-            <span class="x-meter-label">NARRATIVE TOLERANCE</span>
-            <div class="x-meter"><span class="x-meter-fill x-meter-fill-warn" style="--fill:0%"></span></div>
-            <span class="x-meter-val">0%</span>
-          </div>
-          <div class="x-meter-row">
-            <span class="x-meter-label">CONSTRAINT COMPLIANCE</span>
-            <div class="x-meter"><span class="x-meter-fill" style="--fill:100%"></span></div>
-            <span class="x-meter-val">100%</span>
-          </div>
-        </div>
-        <p class="x-panel-note">Discipline is measured at the portfolio level, on every mandate, without exception.</p>
-      </div>
+      <p id="qz-verdict"></p>
     </div>
   </section>
 
-  <!-- ================= 04 / THE FIRM ================= -->
-  <section id="firm" class="x-section" data-index="04">
-    <div class="x-section-head" data-reveal>
-      <span class="x-index">LEVEL 04 // THE OPERATOR</span>
-      <h2 class="x-title x-glitch" data-text="FOUNDER-LED. INDEPENDENT. ACCOUNTABLE.">FOUNDER-LED. INDEPENDENT. ACCOUNTABLE.</h2>
+  <!-- ============ S3 · LV.03 THE HOLD ============ -->
+  <section class="stage" data-stage="3" id="st-hold">
+    <p class="st-eyebrow">LEVEL 03 // RISK DOCTRINE</p>
+    <h2 class="st-title">THE DRAWDOWN TEST.</h2>
+    <div class="st-body">
+      <p>Everyone is a long-term investor until the screen goes red. One instruction: hold.
+      Press the button and do not let go. Eight seconds. Most players release at six.</p>
     </div>
-    <div class="x-grid-2">
-      <div class="x-panel x-panel-founder" data-reveal>
-        <div class="x-panel-head">OPERATOR PROFILE</div>
-        <p>Xenith Capital is an independent, founder-led registered investment adviser,
-        established 2021. Research is not a department here — it is the operating system.</p>
-        <p>You speak with the person who makes the decision. No layers. No hand-offs.
-        The same mind that builds the research defends the portfolio.</p>
-        <p class="x-sig">— FOUNDER, XENITH CAPITAL</p>
+    <div class="st-game" id="hold-game">
+      <div id="hold-ring">
+        <svg viewBox="0 0 160 160" aria-hidden="true">
+          <circle class="hold-track" cx="80" cy="80" r="70"/>
+          <circle class="hold-fill" id="hold-fill" cx="80" cy="80" r="70"/>
+        </svg>
+        <button id="hold-btn" type="button">HOLD<br>POSITION</button>
       </div>
-      <div class="x-facts" data-reveal>
-        <div class="x-fact"><span class="x-fact-num" data-count="2021">0</span><span class="x-fact-label">ESTABLISHED</span></div>
-        <div class="x-fact"><span class="x-fact-num x-fact-word">RIA</span><span class="x-fact-label">REGISTERED ADVISER</span></div>
-        <div class="x-fact"><span class="x-fact-num x-fact-word">1:1</span><span class="x-fact-label">FOUNDER ACCESS</span></div>
-        <div class="x-fact"><span class="x-fact-num x-fact-word">100%</span><span class="x-fact-label">INDEPENDENT</span></div>
-      </div>
+      <p id="hold-status">press and hold.</p>
+      <p id="hold-attempts">ATTEMPTS: 2</p>
     </div>
   </section>
 
-  <!-- ================= 05 / MANDATE ================= -->
-  <section id="mandate" class="x-section" data-index="05">
-    <div class="x-section-head" data-reveal>
-      <span class="x-index">FINAL LEVEL // CLEARANCE PROTOCOL</span>
-      <h2 class="x-title x-glitch" data-text="EARN THE CHANNEL.">EARN THE CHANNEL.</h2>
+  <!-- ============ S4 · LV.04 JUDGMENT ============ -->
+  <section class="stage" data-stage="4" id="st-judgment">
+    <p class="st-eyebrow">LEVEL 04 // THE OPERATOR</p>
+    <h2 class="st-title">JUDGMENT CALL.</h2>
+    <div class="st-body">
+      <p>Models inform. Judgment decides. Two scenarios from the desk.
+      Choose like an analyst, not an audience.</p>
     </div>
-    <p class="x-lead" data-reveal>
-      The direct channel is sealed. Three trials stand between you and it:
-      signal, patience, verification. Type <code>clearance</code> in the terminal to begin.
-      Every granted channel is reviewed personally.
-    </p>
-    <div class="x-grid-2">
-      <div id="x-terminal" data-reveal>
+    <div class="st-game" id="jg-game">
+      <p id="jg-scenario">scenario loading…</p>
+      <div class="jg-actions">
+        <button class="jg-choice x-btn-ghost" data-choice="accept" type="button">ACCEPT</button>
+        <button class="jg-choice x-btn" data-choice="verify" type="button">VERIFY</button>
+        <button class="jg-choice x-btn-ghost" data-choice="reject" type="button">REJECT</button>
+      </div>
+      <p id="jg-verdict"></p>
+    </div>
+  </section>
+
+  <!-- ============ S5 · FINAL: CLEARANCE TERMINAL ============ -->
+  <section class="stage" data-stage="5" id="st-terminal">
+    <p class="st-eyebrow">FINAL LEVEL // CLEARANCE PROTOCOL</p>
+    <h2 class="st-title">EARN THE CHANNEL.</h2>
+    <div class="st-body st-body-slim">
+      <p>The terminal re-tests everything. Three trials. No saves. Clear it, and the channel unseals.</p>
+    </div>
+    <div class="st-game st-game-terminal">
+      <div id="x-terminal">
         <div class="x-term-head">
           <span class="x-term-dot"></span><span class="x-term-dot"></span><span class="x-term-dot"></span>
-          <span class="x-term-title">XENITH // CLEARANCE PROTOCOL v3.0</span>
+          <span class="x-term-title">XENITH // CLEARANCE PROTOCOL v4.0</span>
         </div>
         <div class="x-term-body" aria-live="polite"></div>
         <div class="x-term-form-row">
@@ -271,32 +189,34 @@
           </form>
         </div>
       </div>
-      <div class="x-contact" data-reveal>
+      <div class="x-contact">
         <div class="x-contact-row"><span class="x-contact-k">CHANNEL</span><span class="x-contact-sealed">SEALED — earn clearance</span></div>
-        <div class="x-contact-row"><span class="x-contact-k">TRIALS</span><span>SIGNAL · PATIENCE · VERIFICATION</span></div>
-        <div class="x-contact-row"><span class="x-contact-k">REVIEW</span><span>Every granted channel read personally</span></div>
+        <div class="x-contact-row"><span class="x-contact-k">REVIEW</span><span>every granted channel read personally</span></div>
         <div class="x-contact-row"><span class="x-contact-k">JURISDICTION</span><span>Texas, United States</span></div>
       </div>
     </div>
   </section>
 
+  <!-- ============ S6 · CLEAR ============ -->
+  <section class="stage" data-stage="6" id="st-clear">
+    <p class="st-eyebrow">PROTOCOL COMPLETE</p>
+    <h2 class="st-title">CHANNEL UNSEALED.</h2>
+    <div class="st-body">
+      <p>You play like an analyst. The channel is open — every transmission is read personally.</p>
+      <div id="clear-panel">
+        <div class="clear-row"><span class="clear-k">CHANNEL KEY</span><span id="clear-key">—</span></div>
+        <div class="clear-row"><span class="clear-k">DIRECT</span>
+          <a id="clear-mail" hidden></a><span id="clear-sealed">unseal via FINAL LEVEL</span>
+        </div>
+      </div>
+      <p id="clear-disc">bring evidence. leave narrative.</p>
+    </div>
+    <button id="clear-restart" class="x-btn-ghost" type="button">REPLAY THE TRIALS</button>
+  </section>
+
 </main>
 
-<footer id="x-footer">
-  <div class="x-foot-grid">
-    <div class="x-brand x-brand-foot">
-      <svg class="x-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-        <path d="M16 2 L29 9.5 V22.5 L16 30 L3 22.5 V9.5 Z" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M10 10 L22 22 M22 10 L10 22" stroke="currentColor" stroke-width="2"/>
-      </svg>
-      <span>XENITH<em>CAPITAL</em></span>
-    </div>
-    <div class="x-foot-row">
-      <button id="x-disc-open" class="x-disc-btn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="x-disc">DISCLOSURES // FORM CRS</button>
-      <p class="x-copy">© 2026 XENITH CAPITAL // ALL SIGNALS RESERVED</p>
-    </div>
-  </div>
-</footer>
+<button id="x-disc-open" class="x-disc-btn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="x-disc">DISCLOSURES // FORM CRS</button>
 
 <div id="x-disc" role="dialog" aria-modal="true" aria-labelledby="x-disc-title" hidden>
   <div class="x-disc-panel">
@@ -324,13 +244,14 @@
   </div>
 </div>
 
-<noscript><p style="text-align:center;padding:1rem;font-family:monospace">Xenith Capital — evidence-directed wealth management, Austin TX. Enable JavaScript to open a channel.</p></noscript>
+<noscript><p style="text-align:center;padding:1rem;font-family:monospace">Xenith Capital — evidence-directed wealth management, Austin TX. Enable JavaScript to play.</p></noscript>
 
 <script src="assets/fx.js" defer></script>
 <script src="assets/boot.js" defer></script>
-<script src="assets/main.js" defer></script>
+<script src="assets/stage.js" defer></script>
+<script src="assets/games.js" defer></script>
 <script src="assets/terminal.js" defer></script>
-<script src="assets/drawer.js" defer></script>
 <script src="assets/game.js" defer></script>
+<script src="assets/drawer.js" defer></script>
 </body>
 </html>

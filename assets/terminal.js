@@ -1,22 +1,35 @@
 /* ==========================================================================
-   XENITH CAPITAL — clearance protocol terminal
-   assets/terminal.js — owns #x-terminal. Vanilla JS, zero dependencies.
-   Public API: window.XenithTerminal = { init(sel, opts), version }
-   Auto-initializes on DOMContentLoaded against #x-terminal.
-   Line classes (.xt-line/.xt-user/.xt-ok/.xt-err) and the matrix-rain overlay
-   class (.xt-rain) are styled by the injected block below; game chrome
-   (.xt-bar/.xt-win) and every other contract selector stay with xenith.css.
-   v3 additions: the CLEARANCE PROTOCOL trial game (SIGNAL / PATIENCE /
-   VERIFICATION) gating the direct channel, sealed mandate + contact,
-   channel key, sessionStorage gate, uptime command, iddqd + xyzzy eggs,
+   XENITH CAPITAL — clearance protocol terminal (SIGNAL TRIALS boss stage)
+   assets/terminal.js — owns #x-terminal on stage 5. Vanilla JS, zero deps.
+   Public API: window.XenithTerminal = { init(sel, opts), enter(), version }
+
+   v4: LAZY BOOT — nothing initializes at DOMContentLoaded. The terminal
+   boots on the first document event x:stage-enter with detail.n === 5
+   (stage.js may also call XenithTerminal.enter()); both paths are
+   idempotent and re-focus the input so it stays usable while body scroll
+   is locked. The BOSS GAUNTLET is the SHORT protocol: 3 signal/noise
+   items → 6s no-input hold → 1 judgment call, then CLEARANCE prints the
+   .xt-win block, the XV-#### channel key and the direct channel
+   (inquiry@xenithcap.io exists ONLY inside these flows), unlocks the
+   mandate flow (mailto handoff; capital bands [1] $1M–$5M [2] $5M–$25M
+   [3] $25M+ [4] below $1M — band 4 prints the fixed not-a-fit line and
+   ends gracefully), stores xv_clearance=granted + xv_channel_key in
+   sessionStorage, and dispatches x:clearance-granted plus
+   x:stage-passed {detail:{n:5}}. On x:stage-enter {n:6} the CLEAR screen
+   (#clear-key / #clear-mail / #clear-sealed) is unsealed from the stored
+   grant; without a grant the sealed text is left untouched.
+   mandate/contact stay SEALED before clearance.
+   Line classes (.xt-line/.xt-user/.xt-ok/.xt-err) and the rain overlay
+   (.xt-rain) are styled by the injected block below; game chrome
+   (.xt-bar/.xt-win) stays with xenith.css.
+   v3 preserved: scan / matrix / disclosures / whoami / uptime / banner /
+   clear / exit, iddqd + xyzzy, uplink clock, ordered print pipeline,
    tab-hidden timer pausing.
-   v2 preserved: scan / matrix / disclosures / banner / clear / exit,
-   uplink clock, print pipeline and printer ordering.
    ========================================================================== */
 (function () {
   'use strict';
 
-  var VERSION = '3.0.0';
+  var VERSION = '4.0.0';
   var DEFAULT_EMAIL = 'inquiry@xenithcap.io';
   var TYPE_MS = 12;            /* per-character cadence for system lines */
   var BOOT_GAP_MS = 130;       /* stagger between boot lines */
@@ -26,21 +39,14 @@
   var MATRIX_MS = 8000;        /* total rain duration */
   var HOLD_TICK_MS = 250;      /* hold bar cadence (~4x/s) */
   var HOLD_TICK_RM_MS = 1000;  /* reduced-motion hold bar cadence (1x/s) */
-  var HOLD_SECONDS = 12;       /* THE HOLD — full duration */
-  var HOLD_RETRY_SECONDS = 10; /* THE HOLD — retry duration */
+  var HOLD_SECONDS = 6;        /* THE HOLD — full duration */
+  var HOLD_RETRY_SECONDS = 6;  /* THE HOLD — retry duration */
   var BAR_WIDTH = 24;          /* block width of the hold progress bar */
   var STYLE_ID = 'xt-line-styles';
   var IDLE_PLACEHOLDER = "type 'clearance'";
   var IDLE_ARIA = 'Terminal input. Type help for commands.';
   var STORAGE_GATE = 'xv_clearance';
   var STORAGE_KEY = 'xv_channel_key';
-
-  var BOOT_LINES = [
-    'XENITH CAPITAL // CLEARANCE PROTOCOL v3.0',
-    'secure channel: SEALED',
-    'trials loaded: SIGNAL · PATIENCE · VERIFICATION',
-    "type 'clearance' to begin — or 'help'"
-  ];
 
   var DISCLOSURE_LINES = [
     'Xenith Capital is a state-registered investment adviser.',
@@ -60,19 +66,12 @@
   ];
   var SCAN_CLEAN_LINE = '0 narrative inputs in doctrine — process CLEAN';
 
-  /* TRIAL 1 // SIGNAL OR NOISE — answer key: s = signal, n = noise. */
-  var TRIAL1_ITEMS = [
+  /* TRIAL 1 // SIGNAL OR NOISE — the short gauntlet deck: 3 items, 3/3.
+     answer key: s = signal, n = noise. */
+  var GAUNTLET_ITEMS = [
     { q: 'A CEO posts a rocket emoji after earnings.', a: 'n' },
     { q: 'Third consecutive quarter of declining free cash flow in the 10-K.', a: 's' },
-    { q: 'A viral thread promises 40% guaranteed.', a: 'n' },
-    { q: 'Cluster of insider buys at a 52-week low.', a: 's' },
-    { q: 'Your gym group chat is all-in on one ticker.', a: 'n' }
-  ];
-  /* Retry set — armed once after a sub-threshold main run; needs 3/3. */
-  var TRIAL1_RETRY = [
-    { q: 'Management raises guidance and funds it with buybacks.', a: 's' },
-    { q: "'This time it's different.' — prime-time segment.", a: 'n' },
-    { q: 'Receivables growing 3x revenue, buried in note 14.', a: 's' }
+    { q: 'A viral thread promises 40% guaranteed.', a: 'n' }
   ];
 
   /* Full-width glyphs keep the rain grid aligned in the mono font. */
@@ -81,19 +80,23 @@
   var RAIN_COL_PX = 12;
   var RAIN_ROW_PX = 15;
 
+  /* Capital bands live ONLY inside this mandate flow — never on a screen. */
   var BAND_LABELS = {
-    '1': 'under 250k',
-    '2': '250k-1M',
-    '3': '1M+',
-    '4': 'prefer not to say'
+    '1': '$1M–$5M',
+    '2': '$5M–$25M',
+    '3': '$25M+',
+    '4': 'below $1M'
   };
 
   var BAND_MENU = [
-    '  [1] under 250k',
-    '  [2] 250k-1M',
-    '  [3] 1M+',
-    '  [4] prefer not to say'
+    '  [1] $1M–$5M',
+    '  [2] $5M–$25M',
+    '  [3] $25M+',
+    '  [4] below $1M'
   ];
+
+  /* Band 4 prints exactly this line, then the flow ends gracefully. */
+  var BAND4_LINE = 'xenith is built for concentrated evidence-directed mandates; below $1M the fit is usually wrong — the doctrine is free, take it with you.';
 
   var EMAIL_RE = /.+@.+\..+/;
 
@@ -162,6 +165,13 @@
       out += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return 'XV-' + out;
+  }
+
+  /* One dispatch path for the stage-manager contract events. */
+  function emit(name, detail) {
+    if (typeof CustomEvent !== 'function' || !document.dispatchEvent) return;
+    document.dispatchEvent(new CustomEvent(name,
+      detail === undefined ? undefined : { detail: detail }));
   }
 
   /* Output printer: every line funnels through one promise chain so typed
@@ -257,7 +267,7 @@
     var printer = makePrinter(body);
 
     /* State machine: { mode:'idle' } | { mode:'mandate', step:0..3, data } |
-       { mode:'trial1'|'hold-confirm'|'hold'|'trial3' } (clearance game). */
+       { mode:'trial1'|'hold-confirm'|'hold'|'trial3' } (boss gauntlet). */
     var state = { mode: 'idle', step: -1, data: {} };
 
     function freshGame() {
@@ -312,29 +322,24 @@
       }, 1000);
     }
 
-    function boot() {
-      for (var i = 0; i < BOOT_LINES.length; i++) {
-        if (i > 0) printer.wait(BOOT_GAP_MS);
-        printer.print(BOOT_LINES[i]);
-      }
+    /* v4.0 banner — channel state is live, so a granted player who revisits
+       the stage (or reloads the tab mid-session) never sees a stale SEAL. */
+    function bootLines() {
+      return [
+        'XENITH CAPITAL // CLEARANCE PROTOCOL v4.0',
+        'secure channel: ' + (granted ? 'UNSEALED' : 'SEALED'),
+        'trials loaded: SIGNAL · HOLD · JUDGMENT',
+        granted
+          ? "type 'mandate' to open the guided inquiry — or 'help'"
+          : "type 'clearance' to begin — or 'help'"
+      ];
     }
 
-    /* Hold the boot sequence until the terminal first scrolls into view so
-       the staggered typing is actually seen; fall back to immediate boot. */
-    function armBoot() {
-      if ('IntersectionObserver' in window) {
-        var io = new IntersectionObserver(function (entries) {
-          for (var i = 0; i < entries.length; i++) {
-            if (entries[i].isIntersecting) {
-              io.disconnect();
-              boot();
-              return;
-            }
-          }
-        }, { threshold: 0.25 });
-        io.observe(root);
-      } else {
-        boot();
+    function boot() {
+      var lines = bootLines();
+      for (var i = 0; i < lines.length; i++) {
+        if (i > 0) printer.wait(BOOT_GAP_MS);
+        printer.print(lines[i]);
       }
     }
 
@@ -540,6 +545,17 @@
             printer.print('select a band — 1, 2, 3 or 4:', 'xt-err');
             return;
           }
+          if (v === '4') {
+            /* Below-fit band: print the exact not-a-fit line and end the
+               flow gracefully — no transmission prepared, no mail handoff. */
+            state.mode = 'idle';
+            state.step = -1;
+            state.data = {};
+            setPlaceholder(null);
+            printer.print(BAND4_LINE);
+            printer.print('mandate flow closed — no transmission sent');
+            return;
+          }
           state.data.band = BAND_LABELS[v];
           break;
         case 'objective':
@@ -552,7 +568,7 @@
       askStep();
     }
 
-    /* ---------------- clearance protocol game ---------------- */
+    /* ---------------- boss gauntlet (clearance protocol) ---------------- */
 
     function gameActive() {
       return state.mode === 'trial1' || state.mode === 'hold-confirm' ||
@@ -578,22 +594,17 @@
       state.mode = 'trial1';
       setPlaceholder('s or n');
       if (wasLocked) printer.print('protocol restart — prior lock cleared');
-      printer.print('CLEARANCE PROTOCOL // three trials — signal, patience, verification');
+      printer.print('CLEARANCE PROTOCOL // three trials — signal, hold, judgment');
       printer.print('ESC aborts at any point. the channel stays sealed until all three clear.');
       printer.print('TRIAL 1 // SIGNAL OR NOISE', 'xt-ok');
-      printer.print('five items. answer [s] signal or [n] noise — 4/5 to clear.');
+      printer.print('three items. answer [s] signal or [n] noise — 3/3 to clear.');
       askTrial1();
     }
 
-    function trial1Set() {
-      return game.t1.retry ? TRIAL1_RETRY : TRIAL1_ITEMS;
-    }
-
     function askTrial1() {
-      var item = trial1Set()[game.t1.index];
-      var label = game.t1.retry
-        ? 'retry ' + (game.t1.index + 1) + '/3'
-        : 'item ' + (game.t1.index + 1) + '/5';
+      var item = GAUNTLET_ITEMS[game.t1.index];
+      var label = (game.t1.retry ? 'retry ' : 'item ') +
+        (game.t1.index + 1) + '/3';
       printer.print(label + ' — ' + item.q + '  [s/n]');
     }
 
@@ -603,13 +614,12 @@
         printer.print("answer 's' (signal) or 'n' (noise):", 'xt-err');
         return;
       }
-      var set = trial1Set();
-      var item = set[game.t1.index];
+      var item = GAUNTLET_ITEMS[game.t1.index];
       var right = v === item.a;
       if (right) game.t1.score += 1;
       printer.print(right ? 'correct' : 'incorrect', right ? 'xt-ok' : 'xt-err');
       game.t1.index += 1;
-      if (game.t1.index < set.length) {
+      if (game.t1.index < GAUNTLET_ITEMS.length) {
         askTrial1();
         return;
       }
@@ -618,16 +628,16 @@
 
     function finishTrial1() {
       if (!game.t1.retry) {
-        printer.print('SIGNAL score: ' + game.t1.score + '/5');
-        if (game.t1.score >= 4) {
+        printer.print('SIGNAL score: ' + game.t1.score + '/3');
+        if (game.t1.score === 3) {
           printer.print('TRIAL 1 CLEARED — signal separated from noise', 'xt-ok');
           startHoldIntro();
         } else {
           game.t1.retry = true;
           game.t1.index = 0;
           game.t1.score = 0;
-          printer.print('below threshold — 4/5 required', 'xt-err');
-          printer.print('retry set armed: 3 items, 3/3 required. last chance.');
+          printer.print('below threshold — 3/3 required', 'xt-err');
+          printer.print('one retry granted: same three items, 3/3 required. last chance.');
           askTrial1();
         }
       } else {
@@ -742,12 +752,12 @@
       }
     }
 
-    /* --- TRIAL 3 // THE VERIFICATION --- */
+    /* --- TRIAL 3 // THE JUDGMENT --- */
 
     function startTrial3() {
       state.mode = 'trial3';
       setPlaceholder('accept / verify / reject');
-      printer.print('TRIAL 3 // THE VERIFICATION', 'xt-ok');
+      printer.print('TRIAL 3 // THE JUDGMENT', 'xt-ok');
       printer.print('claim on file: "Our model predicted the last three crashes."');
       printer.print('Your move: [accept / verify / reject]');
     }
@@ -797,16 +807,15 @@
       storageSet(STORAGE_KEY, channelKey);
       printer.print(
         'CLEARANCE GRANTED — PROTOCOL COMPLETE\n' +
-        'trials cleared: SIGNAL · PATIENCE · VERIFICATION\n' +
+        'trials cleared: SIGNAL · HOLD · JUDGMENT\n' +
         'secure channel: UNSEALED',
         'xt-win'
       );
       printer.print('direct channel: ' + email, 'xt-ok');
       printer.print('channel key: ' + channelKey, 'xt-ok');
       printer.print("type 'mandate' to open the guided inquiry — 'contact' reprints the channel");
-      if (typeof CustomEvent === 'function' && document.dispatchEvent) {
-        document.dispatchEvent(new CustomEvent('x:clearance-granted'));
-      }
+      emit('x:clearance-granted');
+      emit('x:stage-passed', { n: 5 });
     }
 
     function abortGame() {
@@ -828,7 +837,7 @@
         '-------       --------',
         'help          show this command list',
         'whoami        player identity + clearance state',
-        'clearance     begin the clearance protocol (alias: protocol)',
+        'clearance     begin the boss gauntlet (alias: protocol)',
         'contact       direct contact channel [' + gate + ']',
         'disclosures   regulatory disclosures',
         'scan          doctrinal exposure sweep',
@@ -969,10 +978,24 @@
       input.focus();
     });
 
-    startUplink();
-    armBoot();
+    /* The stage manager locks body scroll; preventScroll keeps focus from
+       fighting the lock, with a plain-focus fallback for older engines. */
+    function focusInput() {
+      try {
+        input.focus({ preventScroll: true });
+      } catch (e) {
+        input.focus();
+      }
+    }
 
-    return { boot: boot, clear: printer.clear, print: printer.print };
+    startUplink();
+
+    return {
+      boot: boot,
+      clear: printer.clear,
+      print: printer.print,
+      focus: focusInput
+    };
   }
 
   function init(sel, opts) {
@@ -985,15 +1008,69 @@
     return api;
   }
 
-  window.XenithTerminal = { init: init, version: VERSION };
+  /* ---------------- v4 lazy boot + stage wiring ---------------- */
 
-  function autoInit() {
-    init('#x-terminal', { email: DEFAULT_EMAIL });
+  var termApi = null;
+  var booted = false;
+
+  /* Idempotent: boots once, re-focuses on every call. Safe for stage.js to
+     call directly and safe to fire on every x:stage-enter {n:5}. */
+  function enter() {
+    if (!termApi) {
+      termApi = init('#x-terminal', { email: DEFAULT_EMAIL });
+      if (termApi && !booted) {
+        booted = true;
+        termApi.boot();
+      }
+    }
+    if (termApi && termApi.focus) termApi.focus();
+    return termApi;
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', autoInit);
-  } else {
-    autoInit();
+  /* CLEAR-stage fill: unseal #clear-key / #clear-mail only when the stored
+     grant exists; otherwise the sealed text stays exactly as shipped. */
+  function fillClearStage() {
+    if (storageGet(STORAGE_GATE) !== 'granted') return;
+    var key = storageGet(STORAGE_KEY);
+    if (!key) {
+      key = genKey();
+      storageSet(STORAGE_KEY, key);
+    }
+    var keyEl = document.getElementById('clear-key');
+    var mail = document.getElementById('clear-mail');
+    var sealed = document.getElementById('clear-sealed');
+    if (keyEl) keyEl.textContent = key;
+    if (mail) {
+      mail.textContent = DEFAULT_EMAIL;
+      mail.setAttribute('href', 'mailto:' + DEFAULT_EMAIL);
+      mail.hidden = false;
+      if (mail.removeAttribute) mail.removeAttribute('hidden');
+    }
+    if (sealed) {
+      sealed.hidden = true;
+      if (sealed.setAttribute) sealed.setAttribute('hidden', '');
+    }
   }
+
+  /* Unseal the stage-5 contact panel once clearance exists. */
+  function unsealPanel() {
+    if (storageGet(STORAGE_GATE) !== 'granted') return;
+    var slot = document.querySelector('.x-contact-sealed');
+    if (!slot || slot.getAttribute('data-unsealed') === '1') return;
+    slot.setAttribute('data-unsealed', '1');
+    var a = document.createElement('a');
+    a.href = 'mailto:' + DEFAULT_EMAIL;
+    a.textContent = DEFAULT_EMAIL;
+    slot.textContent = '';
+    slot.appendChild(a);
+  }
+
+  document.addEventListener('x:stage-enter', function (e) {
+    var n = e && e.detail ? e.detail.n : null;
+    if (n === 5) { enter(); unsealPanel(); }
+    else if (n === 6) fillClearStage();
+  });
+  document.addEventListener('x:clearance-granted', unsealPanel);
+
+  window.XenithTerminal = { init: init, enter: enter, version: VERSION };
 })();

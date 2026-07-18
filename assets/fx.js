@@ -1,28 +1,48 @@
 /* ==========================================================================
-   XENITH CAPITAL — ambient canvas engine (fx.js) v3
-   Renders into #fx-bg (fixed, full-viewport, z-index 0). Layers per frame:
-     1. perspective neon grid floor (lower ~45%, horizon glow, scroll parallax)
-     2. starfield sky (upper ~55%, phase-offset twinkle, scroll parallax)
-     3. monospace data rain (glyph + ticker columns, pointer-proximity boost)
-     4. lerped pointer glow (additive cyan/magenta blend)
-     5. click shockwaves (additive expanding rings, max 3 concurrent)
-     6. edge vignette
-     7. glitch tear post-pass (random 9–14s timer or on demand, ~120ms)
-   v3 additions:
-     8. BOSS-ZONE PALETTE — MutationObserver on body.x-boss-zone; while active,
-        eases (smoothstep, ~0.4s ramp) the scene toward a boss palette:
-        rain columns migrate cyan→magenta until ~60/40 magenta-dominant
-        (per-column tint seed crossing a lerped mix threshold — columns flip
-        individually, no sprite re-bakes, no extra draw calls), grid fan lines
-        lerp toward amber, grid rows + horizon rule toward magenta, horizon
-        glow + pointer glow cross-fade to pre-baked amber/magenta variants.
-     9. SCROLL-VELOCITY SURGE — EMA of |scrollY velocity| (~0.2 smoothing at
-        60fps, frame-rate independent) scales rain fall speed by
-        1 + min(vel*0.004, 1.5); decays back to 1 when idle.
-    10. CRT SHIMMER — full-frame alpha dip ≤0.03 at ~8Hz, composited last;
-        never in the static frame, never under prefers-reduced-motion.
-   Vanilla JS, zero dependencies. Public API: window.XENITH_FX
-   ({ start, stop, setIntensity, burst }).
+   XENITH CAPITAL — SIGNAL TRIALS :: black-hole engine (fx.js) v4
+   Full rewrite for the stage game. Renders into #fx-bg (fixed, full-viewport;
+   positioning/z-index owned by xenith.css). Vanilla JS, zero dependencies.
+
+   Frame assembly (back to front):
+     1. void clear (#04060a)
+     2. 2 nebula sprites — cyan/deep-blue + magenta/deep-purple radial
+        gradients, baked once offscreen, peak alpha <= .06, slow independent
+        Lissajous drift                                            [lighter]
+     3. 3-layer starfield (far/mid/near): per-layer drift speed, pointer
+        parallax (far least, near most), phase-offset twinkle, edge wrap
+     4. mood-tinted hole glow (radial gradient around origin, rebuilt only
+        when the quantized tint changes or on resize)              [lighter]
+     5. accretion disk — FAR half (orbits passing behind the hole) [lighter]
+     6. dark core: true black fill + 1px void edge
+     7. photon ring: bright thin ellipse, tilt -12deg, 3-stroke fake bloom
+        (cyan-white core glow)                                     [lighter]
+     8. accretion disk — NEAR half (orbits passing in front)       [lighter]
+     9. gravitational-lensing shimmer ring at the disk edge (faint,
+        breathing radius/alpha)                                    [lighter]
+    10. warp rays — radial screen-edge streaks, warp jumps only    [lighter]
+    11. edge vignette
+
+   Disk: preallocated pool (600 active desktop / 260 under 760px, scaled by
+   setIntensity). Elliptical orbits at 1.2–3.4x core radius, angular speed
+   om = KEPLER/sqrt(r) (Kepler-ish), slow orbital decay with respawn at the
+   outer rim, ~2x alpha on the approaching side, slow precession.
+
+   API: window.XENITH_FX = { start, stop, setIntensity, burst, warp, setMood }
+     warp(midCb) : 450ms suck-in (disk+stars dive toward the core, core grows
+                   to ~2.4x, radial screen streaks) -> midCb fired exactly
+                   once -> 450ms de-warp back. Reduced motion or halted loop:
+                   midCb fires synchronously, no animation. Re-entrant calls
+                   while a jump is live are ignored (midCb NOT called).
+     setMood(m)  : 'cyan' | 'magenta' | 'amber' — ~0.5s tint lerp of
+                   ring/disk/glow. Snaps + repaints under reduced motion.
+     burst()     : 150ms disk flare + ring flash.
+     setIntensity: 0..2 density multiplier on disk particles + stars.
+
+   Hard constraints honored: DPR cap 2; zero allocations in the steady-state
+   frame loop (fixed pools + quantized tint caches; tint strings/gradients
+   rebuild only on actual color change); rAF paused on hidden tabs and under
+   prefers-reduced-motion (static frame: nebulae + stars + frozen disk +
+   core + ring, nothing moves); particle halving under 760px width.
    ========================================================================== */
 (function () {
   'use strict';
@@ -31,7 +51,9 @@
     start: function () {},
     stop: function () {},
     setIntensity: function () {},
-    burst: function () {}
+    burst: function () {},
+    warp: function (cb) { if (typeof cb === 'function') cb(); },
+    setMood: function () {}
   };
 
   var canvas = document.getElementById('fx-bg');
@@ -39,607 +61,512 @@
   var ctx = canvas.getContext('2d', { alpha: false });
   if (!ctx) { window.XENITH_FX = API_STUB; return; }
 
-  /* ---------- palette (mirrors CONTRACT tokens) ---------- */
+  /* ---------- palette ---------- */
   var VOID = '#04060a';
-  var CYAN = '#00f0ff';
-  var MAGENTA = '#ff2d78';
-  var HEAD_CYAN = '#eafdff';
-  var HEAD_MAGENTA = '#ffe6f0';
-  var STAR_CYAN = '#d9f6ff';
-  var STAR_MAGENTA = '#ffd9ea';
+  var CORE_BLACK = '#000000';
+  var STAR_FAR = '#7ea9d4';
+  var STAR_MID = '#c2e2ff';
+  var STAR_NEAR = '#eafdff';
+
+  /* mood endpoints [r,g,b] — lerped as floats, quantized for style caches */
+  var MOODS = {
+    cyan: [0, 240, 255],
+    magenta: [255, 45, 120],
+    amber: [255, 176, 0]
+  };
 
   /* ---------- tuning ---------- */
+  var TAU = Math.PI * 2;
   var MAX_DPR = 2;
-  var SPRITE_SCALE = 2;      /* sprite supersample factor; keeps text crisp on retina */
-  var GLYPH_BASE = 30;       /* canonical css px size sprites are pre-rendered at */
-  var GRID_ROWS = 13;        /* horizontal floor lines */
-  var GRID_SPEED = 0.3;      /* perspective slots per second (drift toward viewer) */
-  var HORIZON = 0.55;        /* horizon line position as a fraction of height */
-  var COL_SPACING = 32;      /* css px of width per rain column at intensity 1 */
-  var MAX_INTENSITY = 3;
-  var MAX_POOL = 170;        /* hard bound on the column pool */
-  var MAX_TRAIL = 20;        /* hard bound on glyphs per column */
-  var TICKER_PROB = 0.035;
-  var MAGENTA_HEAD_PROB = 0.12;
-  var FONT_STACK = '"JetBrains Mono", ui-monospace, monospace';
-
-  /* ---------- v2 tuning ---------- */
-  var STAR_MIN = 90;         /* starfield density bounds */
-  var STAR_MAX = 140;
-  var STAR_MAGENTA_PROB = 0.12;
-  var PAR_GRID = 0.06;       /* grid shift per px of smoothed scrollY */
-  var PAR_STAR = 0.03;       /* star shift per px of smoothed scrollY */
-  var PAR_CLAMP = 0.22;      /* grid parallax bound as a fraction of height */
-  var BURST_MIN = 9;         /* seconds between scheduled glitch bursts (min) */
-  var BURST_MAX = 14;        /* seconds between scheduled glitch bursts (max) */
-  var BURST_TIME = 0.12;     /* burst duration in seconds (~120ms) */
-  var BAND_MAX = 4;          /* hard bound on tear bands per burst */
-  var RING_MAX = 3;          /* hard bound on concurrent shockwaves */
-  var RING_LIFE = 0.5;       /* shockwave lifetime in seconds (~500ms) */
-  var RING_SPEED = 900;      /* shockwave radius growth, css px/s */
-  var BOOST_RADIUS = 200;    /* rain proximity-boost radius, css px */
-  var BOOST_GAIN = 0.6;      /* +60% alpha at the pointer column, falls to 0 at radius */
-  var TAU = 6.2832;
-
-  /* ---------- v3 tuning ---------- */
-  var BOSS_RAMP = 0.4;       /* boss palette lerp duration, seconds, both directions */
-  var RAIN_MAGENTA_MIX = 0.6;/* boss-active column mix → ~60/40 magenta-dominant */
-  var VEL_EMA_BASE = 0.8;    /* per-frame EMA retention at 60fps → ~0.2 smoothing */
-  var SURGE_GAIN = 0.004;    /* rain speed gain per px/s of smoothed scroll velocity */
-  var SURGE_CAP = 1.5;       /* surge bound → total rain speed cap 2.5x */
-  var SHIMMER_AMP = 0.03;    /* CRT shimmer peak frame-alpha modulation */
-  var SHIMMER_OMEGA = TAU * 8; /* ~8Hz */
-  /* boss palette endpoints: fan lines cyan→amber, rows/horizon cyan→magenta */
-  var FAN_R = 255, FAN_G = 176, FAN_B = 0;     /* amber */
-  var ROW_R = 255, ROW_G = 45, ROW_B = 120;    /* magenta */
-
-  var GLYPHS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '%', '$', '▲', '▼'];
-  var TICKERS = ['SPX', 'BTC', 'ETH', 'GOLD', 'OIL', 'VIX', 'NAS'];
+  var TILT = -12 * Math.PI / 180;   /* disk + photon-ring inclination */
+  var FLAT = 0.34;                  /* disk flatten (ry/rx) */
+  var RING_FLAT = 0.88;             /* photon ring flatten — near-circular */
+  var PRECESS = 0.021;              /* disk precession, rad/s */
+  var KEPLER = 1.0;                 /* angular speed scale: om = KEPLER/sqrt(r) */
+  var R_IN = 1.2;                   /* orbit band inner edge, x core radius */
+  var R_OUT = 3.4;                  /* orbit band outer edge / respawn rim */
+  var R_KILL = 1.15;                /* decay below this -> respawn */
+  var HOT_R = 1.75;                 /* inside this radius particles burn white */
+  var POOL = 1200;                  /* hard cap on disk particle pool */
+  var DISK_DESKTOP = 600;
+  var DISK_MOBILE = 260;
+  var MOBILE_W = 760;               /* below this width: halved particle base */
+  var WARP_IN = 0.45;               /* suck-in seconds */
+  var WARP_OUT = 0.45;              /* de-warp seconds */
+  var WARP_CORE = 1.4;              /* core scale = 1 + WARP_CORE*warpK (~2.4x) */
+  var WARP_PULL = 0.75;             /* star/disk pull toward the core at warpK=1 */
+  var BURST_TIME = 0.15;            /* disk flare seconds */
+  var MOOD_TIME = 0.5;              /* mood lerp seconds */
+  var RAY_COUNT = 44;               /* warp edge-streak pool */
+  var NEB_PX = 256;                 /* nebula sprite bake size */
+  var STAR_WRAP = 12;               /* offscreen wrap margin, css px */
 
   /* ---------- state ---------- */
   var W = 1, H = 1, DPR = 1;
-  var running = false, rafId = 0, lastT = 0;
-  var wasRunning = false;
-  var gridOffset = 0;
+  var running = false, rafId = 0, lastT = 0, wasRunning = false;
+  var tNow = 0;                     /* loop clock; frozen under reduced motion */
   var intensity = 1;
-  var columns = [];
-  var activeCols = 0;
-  var px = 0, py = 0, tx = 0, ty = 0, pointerReady = false;
-  var horizonGlow = null, horizonGlowBoss = null, vignette = null;
-  var glowSprite = null, glowSpriteBoss = null;
-  var sprites = { trail: [], trailMag: [], ticker: [], tickerMag: [], headCyan: [], headMagenta: [] };
-  var measureCtx = document.createElement('canvas').getContext('2d');
+
+  /* hole geometry (rebuilt on resize) */
+  var hx = 0, hy = 0, coreR = 40, portrait = false, isMobile = false;
+
+  /* pointer parallax (smoothed) */
+  var pxt = 0, pyt = 0, pxs = 0, pys = 0;
+
+  /* disk */
+  var disk = [];                    /* preallocated particle pool */
+  var activeDisk = 0;
+  var diskBase = DISK_DESKTOP;
+  var precess = 0;                  /* accumulated precession angle */
+
+  /* warp state machine: 0 idle, 1 suck-in, 2 de-warp */
+  var warpState = 0, warpT = 0, warpK = 0;
+  var warpCb = null, warpFired = false;
+
+  /* burst flare: counts down, burstK eases 1 -> 0 */
+  var burstT = 0, burstK = 0;
+
+  /* mood tint (floats) + quantized caches (ints/strings) */
+  var moodName = 'cyan';
+  var mr = 0, mg = 240, mb = 255;          /* current tint */
+  var mfr = 0, mfg = 240, mfb = 255;       /* lerp from */
+  var mtr = 0, mtg = 240, mtb = 255;       /* lerp to */
+  var moodT = 1;                           /* 1 = settled */
+  var qR = -1, qG = -1, qB = -1;
+  var strDisk = 'rgb(0,240,255)';
+  var strRing = 'rgb(159,247,255)';
+  var strHot = 'rgb(244,252,255)';
+  var tintGradDirty = true;
+
+  /* baked resources (rebuilt on resize / tint change only) */
+  var nebA = null, nebB = null, nebSize = 1;
+  var holeGlow = null, holeGlowR = 1, vignette = null;
+
+  /* warp rays pool */
+  var rays = [];
+
+  /* starfield: 3 parallax layers, typed-array pools (no per-frame churn) */
+  var starLayers = [
+    { cap: 150, baseN: 0, n: 0, par: 3,  vx: -1.6, vy: 0.5, color: STAR_FAR,
+      per: 15000, min: 26, rLo: 0.4, rHi: 0.9, aLo: 0.08, aHi: 0.22, tLo: 0.3, tHi: 0.9,
+      x: null, y: null, r: null, a: null, ph: null, sp: null },
+    { cap: 100, baseN: 0, n: 0, par: 7,  vx: -2.8, vy: 0.9, color: STAR_MID,
+      per: 21000, min: 16, rLo: 0.7, rHi: 1.3, aLo: 0.12, aHi: 0.30, tLo: 0.5, tHi: 1.2,
+      x: null, y: null, r: null, a: null, ph: null, sp: null },
+    { cap: 70,  baseN: 0, n: 0, par: 12, vx: -4.4, vy: 1.4, color: STAR_NEAR,
+      per: 34000, min: 10, rLo: 1.0, rHi: 1.8, aLo: 0.18, aHi: 0.42, tLo: 0.8, tHi: 1.6,
+      x: null, y: null, r: null, a: null, ph: null, sp: null }
+  ];
+
   var mq = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
   var reduced = mq ? mq.matches : false;
 
-  /* v2 state: starfield split into two fixed-tint batches so the frame loop
-     only touches globalAlpha (no per-star style string work) */
-  var starsC = [], starsM = [];
-  var tNow = 0;              /* accumulated loop time, drives star twinkle + shimmer */
-  var targetScroll = 0;      /* raw scrollY target, set by the scroll listener */
-  var parY = 0;              /* smoothed scroll position */
-  var gridShift = 0;         /* clamped grid parallax offset, css px */
-  var starShiftMod = 0;      /* star parallax offset wrapped into the sky zone */
-  var gridGlowR = 1;         /* horizon glow disc radius, from buildGradients */
-  var burstIn = 0;           /* countdown to the next scheduled burst */
-  var burstT = 0;            /* remaining burst time; > 0 means a burst is live */
-  var bands = [];            /* preallocated tear-band pool (BAND_MAX) */
-  var rings = [];            /* preallocated shockwave pool (RING_MAX) */
-
-  /* v3 state */
-  var bossT = 0;             /* eased-position ramp 0..1 toward bossTarget */
-  var bossTarget = 0;        /* 1 while body.x-boss-zone is present */
-  var rainMix = 0;           /* lerped magenta column mix (0 at rest, 0.6 in boss) */
-  var scrollVel = 0;         /* EMA of |scrollY velocity|, px/s */
-  var lastScrollY = 0;       /* previous frame's raw scrollY */
-  var rainSurge = 1;         /* rain speed multiplier from scroll surge */
-
-  for (var bi = 0; bi < BAND_MAX; bi++) bands.push({ on: false, y: 0, h: 10, dx: 10 });
-  for (var ri = 0; ri < RING_MAX; ri++) rings.push({ on: false, x: 0, y: 0, t: 0 });
-
   function rand(a, b) { return a + Math.random() * (b - a); }
-  function lerp(a, b, t) { return a + (b - a) * t; }
-  /* smoothstep of the linear ramp: ease-in-out, still exactly BOSS_RAMP seconds */
-  function bossEase() { return bossT * bossT * (3 - 2 * bossT); }
 
-  burstIn = rand(BURST_MIN, BURST_MAX);
-
-  /* ---------- sprite pre-render (shadowBlur is used here only, never per frame) ---------- */
-  function fontStr(weight, pxSize) { return weight + ' ' + pxSize + 'px ' + FONT_STACK; }
-
-  function makeSprite(text, fill, glowColor, weight) {
-    var fs = GLYPH_BASE * SPRITE_SCALE;
-    var glow = !!glowColor;
-    measureCtx.font = fontStr(weight, fs);
-    var tw = measureCtx.measureText(text).width;
-    var pad = glow ? fs * 0.55 : fs * 0.16;
-    var cw = Math.max(2, Math.ceil(tw + pad * 2));
-    var ch = Math.ceil(fs * 1.2 + pad * 2);
-    var c = document.createElement('canvas');
-    c.width = cw;
-    c.height = ch;
-    var g = c.getContext('2d');
-    g.font = fontStr(weight, fs);
-    g.textAlign = 'center';
-    g.textBaseline = 'middle';
-    g.fillStyle = fill;
-    if (glow) {
-      g.shadowColor = glowColor;
-      g.shadowBlur = fs * 0.45;
-      g.fillText(text, cw / 2, ch / 2);   /* two passes bake a soft neon halo */
-      g.fillText(text, cw / 2, ch / 2);
-      g.shadowBlur = 0;
+  /* ---------- pool allocation (init-time only) ---------- */
+  function allocPools() {
+    var i, L;
+    for (i = 0; i < POOL; i++) {
+      disk.push({ r: 0, th: 0, decay: 0, base: 0, sz: 0 });
+      respawn(disk[i], true);
     }
-    g.fillText(text, cw / 2, ch / 2);     /* crisp core pass */
-    return { c: c, w: cw / SPRITE_SCALE, h: ch / SPRITE_SCALE };
-  }
-
-  function buildSprites() {
-    var i;
-    sprites.trail.length = 0;
-    sprites.trailMag.length = 0;
-    sprites.ticker.length = 0;
-    sprites.tickerMag.length = 0;
-    sprites.headCyan.length = 0;
-    sprites.headMagenta.length = 0;
-    /* v3: dual tint sets are baked once here; the frame loop only picks a set,
-       so boss transitions cost zero extra draws and zero re-bakes */
-    for (i = 0; i < GLYPHS.length; i++) {
-      sprites.trail.push(makeSprite(GLYPHS[i], CYAN, null, 400));
-      sprites.trailMag.push(makeSprite(GLYPHS[i], MAGENTA, null, 400));
-      sprites.headCyan.push(makeSprite(GLYPHS[i], HEAD_CYAN, CYAN, 700));
-      sprites.headMagenta.push(makeSprite(GLYPHS[i], HEAD_MAGENTA, MAGENTA, 700));
+    for (i = 0; i < RAY_COUNT; i++) {
+      rays.push({ ang: Math.random() * TAU, len: rand(0.7, 1.3), a: rand(0.05, 0.14), w: rand(0.5, 1.4) });
     }
-    for (i = 0; i < TICKERS.length; i++) {
-      sprites.ticker.push(makeSprite(TICKERS[i], CYAN, null, 700));
-      sprites.tickerMag.push(makeSprite(TICKERS[i], MAGENTA, null, 700));
+    for (var k = 0; k < starLayers.length; k++) {
+      L = starLayers[k];
+      L.x = new Float32Array(L.cap);
+      L.y = new Float32Array(L.cap);
+      L.r = new Float32Array(L.cap);
+      L.a = new Float32Array(L.cap);
+      L.ph = new Float32Array(L.cap);
+      L.sp = new Float32Array(L.cap);
     }
   }
 
-  function buildGlowSprite() {
-    var S = 256;
+  function respawn(p, initial) {
+    p.r = initial ? rand(R_IN, R_OUT) : R_OUT + Math.random() * 0.05;
+    p.th = Math.random() * TAU;
+    p.decay = rand(0.010, 0.024);   /* core radii per second — ~2min spiral-in */
+    p.base = rand(0.22, 0.62);
+    p.sz = rand(0.8, 2.2);
+  }
+
+  /* ---------- quantized tint caches: strings/gradients rebuild only on change ---------- */
+  function syncTint() {
+    var r = (mr + 0.5) | 0, g = (mg + 0.5) | 0, b = (mb + 0.5) | 0;
+    if (r === qR && g === qG && b === qB) return;
+    qR = r; qG = g; qB = b;
+    strDisk = 'rgb(' + r + ',' + g + ',' + b + ')';
+    /* photon ring: pulled 55% toward cyan-white */
+    strRing = 'rgb(' + ((r + (232 - r) * 0.55) | 0) + ',' + ((g + (248 - g) * 0.55) | 0) + ',' + ((b + (255 - b) * 0.55) | 0) + ')';
+    /* hot inner disk: pulled 80% toward white */
+    strHot = 'rgb(' + ((r + (244 - r) * 0.8) | 0) + ',' + ((g + (252 - g) * 0.8) | 0) + ',' + ((b + (255 - b) * 0.8) | 0) + ')';
+    tintGradDirty = true;
+  }
+
+  function buildHoleGlow() {
+    holeGlowR = coreR * 4.4;
+    holeGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, holeGlowR);
+    holeGlow.addColorStop(0, 'rgba(' + qR + ',' + qG + ',' + qB + ',0.15)');
+    holeGlow.addColorStop(0.4, 'rgba(' + qR + ',' + qG + ',' + qB + ',0.05)');
+    holeGlow.addColorStop(1, 'rgba(' + qR + ',' + qG + ',' + qB + ',0)');
+    tintGradDirty = false;
+  }
+
+  /* ---------- nebula sprites (baked once at init) ---------- */
+  function bakeNebula(stops) {
     var c = document.createElement('canvas');
-    c.width = S;
-    c.height = S;
+    c.width = NEB_PX;
+    c.height = NEB_PX;
     var g = c.getContext('2d');
-    var grad = g.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
-    grad.addColorStop(0, 'rgba(0,240,255,0.50)');
-    grad.addColorStop(0.35, 'rgba(80,170,235,0.22)');
-    grad.addColorStop(0.7, 'rgba(255,45,120,0.10)');
-    grad.addColorStop(1, 'rgba(255,45,120,0)');
+    var grad = g.createRadialGradient(NEB_PX / 2, NEB_PX / 2, 0, NEB_PX / 2, NEB_PX / 2, NEB_PX / 2);
+    for (var i = 0; i < stops.length; i++) grad.addColorStop(stops[i][0], stops[i][1]);
     g.fillStyle = grad;
-    g.fillRect(0, 0, S, S);
-    glowSprite = c;
-
-    /* v3 boss variant: magenta core, pink mid, amber fringe (matches grid shift) */
-    var c2 = document.createElement('canvas');
-    c2.width = S;
-    c2.height = S;
-    var g2 = c2.getContext('2d');
-    var grad2 = g2.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
-    grad2.addColorStop(0, 'rgba(255,45,120,0.50)');
-    grad2.addColorStop(0.35, 'rgba(255,95,150,0.22)');
-    grad2.addColorStop(0.7, 'rgba(255,176,0,0.08)');
-    grad2.addColorStop(1, 'rgba(255,176,0,0)');
-    g2.fillStyle = grad2;
-    g2.fillRect(0, 0, S, S);
-    glowSpriteBoss = c2;
+    g.fillRect(0, 0, NEB_PX, NEB_PX);
+    return c;
   }
 
-  /* ---------- starfield (v2) ---------- */
+  function buildNebulas() {
+    /* peak alpha <= .06 everywhere; cyan->deep blue, magenta->deep purple */
+    nebA = bakeNebula([
+      [0, 'rgba(0,240,255,0.06)'],
+      [0.35, 'rgba(30,90,220,0.045)'],
+      [0.7, 'rgba(12,32,96,0.02)'],
+      [1, 'rgba(4,6,10,0)']
+    ]);
+    nebB = bakeNebula([
+      [0, 'rgba(255,45,120,0.055)'],
+      [0.4, 'rgba(150,32,170,0.038)'],
+      [0.75, 'rgba(52,16,84,0.018)'],
+      [1, 'rgba(4,6,10,0)']
+    ]);
+  }
+
+  /* ---------- layout ---------- */
+  function computeActive() {
+    activeDisk = Math.min(POOL, Math.round(diskBase * intensity));
+    for (var k = 0; k < starLayers.length; k++) {
+      var L = starLayers[k];
+      L.n = Math.min(L.cap, Math.round(L.baseN * intensity));
+    }
+  }
+
+  function layout() {
+    isMobile = W < MOBILE_W;
+    portrait = H > W;
+    if (portrait) { hx = W * 0.5; hy = H * 0.30; }   /* upper-center on phones */
+    else { hx = W * 0.62; hy = H * 0.5; }            /* slightly right of center */
+    coreR = Math.min(W, H) * 0.07;
+    if (coreR < 20) coreR = 20;
+    else if (coreR > 80) coreR = 80;
+    diskBase = isMobile ? DISK_MOBILE : DISK_DESKTOP;
+    nebSize = Math.max(W, H) * 1.5;
+    computeActive();
+  }
+
   function buildStars() {
-    starsC.length = 0;
-    starsM.length = 0;
-    var n = Math.max(STAR_MIN, Math.min(STAR_MAX, Math.round(W / 14)));
-    var zoneH = H * HORIZON; /* upper ~55% of the viewport, above the floor horizon */
-    for (var i = 0; i < n; i++) {
-      var s = {
-        x: Math.random() * W,
-        y: Math.random() * zoneH,
-        r: rand(0.5, 1.5),          /* 0.5–1.5px points */
-        base: rand(0.10, 0.30),     /* very low alpha ceiling */
-        ph: rand(0, TAU),           /* twinkle phase offset */
-        sp: rand(0.5, 1.6)          /* slow twinkle rate, rad/s */
-      };
-      if (Math.random() < STAR_MAGENTA_PROB) starsM.push(s);
-      else starsC.push(s);
+    var area = W * H;
+    for (var k = 0; k < starLayers.length; k++) {
+      var L = starLayers[k];
+      var n = Math.round(area / L.per);
+      if (n < L.min) n = L.min;
+      if (n > L.cap) n = L.cap;
+      L.baseN = n;
+      for (var i = 0; i < L.cap; i++) {
+        L.x[i] = Math.random() * W;
+        L.y[i] = Math.random() * H;
+        L.r[i] = rand(L.rLo, L.rHi);
+        L.a[i] = rand(L.aLo, L.aHi);
+        L.ph[i] = Math.random() * TAU;
+        L.sp[i] = rand(L.tLo, L.tHi);
+      }
+    }
+    computeActive();
+  }
+
+  /* ---------- update (never runs under reduced motion) ---------- */
+  function step(dt) {
+    tNow += dt;
+
+    /* smoothed pointer for parallax */
+    var k = 1 - Math.exp(-4 * dt);
+    pxs += (pxt - pxs) * k;
+    pys += (pyt - pys) * k;
+
+    /* warp state machine — midCb fires exactly once at the singularity */
+    if (warpState === 1) {
+      warpT += dt / WARP_IN;
+      if (warpT >= 1) {
+        warpT = 1;
+        warpState = 2;
+        fireWarpCb();
+      }
+    } else if (warpState === 2) {
+      warpT -= dt / WARP_OUT;
+      if (warpT <= 0) {
+        warpT = 0;
+        warpState = 0;
+      }
+    }
+    warpK = warpT * warpT * (3 - 2 * warpT);
+
+    /* mood lerp */
+    if (moodT < 1) {
+      moodT += dt / MOOD_TIME;
+      if (moodT > 1) moodT = 1;
+      var e = moodT * moodT * (3 - 2 * moodT);
+      mr = mfr + (mtr - mfr) * e;
+      mg = mfg + (mtg - mfg) * e;
+      mb = mfb + (mtb - mfb) * e;
+    }
+    syncTint();
+
+    /* burst flare decay */
+    if (burstT > 0) {
+      burstT -= dt;
+      if (burstT < 0) burstT = 0;
+    }
+    burstK = burstT > 0 ? burstT / BURST_TIME : 0;
+
+    precess += PRECESS * dt;
+    if (precess > TAU) precess -= TAU;
+
+    /* starfield drift + edge wrap */
+    for (var k2 = 0; k2 < starLayers.length; k2++) {
+      var L = starLayers[k2];
+      var dx = L.vx * dt, dy = L.vy * dt;
+      for (var i = 0; i < L.n; i++) {
+        var x = L.x[i] + dx, y = L.y[i] + dy;
+        if (x < -STAR_WRAP) x += W + STAR_WRAP * 2;
+        else if (x > W + STAR_WRAP) x -= W + STAR_WRAP * 2;
+        if (y < -STAR_WRAP) y += H + STAR_WRAP * 2;
+        else if (y > H + STAR_WRAP) y -= H + STAR_WRAP * 2;
+        L.x[i] = x;
+        L.y[i] = y;
+      }
+    }
+
+    /* accretion disk: Kepler-ish orbit + decay; warp feeds the hole */
+    var speedUp = 1 + 5 * warpK;
+    var decayUp = 1 + 2.5 * warpK;
+    for (var j = 0; j < activeDisk; j++) {
+      var p = disk[j];
+      p.th += (KEPLER / Math.sqrt(p.r)) * dt * speedUp;
+      if (p.th >= TAU) p.th -= TAU;
+      p.r -= p.decay * dt * decayUp;
+      if (p.r < R_KILL) respawn(p, false);
     }
   }
 
-  function drawStars(twinkle) {
-    var zoneH = H * HORIZON;
-    var i, s, sy;
-    ctx.fillStyle = STAR_CYAN;
-    for (i = 0; i < starsC.length; i++) {
-      s = starsC[i];
-      sy = s.y + starShiftMod;
-      if (sy >= zoneH) sy -= zoneH;
-      ctx.globalAlpha = twinkle
-        ? s.base * (0.55 + 0.45 * Math.sin(tNow * s.sp + s.ph))
-        : s.base * 0.8;             /* static frame: fixed low alpha, no twinkle */
-      ctx.fillRect(s.x, sy, s.r, s.r);
-    }
-    ctx.fillStyle = STAR_MAGENTA;
-    for (i = 0; i < starsM.length; i++) {
-      s = starsM[i];
-      sy = s.y + starShiftMod;
-      if (sy >= zoneH) sy -= zoneH;
-      ctx.globalAlpha = twinkle
-        ? s.base * (0.55 + 0.45 * Math.sin(tNow * s.sp + s.ph))
-        : s.base * 0.8;
-      ctx.fillRect(s.x, sy, s.r, s.r);
-    }
+  /* ---------- draw passes ---------- */
+  function drawNebulas() {
+    var S = nebSize, half = S / 2;
+    /* slow independent Lissajous drift; frozen when tNow never advances */
+    var ax = W * 0.28 + Math.sin(tNow * 0.031 + 1.7) * W * 0.04;
+    var ay = H * 0.34 + Math.cos(tNow * 0.023) * H * 0.05;
+    var bx = W * 0.78 + Math.sin(tNow * 0.019 + 4.2) * W * 0.05;
+    var by = H * 0.72 + Math.cos(tNow * 0.027 + 2.1) * H * 0.04;
+    ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = 1;
+    ctx.drawImage(nebA, ax - half, ay - half, S, S);
+    ctx.drawImage(nebB, bx - half, by - half, S, S);
+    ctx.globalCompositeOperation = 'source-over';
   }
 
-  /* ---------- data rain ---------- */
-  function newCell(col) {
-    if (col.size >= 13 && Math.random() < TICKER_PROB) {
-      return 100 + ((Math.random() * TICKERS.length) | 0);
-    }
-    return (Math.random() * GLYPHS.length) | 0;
-  }
-
-  function resetColumn(col, initial) {
-    col.size = rand(11, 19);
-    col.rowH = col.size * 1.18;
-    col.speed = col.size * rand(3.2, 6.8);
-    col.len = 7 + ((Math.random() * (MAX_TRAIL - 7)) | 0);
-    col.alpha = rand(0.10, 0.26);
-    col.headMag = Math.random() < MAGENTA_HEAD_PROB;
-    col.tintSeed = Math.random(); /* v3: stable per-column boss-tint threshold */
-    col.y = initial ? rand(-H * 0.5, H) : -rand(30, H * 0.3);
-    col.mutateT = rand(0.05, 0.3);
-    col.cells.length = 0;
-    for (var i = 0; i < col.len; i++) col.cells.push(newCell(col));
-  }
-
-  function layoutRain() {
-    var base = Math.max(1, Math.round(W / COL_SPACING));
-    activeCols = Math.min(columns.length, Math.round(base * intensity));
-    for (var i = 0; i < activeCols; i++) {
-      columns[i].x = (i + 0.15 + Math.random() * 0.7) * (W / activeCols);
-    }
-  }
-
-  function buildColumns() {
-    var pool = Math.min(MAX_POOL, Math.max(8, Math.round(W / COL_SPACING) * MAX_INTENSITY));
-    columns.length = 0;
-    for (var i = 0; i < pool; i++) {
-      var col = { x: 0, y: 0, speed: 60, size: 12, rowH: 14, alpha: 0.15, len: 10, cells: [], headMag: false, tintSeed: 1, mutateT: 0.1 };
-      resetColumn(col, true);
-      columns.push(col);
-    }
-    layoutRain();
-  }
-
-  function updateRain(dt) {
-    var fall = rainSurge * dt; /* v3: scroll-velocity surge scales fall speed */
-    for (var i = 0; i < activeCols; i++) {
-      var col = columns[i];
-      col.y += col.speed * fall;
-      col.mutateT -= dt;
-      if (col.mutateT <= 0) {
-        col.mutateT = rand(0.08, 0.3);
-        col.cells[(Math.random() * col.len) | 0] = newCell(col);
-      }
-      /* recycle the column once its whole trail has passed the bottom edge */
-      if (col.y - col.len * col.rowH > H + 60) resetColumn(col, false);
-    }
-  }
-
-  function drawRain() {
-    var scale, col, i, y, id, sp, fade, dw, dh, dxp, boost, magCol;
-    for (var k = 0; k < activeCols; k++) {
-      col = columns[k];
-      scale = col.size / GLYPH_BASE;
-      /* v3: whole column rides the magenta set once the lerped mix passes its
-         tint seed — as rainMix sweeps 0→0.6, columns migrate one by one */
-      magCol = col.tintSeed < rainMix;
-      /* v2: columns within ~200px horizontal of the pointer glow up to +60% alpha */
-      dxp = col.x - px;
-      if (dxp < 0) dxp = -dxp;
-      boost = dxp < BOOST_RADIUS ? 1 + BOOST_GAIN * (1 - dxp / BOOST_RADIUS) : 1;
-      for (i = col.len - 1; i >= 1; i--) {
-        y = col.y - i * col.rowH;
-        if (y < -40 || y > H + 40) continue;
-        id = col.cells[i];
-        sp = id < 100
-          ? (magCol ? sprites.trailMag[id] : sprites.trail[id])
-          : (magCol ? sprites.tickerMag[id - 100] : sprites.ticker[id - 100]);
-        fade = 1 - i / col.len;
-        ctx.globalAlpha = col.alpha * boost * (0.2 + 0.8 * fade * fade);
-        dw = sp.w * scale;
-        dh = sp.h * scale;
-        ctx.drawImage(sp.c, col.x - dw / 2, y - dh / 2, dw, dh);
-      }
-      y = col.y;
-      if (y > -40 && y < H + 40) {
-        id = col.cells[0];
-        ctx.globalAlpha = Math.min(0.85, col.alpha * 3.4 * boost);
-        if (id < 100) {
-          sp = (magCol || col.headMag) ? sprites.headMagenta[id] : sprites.headCyan[id];
-          dw = sp.w * scale;
-          dh = sp.h * scale;
-          ctx.drawImage(sp.c, col.x - dw / 2, y - dh / 2, dw, dh);
-        } else {
-          /* ticker at the head position: brighten it additively in place of a baked halo */
-          sp = magCol ? sprites.tickerMag[id - 100] : sprites.ticker[id - 100];
-          dw = sp.w * scale;
-          dh = sp.h * scale;
-          ctx.globalCompositeOperation = 'lighter';
-          ctx.drawImage(sp.c, col.x - dw / 2, y - dh / 2, dw, dh);
-          ctx.globalCompositeOperation = 'source-over';
+  function drawStars() {
+    var ndx = W > 0 ? (pxs - W * 0.5) / (W * 0.5) : 0;
+    var ndy = H > 0 ? (pys - H * 0.5) / (H * 0.5) : 0;
+    if (ndx > 1) ndx = 1; else if (ndx < -1) ndx = -1;
+    if (ndy > 1) ndy = 1; else if (ndy < -1) ndy = -1;
+    var streaking = warpK > 0.01;
+    var pull = warpK * WARP_PULL;
+    for (var k = 0; k < starLayers.length; k++) {
+      var L = starLayers[k];
+      var ox = ndx * L.par, oy = ndy * L.par;
+      ctx.fillStyle = L.color;
+      if (streaking) ctx.beginPath();
+      for (var i = 0; i < L.n; i++) {
+        var x = L.x[i] + ox, y = L.y[i] + oy;
+        var a = L.a[i] * (0.65 + 0.35 * Math.sin(tNow * L.sp[i] + L.ph[i]));
+        if (streaking) {
+          x += (hx - x) * pull;
+          y += (hy - y) * pull;
+          var dx = x - hx, dy = y - hy;
+          var d = Math.sqrt(dx * dx + dy * dy);
+          if (d < 1) d = 1;
+          var sl = warpK * (14 + L.par * 2.2);
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + (dx / d) * sl, y + (dy / d) * sl);
         }
+        ctx.globalAlpha = a;
+        ctx.fillRect(x, y, L.r[i], L.r[i]);
+      }
+      if (streaking) {
+        /* one batched stroke per layer: radial warp streaks */
+        ctx.globalAlpha = warpK * 0.55;
+        ctx.strokeStyle = L.color;
+        ctx.lineWidth = 1;
+        ctx.stroke();
       }
     }
     ctx.globalAlpha = 1;
   }
 
-  /* ---------- perspective grid floor ---------- */
-  function drawGrid() {
-    var horizon = H * HORIZON + gridShift; /* v2: horizon rides the scroll parallax */
-    var cx = W * 0.5;
-    var a, f, r, z, yy, dist;
-
-    /* v3: lerped boss palette — fan toward amber, rows/horizon toward magenta */
-    var e = bossEase();
-    var fanRGB = ((lerp(0, FAN_R, e) + 0.5) | 0) + ',' + ((lerp(240, FAN_G, e) + 0.5) | 0) + ',' + ((lerp(255, FAN_B, e) + 0.5) | 0);
-    var rowRGB = ((lerp(0, ROW_R, e) + 0.5) | 0) + ',' + ((lerp(240, ROW_G, e) + 0.5) | 0) + ',' + ((lerp(255, ROW_B, e) + 0.5) | 0);
-
-    /* glow gradients are baked around the origin so they travel with the horizon;
-       the boss variant cross-fades in over the cyan disc (both pre-baked) */
+  function drawHoleGlow(cs) {
     ctx.globalCompositeOperation = 'lighter';
     ctx.save();
-    ctx.translate(cx, horizon);
-    if (e < 0.999) {
-      ctx.globalAlpha = 1 - e;
-      ctx.fillStyle = horizonGlow;
-      ctx.fillRect(-gridGlowR, -gridGlowR, gridGlowR * 2, gridGlowR * 2);
-    }
-    if (e > 0.001) {
-      ctx.globalAlpha = e;
-      ctx.fillStyle = horizonGlowBoss;
-      ctx.fillRect(-gridGlowR, -gridGlowR, gridGlowR * 2, gridGlowR * 2);
-    }
+    ctx.translate(hx, hy);
+    ctx.scale(cs, cs);
+    ctx.fillStyle = holeGlow;
+    ctx.fillRect(-holeGlowR, -holeGlowR, holeGlowR * 2, holeGlowR * 2);
     ctx.restore();
-    ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
+  }
 
-    ctx.lineWidth = 1;
-    var fanCount = Math.max(14, Math.min(30, Math.round(W / 90)));
-    for (f = 0; f <= fanCount; f++) {
-      dist = Math.abs(f / fanCount - 0.5) * 2;
-      a = 0.10 * (1 - dist * 0.65);
-      ctx.strokeStyle = 'rgba(' + fanRGB + ',' + a.toFixed(3) + ')';
-      ctx.beginPath();
-      ctx.moveTo(cx, horizon);
-      ctx.lineTo(cx + (f / fanCount - 0.5) * W * 3, H);
-      ctx.stroke();
+  /* one disk hemisphere (behind=true -> far side of the hole) in two color
+     batches; per-particle work is pure math on preallocated pool objects */
+  function diskHalf(behind, pc, ps, wShrink, alphaBoost) {
+    ctx.globalCompositeOperation = 'lighter';
+    for (var batch = 0; batch < 2; batch++) {
+      ctx.fillStyle = batch === 0 ? strDisk : strHot;
+      var wantHot = batch === 1;
+      for (var i = 0; i < activeDisk; i++) {
+        var p = disk[i];
+        var hot = p.r < HOT_R;
+        if (hot !== wantHot) continue;
+        var sn = Math.sin(p.th);
+        if ((sn < 0) !== behind) continue;
+        var cn = Math.cos(p.th);
+        var rr = p.r * coreR * wShrink;
+        var x0 = cn * rr;
+        var y0 = sn * rr * FLAT;
+        var x = hx + x0 * pc - y0 * ps;
+        var y = hy + x0 * ps + y0 * pc;
+        /* brightness asymmetry: normalized screen-ward velocity — the side
+           rotating toward the viewer runs ~2x alpha */
+        var s = -sn * ps + cn * FLAT * pc;
+        var a = p.base * (1.5 + 0.5 * s) * alphaBoost;
+        if (p.r < 1.8) a *= 1 + (1.8 - p.r) * 0.9;   /* inner heat */
+        if (a > 0.95) a = 0.95;
+        ctx.globalAlpha = a;
+        ctx.fillRect(x - p.sz * 0.5, y - p.sz * 0.5, p.sz, p.sz);
+      }
     }
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+  }
 
-    for (r = 0; r < GRID_ROWS; r++) {
-      z = ((r + gridOffset) % GRID_ROWS) / GRID_ROWS;
-      yy = horizon + (H - horizon) * Math.pow(z, 2.7);
-      a = 0.05 + 0.15 * z;
-      ctx.strokeStyle = 'rgba(' + rowRGB + ',' + a.toFixed(3) + ')';
-      ctx.beginPath();
-      ctx.moveTo(0, yy);
-      ctx.lineTo(W, yy);
-      ctx.stroke();
-    }
-
-    ctx.strokeStyle = 'rgba(' + rowRGB + ',0.220)';
+  function drawCore(cs) {
+    var cr = coreR * cs;
     ctx.beginPath();
-    ctx.moveTo(0, horizon + 0.5);
-    ctx.lineTo(W, horizon + 0.5);
+    ctx.arc(hx, hy, cr, 0, TAU);
+    ctx.fillStyle = CORE_BLACK;              /* true black fill */
+    ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = VOID;                  /* 1px void edge */
     ctx.stroke();
   }
 
-  /* ---------- pointer glow ---------- */
-  function drawPointerGlow() {
-    var d = Math.max(W, H) * 0.5;
-    var e = bossEase();
+  function drawRing(cs, ringFlash) {
+    var rr = (coreR + 2) * cs;
     ctx.globalCompositeOperation = 'lighter';
-    if (e < 0.999) {
-      ctx.globalAlpha = 0.42 * (1 - e);
-      ctx.drawImage(glowSprite, px - d / 2, py - d / 2, d, d);
-    }
-    if (e > 0.001) {
-      ctx.globalAlpha = 0.42 * e;
-      ctx.drawImage(glowSpriteBoss, px - d / 2, py - d / 2, d, d);
-    }
-    ctx.globalAlpha = 1;
+    ctx.strokeStyle = strDisk;
+    ctx.globalAlpha = 0.10 * ringFlash;
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.ellipse(hx, hy, rr, rr * RING_FLAT, TILT, 0, TAU);
+    ctx.stroke();
+    ctx.strokeStyle = strRing;
+    ctx.globalAlpha = 0.28 * ringFlash;
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.ellipse(hx, hy, rr, rr * RING_FLAT, TILT, 0, TAU);
+    ctx.stroke();
+    ctx.globalAlpha = Math.min(1, 0.9 * ringFlash);
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.ellipse(hx, hy, rr, rr * RING_FLAT, TILT, 0, TAU);
+    ctx.stroke();
     ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
   }
 
-  /* ---------- click shockwaves (v2) ---------- */
-  function spawnRing(x, y) {
-    var slot = null, i;
-    for (i = 0; i < RING_MAX; i++) {
-      if (!rings[i].on) { slot = rings[i]; break; }
-    }
-    if (!slot) {
-      /* pool full: reuse the oldest live ring */
-      slot = rings[0];
-      for (i = 1; i < RING_MAX; i++) {
-        if (rings[i].t > slot.t) slot = rings[i];
-      }
-    }
-    slot.on = true;
-    slot.x = x;
-    slot.y = y;
-    slot.t = 0;
-  }
-
-  function drawRings() {
-    var i, rg, any = false;
-    for (i = 0; i < RING_MAX; i++) if (rings[i].on) { any = true; break; }
-    if (!any) return;
+  function drawShimmer() {
+    var shR = coreR * 3.55 * (1 + 0.02 * Math.sin(tNow * 1.7));
+    var shA = 0.05 * (0.6 + 0.4 * Math.sin(tNow * 2.3)) + burstK * 0.05;
+    var rot = TILT + precess * 0.5;
     ctx.globalCompositeOperation = 'lighter';
-    ctx.lineWidth = 1.5;
-    for (i = 0; i < RING_MAX; i++) {
-      rg = rings[i];
-      if (!rg.on) continue;
-      var p = rg.t / RING_LIFE;
-      var fade = (1 - p) * (1 - p);
-      var rr = RING_SPEED * rg.t;
-      ctx.globalAlpha = fade * 0.6;
-      ctx.strokeStyle = CYAN;
-      ctx.beginPath();
-      ctx.arc(rg.x, rg.y, rr, 0, TAU);
-      ctx.stroke();
-      ctx.globalAlpha = fade * 0.35;
-      ctx.strokeStyle = MAGENTA;
-      ctx.beginPath();
-      ctx.arc(rg.x, rg.y, rr * 0.82, 0, TAU);
-      ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
+    ctx.strokeStyle = strDisk;
+    ctx.globalAlpha = shA;
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.ellipse(hx, hy, shR, shR * FLAT, rot, 0, TAU);
+    ctx.stroke();
+    ctx.globalAlpha = shA * 1.6;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(hx, hy, shR, shR * FLAT, rot, 0, TAU);
+    ctx.stroke();
     ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
   }
 
-  /* ---------- glitch bursts (v2) ---------- */
-  function triggerBurst() {
-    burstT = BURST_TIME;
-    var count = 2 + ((Math.random() * 3) | 0); /* 2–4 tear bands */
-    for (var i = 0; i < BAND_MAX; i++) {
-      var b = bands[i];
-      b.on = i < count;
-      if (b.on) {
-        b.h = 6 + ((Math.random() * 21) | 0);    /* 6–26px tall slices */
-        b.y = (Math.random() * Math.max(1, H - b.h - 2)) | 0;
-        b.dx = (8 + Math.random() * 10) * (Math.random() < 0.5 ? -1 : 1); /* ±8–18px */
-      }
+  function drawRays(cs) {
+    var R0 = coreR * cs * 2.2;
+    var maxR = Math.sqrt(W * W + H * H);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = strDisk;
+    for (var i = 0; i < RAY_COUNT; i++) {
+      var ray = rays[i];
+      var c = Math.cos(ray.ang), s = Math.sin(ray.ang);
+      ctx.globalAlpha = ray.a * warpK;
+      ctx.lineWidth = ray.w;
+      ctx.beginPath();
+      ctx.moveTo(hx + c * R0, hy + s * R0);
+      ctx.lineTo(hx + c * maxR * ray.len, hy + s * maxR * ray.len);
+      ctx.stroke();
     }
-  }
-
-  /* post-pass over the just-composited frame: displaced self-copies via
-     drawImage (no pixel reads), plus a faint additive echo and edge fringe */
-  function applyGlitch() {
-    var cw = canvas.width;
-    for (var i = 0; i < BAND_MAX; i++) {
-      var b = bands[i];
-      if (!b.on) continue;
-      var jx = b.dx * (0.7 + 0.6 * Math.random()); /* per-frame jitter on the tear */
-      var sy = b.y * DPR, sh = b.h * DPR;
-      /* chromatic ghost: the same slice pushed slightly further, added faintly */
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.globalAlpha = 0.16;
-      ctx.drawImage(canvas, 0, sy, cw, sh, jx * 1.12, b.y, W, b.h);
-      ctx.globalAlpha = 1;
-      ctx.globalCompositeOperation = 'source-over';
-      /* the tear itself */
-      ctx.drawImage(canvas, 0, sy, cw, sh, jx, b.y, W, b.h);
-      /* cyan/magenta edge fringe hugging the displaced slice */
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.globalAlpha = 0.5;
-      ctx.fillStyle = CYAN;
-      ctx.fillRect(jx + 2, b.y, W, 1);
-      ctx.fillStyle = MAGENTA;
-      ctx.fillRect(jx - 2, b.y + b.h - 1, W, 1);
-      ctx.globalAlpha = 1;
-      ctx.globalCompositeOperation = 'source-over';
-    }
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
   }
 
   /* ---------- frame assembly ---------- */
-  function renderBase() {
+  function render() {
+    if (tintGradDirty) buildHoleGlow();
+    var cs = 1 + WARP_CORE * warpK;                 /* core scale (~2.4x peak) */
+    var wShrink = 1 - WARP_PULL * warpK;            /* disk dives inward */
+    var alphaBoost = 1 + burstK * 1.3 + warpK * 0.8;
+    var ringFlash = 1 + burstK * 2 + warpK * 1.2;
+    var pcA = TILT + precess;
+    var pc = Math.cos(pcA), ps = Math.sin(pcA);
+
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
     ctx.fillStyle = VOID;
     ctx.fillRect(0, 0, W, H);
-    drawGrid();
-  }
 
-  function render() {
-    renderBase();
-    drawStars(true);
-    drawRain();
-    drawPointerGlow();
-    drawRings();
+    drawNebulas();
+    drawStars();
+    drawHoleGlow(cs);
+    diskHalf(true, pc, ps, wShrink, alphaBoost);    /* far side behind the hole */
+    drawCore(cs);
+    drawRing(cs, ringFlash);
+    diskHalf(false, pc, ps, wShrink, alphaBoost);   /* near side in front */
+    drawShimmer();
+    if (warpK > 0.001) drawRays(cs);
+
     ctx.fillStyle = vignette;
-    ctx.fillRect(0, 0, W, H);
-    /* v3: CRT refresh shimmer — a ≤3% full-frame alpha dip oscillating at ~8Hz.
-       One fillRect, no allocation; never runs in the static/reduced-motion frame
-       because the loop (and tNow) only advance while running. */
-    ctx.globalAlpha = SHIMMER_AMP * (0.5 + 0.5 * Math.sin(tNow * SHIMMER_OMEGA));
-    ctx.fillStyle = VOID;
     ctx.fillRect(0, 0, W, H);
     ctx.globalAlpha = 1;
   }
 
   function drawStatic() {
-    /* reduced-motion frame: void + grid + static stars + vignette, no loop,
-       no parallax, no rain, no bursts, no shockwaves, no shimmer.
-       Boss tint still applies (snapped, not ramped) so the floor stays truthful. */
-    gridShift = 0;
-    starShiftMod = 0;
-    renderBase();
-    drawStars(false);
-    ctx.fillStyle = vignette;
-    ctx.fillRect(0, 0, W, H);
-  }
-
-  function step(dt) {
-    gridOffset = (gridOffset + dt * GRID_SPEED) % GRID_ROWS;
-    var k = 1 - Math.exp(-5.5 * dt);
-    px += (tx - px) * k;
-    py += (ty - py) * k;
-    tNow += dt;
-
-    /* v2: smoothed scroll parallax — grid at ~scrollY*0.06 (clamped so the
-       floor composition never breaks), stars at ~scrollY*0.03 (wrapped) */
-    var kp = 1 - Math.exp(-4 * dt);
-    parY += (targetScroll - parY) * kp;
-    var maxShift = H * PAR_CLAMP;
-    gridShift = parY * PAR_GRID;
-    if (gridShift > maxShift) gridShift = maxShift;
-    else if (gridShift < -maxShift) gridShift = -maxShift;
-    var zoneH = H * HORIZON;
-    var sm = (parY * PAR_STAR) % zoneH;
-    starShiftMod = sm < 0 ? sm + zoneH : sm;
-
-    /* v3: boss palette ramp — linear progress over BOSS_RAMP seconds in
-       whichever direction bossTarget points; easing applied at read time */
-    if (bossT !== bossTarget) {
-      var dB = dt / BOSS_RAMP;
-      bossT = bossTarget > bossT
-        ? Math.min(bossTarget, bossT + dB)
-        : Math.max(bossTarget, bossT - dB);
-    }
-    rainMix = RAIN_MAGENTA_MIX * bossEase();
-
-    /* v3: scroll-velocity surge — EMA (~0.2/frame at 60fps, frame-rate
-       independent) of |scrollY velocity|; idle frames feed 0 so it decays */
-    var inst = dt > 0 ? Math.abs(targetScroll - lastScrollY) / dt : 0;
-    lastScrollY = targetScroll;
-    var vk = 1 - Math.pow(VEL_EMA_BASE, dt * 60);
-    scrollVel += (inst - scrollVel) * vk;
-    rainSurge = 1 + Math.min(scrollVel * SURGE_GAIN, SURGE_CAP);
-
-    /* v2: glitch scheduler — a burst every 9–14s of live loop time */
-    if (burstT > 0) {
-      burstT -= dt;
-      if (burstT <= 0) {
-        burstT = 0;
-        burstIn = rand(BURST_MIN, BURST_MAX);
-      }
-    } else {
-      burstIn -= dt;
-      if (burstIn <= 0) triggerBurst();
-    }
-
-    /* v2: shockwave aging (~500ms life) */
-    for (var i = 0; i < RING_MAX; i++) {
-      if (rings[i].on) {
-        rings[i].t += dt;
-        if (rings[i].t >= RING_LIFE) rings[i].on = false;
-      }
-    }
-
-    updateRain(dt);
+    /* reduced-motion frame: identical composition, but tNow/warpK/burstK are
+       all frozen at rest so nothing moves — no drift, no orbit, no twinkle */
+    syncTint();
+    render();
   }
 
   function frame(now) {
@@ -651,29 +578,14 @@
     if (dt > 0.05) dt = 0.05;
     step(dt);
     render();
-    if (burstT > 0) applyGlitch(); /* tears the fully composited frame */
   }
 
   /* ---------- gradients / sizing ---------- */
   function buildGradients() {
-    gridGlowR = Math.max(W, H) * 0.55;
-    /* baked around the origin; drawGrid translates it onto the (shifted) horizon */
-    horizonGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, gridGlowR);
-    horizonGlow.addColorStop(0, 'rgba(0,240,255,0.16)');
-    horizonGlow.addColorStop(0.45, 'rgba(0,240,255,0.055)');
-    horizonGlow.addColorStop(1, 'rgba(0,240,255,0)');
-    /* v3 boss variant: amber core bleeding into magenta before falloff */
-    horizonGlowBoss = ctx.createRadialGradient(0, 0, 0, 0, 0, gridGlowR);
-    horizonGlowBoss.addColorStop(0, 'rgba(255,150,30,0.16)');
-    horizonGlowBoss.addColorStop(0.45, 'rgba(255,45,120,0.055)');
-    horizonGlowBoss.addColorStop(1, 'rgba(255,45,120,0)');
+    buildHoleGlow();
     vignette = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.38, W / 2, H / 2, Math.max(W, H) * 0.72);
     vignette.addColorStop(0, 'rgba(2,4,8,0)');
     vignette.addColorStop(1, 'rgba(2,4,8,0.55)');
-  }
-
-  function syncScroll() {
-    targetScroll = window.scrollY || window.pageYOffset || 0;
   }
 
   function resize() {
@@ -686,47 +598,12 @@
     canvas.width = Math.round(W * DPR);
     canvas.height = Math.round(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    if (!pointerReady) {
-      pointerReady = true;
-      px = tx = W * 0.5;
-      py = ty = H * 0.42;
-    }
-    if (px > W) px = W;
-    if (py > H) py = H;
-    if (tx > W) tx = W;
-    if (ty > H) ty = H;
-    syncScroll();
-    parY = targetScroll;     /* snap on resize so parallax never drifts after reflow */
-    lastScrollY = targetScroll; /* v3: no phantom surge spike from a reflow jump */
-    buildGradients();
-    buildColumns();
+    pxt = pxs = W * 0.5;
+    pyt = pys = H * 0.5;
+    layout();
     buildStars();
+    buildGradients();
     if (reduced) drawStatic();
-  }
-
-  /* ---------- v3: boss-zone observation ---------- */
-  function readBossClass() {
-    bossTarget = (document.body && document.body.classList.contains('x-boss-zone')) ? 1 : 0;
-  }
-
-  function onBossClass() {
-    readBossClass();
-    if (reduced) {
-      /* no loop under reduced motion: snap and repaint the static frame */
-      bossT = bossTarget;
-      rainMix = RAIN_MAGENTA_MIX * bossEase();
-      drawStatic();
-    }
-  }
-
-  function initBossObserver() {
-    readBossClass();
-    bossT = bossTarget;
-    rainMix = RAIN_MAGENTA_MIX * bossEase();
-    if (window.MutationObserver && document.body) {
-      var mo = new MutationObserver(onBossClass);
-      mo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    }
   }
 
   /* ---------- public API / lifecycle ---------- */
@@ -741,21 +618,60 @@
   function stop() {
     running = false;
     if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
-    burstT = 0;
-    for (var i = 0; i < RING_MAX; i++) rings[i].on = false;
   }
 
   function setIntensity(n) {
     n = Number(n);
     if (!isFinite(n)) return;
-    intensity = Math.max(0, Math.min(MAX_INTENSITY, n));
-    layoutRain();
+    intensity = Math.max(0, Math.min(2, n));
+    computeActive();
+    if (reduced) drawStatic();
   }
 
-  /* v2: fire a glitch burst on demand (no-op while static or halted) */
   function burst() {
-    if (reduced || !running) return;
-    triggerBurst();
+    if (reduced) return;
+    burstT = BURST_TIME;
+  }
+
+  function fireWarpCb() {
+    if (warpFired) return;
+    warpFired = true;
+    var cb = warpCb;
+    warpCb = null;
+    if (!cb) return;
+    try { cb(); }
+    catch (err) {
+      if (window.console && window.console.error) window.console.error(err);
+    }
+  }
+
+  function warp(midCb) {
+    /* reduced motion or halted loop: instant cut, callback synchronous */
+    if (reduced || !running) {
+      if (typeof midCb === 'function') midCb();
+      return;
+    }
+    if (warpState !== 0) return;   /* one jump at a time */
+    warpState = 1;
+    warpT = 0;
+    warpFired = false;
+    warpCb = typeof midCb === 'function' ? midCb : null;
+  }
+
+  function setMood(m) {
+    if (!MOODS.hasOwnProperty(m)) return;
+    if (m === moodName && moodT >= 1) return;
+    var t = MOODS[m];
+    /* seamless handoff even mid-fade: lerp starts from the live tint */
+    mfr = mr; mfg = mg; mfb = mb;
+    mtr = t[0]; mtg = t[1]; mtb = t[2];
+    moodName = m;
+    moodT = 0;
+    if (reduced) {
+      mr = mtr; mg = mtg; mb = mtb;
+      moodT = 1;
+      drawStatic();
+    }
   }
 
   function onVisibility() {
@@ -772,8 +688,12 @@
     reduced = mq ? mq.matches : false;
     if (reduced) {
       stop();
-      bossT = bossTarget; /* static frame shows the settled palette, no ramp */
-      rainMix = RAIN_MAGENTA_MIX * bossEase();
+      warpState = 0;
+      warpT = 0;
+      warpK = 0;
+      warpCb = null;
+      mr = mtr; mg = mtg; mb = mtb;
+      moodT = 1;
       drawStatic();
     } else {
       start();
@@ -781,34 +701,31 @@
   }
 
   function init() {
-    buildSprites();
-    buildGlowSprite();
-    initBossObserver();
+    allocPools();
+    buildNebulas();
+    syncTint();
     resize();
     window.addEventListener('resize', resize);
-    window.addEventListener('scroll', syncScroll, { passive: true });
-    window.addEventListener('pointermove', function (e) { tx = e.clientX; ty = e.clientY; }, { passive: true });
-    window.addEventListener('pointerdown', function (e) {
-      tx = e.clientX;
-      ty = e.clientY;
-      if (!reduced && running) spawnRing(e.clientX, e.clientY);
+    window.addEventListener('pointermove', function (e) {
+      pxt = e.clientX;
+      pyt = e.clientY;
     }, { passive: true });
     document.addEventListener('visibilitychange', onVisibility);
     if (mq) {
       if (mq.addEventListener) mq.addEventListener('change', onMotionPref);
       else if (mq.addListener) mq.addListener(onMotionPref);
     }
-    if (document.fonts && document.fonts.ready) {
-      /* re-bake sprites once JetBrains Mono is actually available */
-      document.fonts.ready.then(function () {
-        buildSprites();
-        if (reduced) drawStatic();
-      });
-    }
     if (reduced) drawStatic(); else start();
   }
 
-  window.XENITH_FX = { start: start, stop: stop, setIntensity: setIntensity, burst: burst };
+  window.XENITH_FX = {
+    start: start,
+    stop: stop,
+    setIntensity: setIntensity,
+    burst: burst,
+    warp: warp,
+    setMood: setMood
+  };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

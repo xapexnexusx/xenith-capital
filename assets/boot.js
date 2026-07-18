@@ -1,11 +1,13 @@
 /* ============================================================================
    XENITH CAPITAL — assets/boot.js
-   Boot preloader sequence (v3, Lane 5 — PRESS START). Vanilla JS, zero
+   Boot preloader sequence (v4, Lane 6 — SIGNAL TRIALS). Vanilla JS, zero
    dependencies, single IIFE. Owns: the #x-boot overlay lifecycle — game boot
-   log typing, progress bar/pct sync, blinking PRESS ENTER prompt gated on BOTH
-   the typed sequence and window load, Enter/click/Escape finish, hard runtime
-   failsafe, reduced-motion bypass, and timer pause while the tab is hidden.
-   Exposes nothing globally.
+   log typing (7 lines), progress bar/pct sync, blinking PRESS ENTER prompt
+   gated on BOTH the typed sequence and window load, Enter/click/Escape finish,
+   hard runtime failsafe, reduced-motion bypass, and timer pause while the tab
+   is hidden. Every terminal exit (finish, skip, failsafe, reduced-motion
+   removal) dispatches the document event `x:boot-done` exactly once —
+   stage.js listens for it to enter stage 0. Exposes nothing globally.
    ========================================================================== */
 (function () {
   'use strict';
@@ -13,12 +15,13 @@
   /* ------------------------------ configuration -------------------------- */
 
   var LINES = [
-    '> loading LEVEL 01… OK',
-    '> loading LEVEL 02… OK',
-    '> loading LEVEL 03… OK',
-    '> loading LEVEL 04… OK',
-    '> loading FINAL LEVEL… LOCKED',
-    '> XENITH SYSTEM ONLINE'
+    '> initializing XENITH core… OK',
+    '> loading LEVEL 01 // ARCHITECTURE… OK',
+    '> loading LEVEL 02 // RESEARCH… OK',
+    '> loading LEVEL 03 // RISK… OK',
+    '> loading LEVEL 04 // JUDGMENT… OK',
+    '> FINAL LEVEL // CLEARANCE… SEALED',
+    '> XENITH // SIGNAL TRIALS — SYSTEM ONLINE'
   ];
 
   var PROMPT_TEXT = 'PRESS ENTER TO INITIALIZE';
@@ -65,6 +68,7 @@
     var loadDone = document.readyState === 'complete';
     var promptShown = false;
     var finished = false;
+    var bootDoneSent = false;
 
     var lineIdx = 0;
     var charIdx = 0;
@@ -214,6 +218,20 @@
       unbind();
       if (styleEl && styleEl.parentNode) styleEl.parentNode.removeChild(styleEl);
       if (boot.parentNode) boot.parentNode.removeChild(boot);
+      announceDone();
+    }
+
+    // stage.js enters stage 0 on `x:boot-done`. Fired exactly once from every
+    // terminal path (normal finish, skip, failsafe, reduced-motion removal).
+    // Deferred by a tick: this script precedes stage.js in the deferred chain,
+    // so a synchronous dispatch during initial evaluation (the reduced-motion
+    // path) could outrun a listener that is not bound yet.
+    function announceDone() {
+      if (bootDoneSent) return;
+      bootDoneSent = true;
+      window.setTimeout(function () {
+        document.dispatchEvent(new CustomEvent('x:boot-done'));
+      }, 0);
     }
 
     /* ------------------------------- events ------------------------------ */

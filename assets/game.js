@@ -184,9 +184,11 @@
 
   /* ----------------------------- event wiring ---------------------------- */
 
+  var STAGE_LABELS = { 1: 'LV.01', 2: 'LV.02', 3: 'LV.03', 4: 'LV.04', 5: 'FINAL LEVEL', 6: 'CLEAR' };
+
   function onLevelCleared(e) {
     var d = (e && e.detail) || {};
-    var label = d.label || d.id || '';
+    var label = STAGE_LABELS[d.n] || d.label || d.id || '';
     pushToast('LEVEL CLEARED' + (label ? ' // ' + label : ''), false);
   }
 
@@ -202,7 +204,7 @@
   function init() {
     if (document.querySelector('.xg-stack')) return; // already running
     injectStyle();
-    document.addEventListener('x:level-cleared', onLevelCleared);
+    document.addEventListener('x:stage-passed', onLevelCleared);
     document.addEventListener('x:konami', onKonami);
     document.addEventListener('x:clearance-granted', onClearance);
     document.addEventListener('visibilitychange', onVisibility);

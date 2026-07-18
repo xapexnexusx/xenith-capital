@@ -1,8 +1,10 @@
-/* XENITH v2 — disclosures drawer mechanics (lane 5)
+/* XENITH v4 — disclosures drawer mechanics (lane 7, edge surfaces)
    Self-contained IIFE. Zero globals. No dependencies.
-   Opens/closes #x-disc, traps focus, veils background landmarks,
-   locks body scroll. All motion-deferred steps are instant under
-   prefers-reduced-motion. */
+   Opens/closes #x-disc, traps focus, veils background siblings,
+   locks body scroll. #x-disc-open is a fixed body-level button, so the
+   drawer opens from any stage and floats above stages via the existing
+   #x-disc z-layer contract in xenith.css (no JS z-index work here).
+   All motion-deferred steps are instant under prefers-reduced-motion. */
 (function () {
   'use strict';
 
@@ -19,11 +21,17 @@
     var panel = disc.querySelector('.x-disc-panel');
     if (!panel) return;
 
-    // Background landmarks veiled with aria-hidden while the dialog is open.
+    // Background siblings veiled with aria-hidden while the dialog is open.
+    // v4 body children: #x-boot, canvas#fx-bg, .x-scanlines, #x-cursor(-ring),
+    // #x-home, #x-pips, main#x-stage-root, #x-disc-open, #x-disc, noscript.
+    // #x-boot/canvas/scanlines/cursors are decorative and already aria-hidden
+    // in markup, so only the four content siblings below need veiling.
+    // Missing nodes are skipped silently by setLandmarksHidden.
     var landmarks = [
-      document.querySelector('main'),
-      document.getElementById('x-nav'),
-      document.getElementById('x-footer')
+      document.getElementById('x-home'),
+      document.getElementById('x-pips'),
+      document.getElementById('x-stage-root'),
+      document.getElementById('x-disc-open')
     ];
 
     // Live media query — evaluated at close time so an OS-level toggle
