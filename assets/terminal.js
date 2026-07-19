@@ -1,35 +1,37 @@
 /* ==========================================================================
-   XENITH CAPITAL — clearance protocol terminal (SIGNAL TRIALS boss stage)
-   assets/terminal.js — owns #x-terminal on stage 5. Vanilla JS, zero deps.
-   Public API: window.XenithTerminal = { init(sel, opts), enter(), version }
+   XENITH CAPITAL — UPLINK TERMINAL v5 (CLASSIFIED DOSSIER)
+   assets/terminal.js — owns #x-terminal inside #uplink. Vanilla JS, zero deps.
+   Public API: window.XenithTerminal = { init(sel, opts), boot(), version }
 
-   v4: LAZY BOOT — nothing initializes at DOMContentLoaded. The terminal
-   boots on the first document event x:stage-enter with detail.n === 5
-   (stage.js may also call XenithTerminal.enter()); both paths are
-   idempotent and re-focus the input so it stays usable while body scroll
-   is locked. The BOSS GAUNTLET is the SHORT protocol: 3 signal/noise
-   items → 6s no-input hold → 1 judgment call, then CLEARANCE prints the
-   .xt-win block, the XV-#### channel key and the direct channel
-   (inquiry@xenithcap.io exists ONLY inside these flows), unlocks the
-   mandate flow (mailto handoff; capital bands [1] $1M–$5M [2] $5M–$25M
-   [3] $25M+ [4] below $1M — band 4 prints the fixed not-a-fit line and
-   ends gracefully), stores xv_clearance=granted + xv_channel_key in
-   sessionStorage, and dispatches x:clearance-granted plus
-   x:stage-passed {detail:{n:5}}. On x:stage-enter {n:6} the CLEAR screen
-   (#clear-key / #clear-mail / #clear-sealed) is unsealed from the stored
-   grant; without a grant the sealed text is left untouched.
-   mandate/contact stay SEALED before clearance.
-   Line classes (.xt-line/.xt-user/.xt-ok/.xt-err) and the rain overlay
-   (.xt-rain) are styled by the injected block below; game chrome
-   (.xt-bar/.xt-win) stays with xenith.css.
-   v3 preserved: scan / matrix / disclosures / whoami / uptime / banner /
-   clear / exit, iddqd + xyzzy, uplink clock, ordered print pipeline,
-   tab-hidden timer pausing.
+   v5: the uplink is a dossier surface. The v4 multi-step clearance
+   protocol — its state machine, persistence keys, and external event
+   wiring — is deleted. What remains is the dossier uplink.
+
+   LAZY BOOT: nothing initializes at DOMContentLoaded. The terminal boots on
+   IntersectionObserver of #uplink (threshold .25, once), or on the first
+   focus/click/touch into the terminal — whichever comes first. boot() is
+   idempotent and never steals focus on a scroll-driven boot.
+
+   AUTHENTICATE — one question: 'what survives contact: signal or noise?'
+   Answer 'signal' → analyst verified: sessionStorage xv_auth=granted, and
+   both x:auth-granted and x:clearance-granted (legacy listener) dispatch.
+   Anything else → denied, retry allowed; ESC aborts. contact and mandate
+   stay SEALED until granted. inquiry@xenithcap.io exists ONLY inside the
+   contact/mandate flows (guided mandate: name → email → capital band
+   [1] $1M–$5M [2] $5M–$25M [3] $25M+ [4] below $1M — band 4 prints the
+   fixed not-a-fit line and closes gracefully; bands 1–3 hand off to the
+   mail client).
+
+   Kept from v4: ordered print pipeline + per-character typing, reduced-
+   motion instant print, hidden-tab rain pause, uptime clock, scan, matrix
+   rain, disclosures (both SEC URLs), whoami, banner, clear, exit, iddqd,
+   xyzzy. Line classes (.xt-line/.xt-user/.xt-ok/.xt-err) and the rain
+   overlay (.xt-rain) are styled by the injected block below.
    ========================================================================== */
 (function () {
   'use strict';
 
-  var VERSION = '4.0.0';
+  var VERSION = '5.0.0';
   var DEFAULT_EMAIL = 'inquiry@xenithcap.io';
   var TYPE_MS = 12;            /* per-character cadence for system lines */
   var BOOT_GAP_MS = 130;       /* stagger between boot lines */
@@ -37,16 +39,12 @@
   var SCAN_GAP_MS = 400;       /* stagger between doctrinal scan lines */
   var MATRIX_TICK_MS = 90;     /* rain re-render cadence */
   var MATRIX_MS = 8000;        /* total rain duration */
-  var HOLD_TICK_MS = 250;      /* hold bar cadence (~4x/s) */
-  var HOLD_TICK_RM_MS = 1000;  /* reduced-motion hold bar cadence (1x/s) */
-  var HOLD_SECONDS = 6;        /* THE HOLD — full duration */
-  var HOLD_RETRY_SECONDS = 6;  /* THE HOLD — retry duration */
-  var BAR_WIDTH = 24;          /* block width of the hold progress bar */
   var STYLE_ID = 'xt-line-styles';
-  var IDLE_PLACEHOLDER = "type 'clearance'";
+  var IDLE_PLACEHOLDER = "type 'help'";
   var IDLE_ARIA = 'Terminal input. Type help for commands.';
-  var STORAGE_GATE = 'xv_clearance';
-  var STORAGE_KEY = 'xv_channel_key';
+  var STORAGE_AUTH = 'xv_auth';
+  var AUTH_ANSWER = 'signal';
+  var AUTH_QUESTION = 'what survives contact: signal or noise?';
 
   var DISCLOSURE_LINES = [
     'Xenith Capital is a state-registered investment adviser.',
@@ -65,14 +63,6 @@
     '> compiling exposure report…'
   ];
   var SCAN_CLEAN_LINE = '0 narrative inputs in doctrine — process CLEAN';
-
-  /* TRIAL 1 // SIGNAL OR NOISE — the short gauntlet deck: 3 items, 3/3.
-     answer key: s = signal, n = noise. */
-  var GAUNTLET_ITEMS = [
-    { q: 'A CEO posts a rocket emoji after earnings.', a: 'n' },
-    { q: 'Third consecutive quarter of declining free cash flow in the 10-K.', a: 's' },
-    { q: 'A viral thread promises 40% guaranteed.', a: 'n' }
-  ];
 
   /* Full-width glyphs keep the rain grid aligned in the mono font. */
   var RAIN_GLYPHS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ' +
@@ -109,8 +99,8 @@
   ];
 
   /* ONE style block, scoped strictly to this widget's own line classes and
-     the rain overlay. Colors mirror the design tokens (cyan / magenta / amber).
-     Game chrome (.xt-bar/.xt-win) is owned by xenith.css — never styled here. */
+     the rain overlay. Colors mirror the v5 palette (phosphor cyan / alert
+     amber); alert red stays on the chrome owned by xenith.css. */
   function injectStyles() {
     if (document.getElementById(STYLE_ID)) return;
     var el = document.createElement('style');
@@ -118,7 +108,7 @@
     el.textContent =
       '.xt-line{color:inherit;white-space:pre-wrap;overflow-wrap:anywhere}' +
       '.xt-user{color:#00f0ff}' +
-      '.xt-ok{color:#ff2d78}' +
+      '.xt-ok{color:#00f0ff}' +
       '.xt-err{color:#ffb000}' +
       '.xt-rain{position:absolute;inset:0;pointer-events:none;overflow:hidden;' +
       'z-index:2;margin:0;color:#00f0ff;opacity:.32;' +
@@ -157,17 +147,7 @@
     } catch (e) { /* storage unavailable — gate simply does not persist */ }
   }
 
-  /* Channel key: XV-#### — 4 random alphanumerics (ambiguous glyphs dropped). */
-  function genKey() {
-    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    var out = '';
-    for (var i = 0; i < 4; i++) {
-      out += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return 'XV-' + out;
-  }
-
-  /* One dispatch path for the stage-manager contract events. */
+  /* One dispatch path for page-level contract events. */
   function emit(name, detail) {
     if (typeof CustomEvent !== 'function' || !document.dispatchEvent) return;
     document.dispatchEvent(new CustomEvent(name,
@@ -238,23 +218,11 @@
       return chain;
     }
 
-    /* Mutable line, created in chain order and handed back for live updates
-       (the hold progress bar). Stays inside the same ordered pipeline. */
-    function line(cls) {
-      var p = chain.then(function () {
-        var el = makeLine(cls);
-        scroll();
-        return el;
-      });
-      chain = p.then(function () {});
-      return p;
-    }
-
     function clear() {
       body.textContent = '';
     }
 
-    return { print: print, printAll: printAll, wait: wait, line: line, clear: clear };
+    return { print: print, printAll: printAll, wait: wait, clear: clear };
   }
 
   function createTerminal(root, opts) {
@@ -266,27 +234,12 @@
     var email = (opts && opts.email) || DEFAULT_EMAIL;
     var printer = makePrinter(body);
 
-    /* State machine: { mode:'idle' } | { mode:'mandate', step:0..3, data } |
-       { mode:'trial1'|'hold-confirm'|'hold'|'trial3' } (boss gauntlet). */
+    /* State machine: { mode:'idle' } | { mode:'auth' } |
+       { mode:'mandate', step:0..3, data }. */
     var state = { mode: 'idle', step: -1, data: {} };
 
-    function freshGame() {
-      return {
-        t1: { index: 0, score: 0, retry: false },
-        t3: { retry: false },
-        hold: { timer: null, elapsed: 0, last: 0, seconds: 0, bar: null, retryUsed: false },
-        locked: false
-      };
-    }
-    var game = freshGame();
-
-    /* Clearance gate: per-tab persistence + channel key. */
-    var granted = storageGet(STORAGE_GATE) === 'granted';
-    var channelKey = storageGet(STORAGE_KEY);
-    if (granted && !channelKey) {
-      channelKey = genKey();
-      storageSet(STORAGE_KEY, channelKey);
-    }
+    /* Clearance gate: per-tab persistence. */
+    var granted = storageGet(STORAGE_AUTH) === 'granted';
 
     /* Active matrix rain handle: { overlay, render, timer, endTimer,
        endsAt, remaining } or null. */
@@ -322,20 +275,16 @@
       }, 1000);
     }
 
-    /* v4.0 banner — channel state is live, so a granted player who revisits
-       the stage (or reloads the tab mid-session) never sees a stale SEAL. */
+    /* v5.0 banner — printed once per page view, on lazy boot. */
     function bootLines() {
       return [
-        'XENITH CAPITAL // CLEARANCE PROTOCOL v4.0',
-        'secure channel: ' + (granted ? 'UNSEALED' : 'SEALED'),
-        'trials loaded: SIGNAL · HOLD · JUDGMENT',
-        granted
-          ? "type 'mandate' to open the guided inquiry — or 'help'"
-          : "type 'clearance' to begin — or 'help'"
+        'XENITH CAPITAL // UPLINK v5.0',
+        'secure channel: READY',
+        "type 'help' for command list"
       ];
     }
 
-    function boot() {
+    function bootBanner() {
       var lines = bootLines();
       for (var i = 0; i < lines.length; i++) {
         if (i > 0) printer.wait(BOOT_GAP_MS);
@@ -459,6 +408,45 @@
       render();
     }
 
+    /* ---------------- authenticate (one question) ---------------- */
+
+    function startAuth() {
+      if (granted) {
+        printer.print('channel already open — analyst verified', 'xt-ok');
+        printer.print("type 'contact' or 'mandate'");
+        return;
+      }
+      state.mode = 'auth';
+      setPlaceholder('signal or noise');
+      printer.print('AUTHENTICATE // one question', 'xt-ok');
+      printer.print(AUTH_QUESTION);
+    }
+
+    function handleAuthInput(v) {
+      v = v.toLowerCase();
+      if (!v) { printer.print(AUTH_QUESTION); return; }
+      if (v !== AUTH_ANSWER) {
+        printer.print('clearance denied. think like an analyst.', 'xt-err');
+        printer.print(AUTH_QUESTION);
+        return;
+      }
+      state.mode = 'idle';
+      setPlaceholder(null);
+      granted = true;
+      storageSet(STORAGE_AUTH, 'granted');
+      printer.print('analyst verified. channel open.', 'xt-ok');
+      printer.print("type 'contact' for the direct channel — 'mandate' for the guided inquiry");
+      emit('x:auth-granted');
+      emit('x:clearance-granted'); /* legacy listener (toast lane) */
+    }
+
+    function abortAuth() {
+      state.mode = 'idle';
+      input.value = '';
+      setPlaceholder(null);
+      printer.print('authentication aborted — channel remains sealed', 'xt-err');
+    }
+
     /* ---------------- mandate guided flow ---------------- */
 
     function askStep() {
@@ -568,267 +556,11 @@
       askStep();
     }
 
-    /* ---------------- boss gauntlet (clearance protocol) ---------------- */
-
-    function gameActive() {
-      return state.mode === 'trial1' || state.mode === 'hold-confirm' ||
-        state.mode === 'hold' || state.mode === 'trial3';
-    }
+    /* ---------------- idle-mode command dispatch ---------------- */
 
     function sealLine() {
-      printer.print("channel SEALED — type 'clearance'", 'xt-err');
+      printer.print('channel sealed — type authenticate', 'xt-err');
     }
-
-    function startProtocol() {
-      if (granted) {
-        printer.print('clearance: GRANTED — protocol already complete', 'xt-ok');
-        printer.print("type 'mandate' to open the guided inquiry");
-        return;
-      }
-      if (gameActive()) {
-        printer.print('protocol already in progress — ESC aborts', 'xt-err');
-        return;
-      }
-      var wasLocked = game.locked;
-      game = freshGame();
-      state.mode = 'trial1';
-      setPlaceholder('s or n');
-      if (wasLocked) printer.print('protocol restart — prior lock cleared');
-      printer.print('CLEARANCE PROTOCOL // three trials — signal, hold, judgment');
-      printer.print('ESC aborts at any point. the channel stays sealed until all three clear.');
-      printer.print('TRIAL 1 // SIGNAL OR NOISE', 'xt-ok');
-      printer.print('three items. answer [s] signal or [n] noise — 3/3 to clear.');
-      askTrial1();
-    }
-
-    function askTrial1() {
-      var item = GAUNTLET_ITEMS[game.t1.index];
-      var label = (game.t1.retry ? 'retry ' : 'item ') +
-        (game.t1.index + 1) + '/3';
-      printer.print(label + ' — ' + item.q + '  [s/n]');
-    }
-
-    function handleTrial1(v) {
-      v = v.toLowerCase();
-      if (v !== 's' && v !== 'n') {
-        printer.print("answer 's' (signal) or 'n' (noise):", 'xt-err');
-        return;
-      }
-      var item = GAUNTLET_ITEMS[game.t1.index];
-      var right = v === item.a;
-      if (right) game.t1.score += 1;
-      printer.print(right ? 'correct' : 'incorrect', right ? 'xt-ok' : 'xt-err');
-      game.t1.index += 1;
-      if (game.t1.index < GAUNTLET_ITEMS.length) {
-        askTrial1();
-        return;
-      }
-      finishTrial1();
-    }
-
-    function finishTrial1() {
-      if (!game.t1.retry) {
-        printer.print('SIGNAL score: ' + game.t1.score + '/3');
-        if (game.t1.score === 3) {
-          printer.print('TRIAL 1 CLEARED — signal separated from noise', 'xt-ok');
-          startHoldIntro();
-        } else {
-          game.t1.retry = true;
-          game.t1.index = 0;
-          game.t1.score = 0;
-          printer.print('below threshold — 3/3 required', 'xt-err');
-          printer.print('one retry granted: same three items, 3/3 required. last chance.');
-          askTrial1();
-        }
-      } else {
-        printer.print('RETRY score: ' + game.t1.score + '/3');
-        if (game.t1.score === 3) {
-          printer.print('TRIAL 1 CLEARED — on retry', 'xt-ok');
-          startHoldIntro();
-        } else {
-          lockProtocol('SIGNAL');
-        }
-      }
-    }
-
-    /* --- TRIAL 2 // THE HOLD --- */
-
-    function startHoldIntro() {
-      state.mode = 'hold-confirm';
-      var seconds = game.hold.retryUsed ? HOLD_RETRY_SECONDS : HOLD_SECONDS;
-      setPlaceholder('y to hold');
-      printer.print('TRIAL 2 // THE HOLD', 'xt-ok');
-      printer.print('Hold position for ' + seconds + ' seconds. Any input is an impulse.');
-      printer.print('confirm [y] — ESC aborts');
-    }
-
-    function handleHoldConfirm(v) {
-      if (v.toLowerCase() !== 'y') {
-        printer.print("type 'y' to begin the hold — or ESC to abort", 'xt-err');
-        return;
-      }
-      beginHold(game.hold.retryUsed ? HOLD_RETRY_SECONDS : HOLD_SECONDS);
-    }
-
-    function barText(elapsedMs, seconds) {
-      var frac = Math.min(1, elapsedMs / (seconds * 1000));
-      var filled = Math.round(BAR_WIDTH * frac);
-      var bar = '';
-      for (var i = 0; i < BAR_WIDTH; i++) bar += i < filled ? '█' : '░';
-      var shown = Math.min(seconds, elapsedMs / 1000);
-      return '[' + bar + '] ' + shown.toFixed(1) + 's / ' + seconds + '.0s';
-    }
-
-    function stopHoldTimer() {
-      if (game.hold.timer) {
-        window.clearInterval(game.hold.timer);
-        game.hold.timer = null;
-      }
-    }
-
-    function beginHold(seconds) {
-      state.mode = 'hold';
-      setPlaceholder('HOLD — do not type');
-      game.hold.seconds = seconds;
-      game.hold.elapsed = 0;
-      game.hold.last = Date.now();
-      var tickMs = prefersReduced() ? HOLD_TICK_RM_MS : HOLD_TICK_MS;
-      /* The bar line is created in printer order, then mutated live; the
-         mode guard covers an abort that lands before creation resolves. */
-      printer.line('xt-bar').then(function (el) {
-        if (state.mode !== 'hold') return;
-        game.hold.bar = el;
-        el.textContent = barText(0, seconds);
-        scrollBody();
-        game.hold.timer = window.setInterval(holdTick, tickMs);
-      });
-    }
-
-    function holdTick() {
-      if (state.mode !== 'hold') { stopHoldTimer(); return; }
-      var nowTs = Date.now();
-      var delta = nowTs - game.hold.last;
-      game.hold.last = nowTs;
-      if (document.hidden) return;            /* paused while tab hidden */
-      var cap = prefersReduced() ? 2000 : 500;
-      if (delta > cap) delta = cap;           /* no time-skipping after throttle */
-      game.hold.elapsed += delta;
-      if (game.hold.elapsed >= game.hold.seconds * 1000) {
-        finishHold();
-        return;
-      }
-      if (game.hold.bar) {
-        game.hold.bar.textContent = barText(game.hold.elapsed, game.hold.seconds);
-        scrollBody();
-      }
-    }
-
-    function finishHold() {
-      stopHoldTimer();
-      if (game.hold.bar) {
-        game.hold.bar.textContent =
-          barText(game.hold.seconds * 1000, game.hold.seconds);
-        scrollBody();
-        game.hold.bar = null;
-      }
-      printer.print('discipline confirmed — you won by not playing.', 'xt-ok');
-      startTrial3();
-    }
-
-    function impulse() {
-      if (state.mode !== 'hold') return;
-      stopHoldTimer();
-      game.hold.bar = null;
-      input.value = '';
-      printer.print('IMPULSE DETECTED — position broken', 'xt-err');
-      if (!game.hold.retryUsed) {
-        game.hold.retryUsed = true;
-        state.mode = 'hold-confirm';
-        setPlaceholder('y to hold');
-        printer.print('one retry granted — hold ' + HOLD_RETRY_SECONDS +
-          ' seconds. confirm [y]');
-      } else {
-        lockProtocol('PATIENCE');
-      }
-    }
-
-    /* --- TRIAL 3 // THE JUDGMENT --- */
-
-    function startTrial3() {
-      state.mode = 'trial3';
-      setPlaceholder('accept / verify / reject');
-      printer.print('TRIAL 3 // THE JUDGMENT', 'xt-ok');
-      printer.print('claim on file: "Our model predicted the last three crashes."');
-      printer.print('Your move: [accept / verify / reject]');
-    }
-
-    function handleTrial3(v) {
-      v = v.toLowerCase();
-      if (v !== 'accept' && v !== 'verify' && v !== 'reject') {
-        printer.print('choose: accept / verify / reject', 'xt-err');
-        return;
-      }
-      if (!game.t3.retry) {
-        if (v === 'verify') {
-          printer.print('> correct — claims get verified, never worshipped.', 'xt-ok');
-          grantClearance();
-        } else {
-          game.t3.retry = true;
-          printer.print('> incorrect — one retry granted.', 'xt-err');
-          printer.print('claim on file: "This mandate guarantees 20% annually."');
-          printer.print('Your move: [accept / verify / reject]');
-        }
-      } else {
-        if (v === 'reject') {
-          printer.print('> correct — guaranteed returns are narrative fiction.', 'xt-ok');
-          grantClearance();
-        } else {
-          lockProtocol('VERIFICATION');
-        }
-      }
-    }
-
-    /* --- game outcomes --- */
-
-    function lockProtocol(trialName) {
-      state.mode = 'idle';
-      game.locked = true;
-      setPlaceholder(null);
-      printer.print(trialName + ' trial failed twice — PROTOCOL LOCKED', 'xt-err');
-      printer.print("the channel stays sealed. type 'clearance' to restart fresh.", 'xt-err');
-    }
-
-    function grantClearance() {
-      state.mode = 'idle';
-      setPlaceholder(null);
-      granted = true;
-      channelKey = genKey();
-      storageSet(STORAGE_GATE, 'granted');
-      storageSet(STORAGE_KEY, channelKey);
-      printer.print(
-        'CLEARANCE GRANTED — PROTOCOL COMPLETE\n' +
-        'trials cleared: SIGNAL · HOLD · JUDGMENT\n' +
-        'secure channel: UNSEALED',
-        'xt-win'
-      );
-      printer.print('direct channel: ' + email, 'xt-ok');
-      printer.print('channel key: ' + channelKey, 'xt-ok');
-      printer.print("type 'mandate' to open the guided inquiry — 'contact' reprints the channel");
-      emit('x:clearance-granted');
-      emit('x:stage-passed', { n: 5 });
-    }
-
-    function abortGame() {
-      stopHoldTimer();
-      game = freshGame();
-      state.mode = 'idle';
-      state.step = -1;
-      input.value = '';
-      setPlaceholder(null);
-      printer.print('protocol aborted — channel remains SEALED', 'xt-err');
-    }
-
-    /* ---------------- idle-mode command dispatch ---------------- */
 
     function helpLines() {
       var gate = granted ? 'OPEN' : 'SEALED';
@@ -836,13 +568,13 @@
         'command       function',
         '-------       --------',
         'help          show this command list',
-        'whoami        player identity + clearance state',
-        'clearance     begin the boss gauntlet (alias: protocol)',
+        'authenticate  verify analyst clearance',
         'contact       direct contact channel [' + gate + ']',
+        'mandate       guided mandate inquiry [' + gate + ']',
         'disclosures   regulatory disclosures',
         'scan          doctrinal exposure sweep',
         'matrix        signal saturation (8s)',
-        'mandate       guided mandate inquiry [' + gate + ']',
+        'whoami        analyst identity + clearance state',
         'uptime        uplink clock readout',
         'banner        reprint boot banner',
         'clear         clear terminal output',
@@ -853,8 +585,7 @@
     function printContact() {
       printer.printAll([
         'direct channel: ' + email,
-        'channel key: ' + channelKey,
-        'every granted channel read personally'
+        'every transmission read personally'
       ]);
     }
 
@@ -864,12 +595,11 @@
           printer.printAll(helpLines());
           break;
         case 'whoami':
-          printer.print('PLAYER: EVIDENCE-SEEKER // CLEARANCE: ' +
+          printer.print('ANALYST // CLEARANCE: ' +
             (granted ? 'GRANTED' : 'NONE'));
           break;
-        case 'clearance':
-        case 'protocol':
-          startProtocol();
+        case 'authenticate':
+          startAuth();
           break;
         case 'contact':
           if (granted) printContact(); else sealLine();
@@ -889,7 +619,7 @@
             ' // sys.online');
           break;
         case 'banner':
-          boot();
+          bootBanner();
           break;
         case 'clear':
           printer.clear();
@@ -909,7 +639,7 @@
         case 'exit':
           printer.print(granted
             ? 'channel remains open — type contact'
-            : "channel remains SEALED — type 'clearance'");
+            : 'channel remains sealed — type authenticate');
           break;
         default:
           printer.print("unrecognized command — type 'help'", 'xt-err');
@@ -927,25 +657,9 @@
         handleMandateInput(raw.trim());
         return;
       }
-      if (state.mode === 'trial1') {
+      if (state.mode === 'auth') {
         printer.print('> ' + raw, 'xt-user');
-        handleTrial1(raw.trim());
-        return;
-      }
-      if (state.mode === 'hold-confirm') {
-        printer.print('> ' + raw, 'xt-user');
-        handleHoldConfirm(raw.trim());
-        return;
-      }
-      if (state.mode === 'hold') {
-        /* THE HOLD: any submitted input is an impulse. */
-        if (raw) printer.print('> ' + raw, 'xt-user');
-        impulse();
-        return;
-      }
-      if (state.mode === 'trial3') {
-        printer.print('> ' + raw, 'xt-user');
-        handleTrial3(raw.trim());
+        handleAuthInput(raw.trim());
         return;
       }
       var cmd = raw.trim();
@@ -954,22 +668,17 @@
       runCommand(cmd.toLowerCase());
     });
 
-    /* THE HOLD: real text entry counts as an impulse even before Enter. */
-    input.addEventListener('input', function () {
-      if (state.mode === 'hold') impulse();
-    });
-
     input.addEventListener('keydown', function (e) {
       if (e.key !== 'Escape') return;
       if (state.mode === 'mandate') {
         abortMandate();
-      } else if (gameActive()) {
-        abortGame();
+      } else if (state.mode === 'auth') {
+        abortAuth();
       }
     });
 
-    /* Freeze the rain while the tab is hidden; the hold timer pauses
-       itself inside holdTick via the same document.hidden check. */
+    /* Freeze the rain while the tab is hidden; the uptime tick skips hidden
+       frames inside its own interval. */
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) pauseRain(); else resumeRain();
     });
@@ -978,8 +687,6 @@
       input.focus();
     });
 
-    /* The stage manager locks body scroll; preventScroll keeps focus from
-       fighting the lock, with a plain-focus fallback for older engines. */
     function focusInput() {
       try {
         input.focus({ preventScroll: true });
@@ -991,7 +698,7 @@
     startUplink();
 
     return {
-      boot: boot,
+      boot: bootBanner,
       clear: printer.clear,
       print: printer.print,
       focus: focusInput
@@ -1008,69 +715,50 @@
     return api;
   }
 
-  /* ---------------- v4 lazy boot + stage wiring ---------------- */
+  /* ---------------- v5 lazy boot ---------------- */
 
   var termApi = null;
   var booted = false;
 
-  /* Idempotent: boots once, re-focuses on every call. Safe for stage.js to
-     call directly and safe to fire on every x:stage-enter {n:5}. */
-  function enter() {
-    if (!termApi) {
-      termApi = init('#x-terminal', { email: DEFAULT_EMAIL });
-      if (termApi && !booted) {
-        booted = true;
-        termApi.boot();
-      }
+  /* Idempotent: the first trigger initializes the terminal and prints the
+     banner; every later trigger is a no-op. Never steals focus — scroll-
+     driven boots stay passive, and click/focus boots already have the
+     user's cursor. */
+  function boot() {
+    if (!termApi) termApi = init('#x-terminal', { email: DEFAULT_EMAIL });
+    if (termApi && !booted) {
+      booted = true;
+      termApi.boot();
     }
-    if (termApi && termApi.focus) termApi.focus();
     return termApi;
   }
 
-  /* CLEAR-stage fill: unseal #clear-key / #clear-mail only when the stored
-     grant exists; otherwise the sealed text stays exactly as shipped. */
-  function fillClearStage() {
-    if (storageGet(STORAGE_GATE) !== 'granted') return;
-    var key = storageGet(STORAGE_KEY);
-    if (!key) {
-      key = genKey();
-      storageSet(STORAGE_KEY, key);
-    }
-    var keyEl = document.getElementById('clear-key');
-    var mail = document.getElementById('clear-mail');
-    var sealed = document.getElementById('clear-sealed');
-    if (keyEl) keyEl.textContent = key;
-    if (mail) {
-      mail.textContent = DEFAULT_EMAIL;
-      mail.setAttribute('href', 'mailto:' + DEFAULT_EMAIL);
-      mail.hidden = false;
-      if (mail.removeAttribute) mail.removeAttribute('hidden');
-    }
-    if (sealed) {
-      sealed.hidden = true;
-      if (sealed.setAttribute) sealed.setAttribute('hidden', '');
-    }
+  var rootEl = document.getElementById('x-terminal');
+  var uplinkEl = document.getElementById('uplink');
+
+  /* Direct engagement beats the observer: if the user reaches the terminal
+     before it scrolls a quarter into view, boot on first contact. */
+  if (rootEl) {
+    rootEl.addEventListener('focusin', boot);
+    rootEl.addEventListener('click', boot);
+    rootEl.addEventListener('touchstart', boot, { passive: true });
   }
 
-  /* Unseal the stage-5 contact panel once clearance exists. */
-  function unsealPanel() {
-    if (storageGet(STORAGE_GATE) !== 'granted') return;
-    var slot = document.querySelector('.x-contact-sealed');
-    if (!slot || slot.getAttribute('data-unsealed') === '1') return;
-    slot.setAttribute('data-unsealed', '1');
-    var a = document.createElement('a');
-    a.href = 'mailto:' + DEFAULT_EMAIL;
-    a.textContent = DEFAULT_EMAIL;
-    slot.textContent = '';
-    slot.appendChild(a);
+  if (uplinkEl && typeof IntersectionObserver === 'function') {
+    var io = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting) {
+          io.disconnect();
+          boot();
+          break;
+        }
+      }
+    }, { threshold: 0.25 });
+    io.observe(uplinkEl);
+  } else if (rootEl && typeof IntersectionObserver !== 'function') {
+    /* Legacy engines without an observer boot immediately. */
+    boot();
   }
 
-  document.addEventListener('x:stage-enter', function (e) {
-    var n = e && e.detail ? e.detail.n : null;
-    if (n === 5) { enter(); unsealPanel(); }
-    else if (n === 6) fillClearStage();
-  });
-  document.addEventListener('x:clearance-granted', unsealPanel);
-
-  window.XenithTerminal = { init: init, enter: enter, version: VERSION };
+  window.XenithTerminal = { init: init, boot: boot, version: VERSION };
 })();

@@ -1,17 +1,22 @@
 /* ============================================================================
-   XENITH CAPITAL — assets/game.js  (v3, Lane 6: achievements + fanfare)
-   Achievement toasts + CLEARANCE GRANTED fanfare. Vanilla JS, zero
+   XENITH CAPITAL — assets/game.js  (v5, Lane 6: toasts + auth sweep)
+   Dossier-event toasts + ANALYST VERIFIED sweep. Vanilla JS, zero
    dependencies, single IIFE, exposes nothing globally. Injects ONE <style>
    scoped exclusively to .xg-* classes; touches no other lane's selectors.
+   (Filename kept for the v5 script order in index.html; this lane ships
+   toasts only and the v4 arcade vocabulary is gone.)
 
    Listens on document for CustomEvents dispatched by main.js / terminal.js:
-     x:level-cleared      -> toast "LEVEL CLEARED // <label>"
-                             (detail.label, falling back to detail.id)
+     x:redacted           -> toast "DOSSIER DECLASSIFIED // <file>"
+                             (detail.file, e.g. "FILE 01"; suffix omitted if
+                             the detail carries no usable file label)
      x:konami             -> toast "ACHIEVEMENT: OLD SCHOOL"
-     x:clearance-granted  -> full-screen cyan->magenta sweep (~600ms), then a
-                             .xg-win toast "CLEARANCE GRANTED // CHANNEL UNSEALED"
+     x:auth-granted       -> shared handler with x:clearance-granted,
+     x:clearance-granted    deduped to ONCE per session: full-screen
+                             cyan->alert-red sweep (~600ms), then a .xg-win
+                             toast "ANALYST VERIFIED // CHANNEL OPEN"
 
-   Toasts: fixed top-right stack below the nav, mono .7rem, cyan hairline
+   Toasts: fixed top-right stack below the topbar, mono .7rem, cyan hairline
    border, void-translucent bg, slide in from the right, auto-dismiss after
    3.5s, max 3 concurrent (oldest drops). Reduced motion: toasts appear and
    dismiss instantly, sweep suppressed. Every timer pauses while the tab is
@@ -25,7 +30,7 @@
   var TOAST_MS = 3500;    // visible time before auto-dismiss
   var EXIT_MS = 280;      // slide-out time before the node leaves the DOM
   var MAX_TOASTS = 3;     // concurrent cap; oldest drops
-  var SWEEP_MS = 600;     // fanfare sweep duration (must match the CSS)
+  var SWEEP_MS = 600;     // auth sweep duration (must match the CSS)
 
   var reduceMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -45,10 +50,10 @@
     'transition:transform .28s cubic-bezier(.22,1,.36,1),opacity .28s ease;pointer-events:none}',
     '.xg-toast.xg-on{opacity:1;transform:translateX(0)}',
     '.xg-toast.xg-off{opacity:0;transform:translateX(112%)}',
-    '.xg-toast.xg-win{color:#ffe4ef;border-color:rgba(255,45,120,.6);border-left-color:#ff2d78;',
-    'box-shadow:0 0 16px rgba(255,45,120,.28)}',
+    '.xg-toast.xg-win{color:#ffe9ec;border-color:rgba(255,45,60,.6);border-left-color:#ff2d3c;',
+    'box-shadow:0 0 16px rgba(255,45,60,.28)}',
     '.xg-sweep{position:fixed;inset:0;z-index:9400;pointer-events:none;',
-    'background:linear-gradient(100deg,rgba(0,240,255,.16) 0%,rgba(0,240,255,.05) 45%,rgba(255,45,120,.16) 100%);',
+    'background:linear-gradient(100deg,rgba(0,240,255,.16) 0%,rgba(0,240,255,.05) 45%,rgba(255,45,60,.16) 100%);',
     'opacity:0;transform:scaleY(0);transform-origin:50% 0}',
     '.xg-sweep.xg-run{animation:xg-sweep-anim .6s cubic-bezier(.22,1,.36,1) forwards}',
     '@keyframes xg-sweep-anim{0%{opacity:0;transform:scaleY(0)}18%{opacity:1}62%{opacity:.85;transform:scaleY(1)}100%{opacity:0;transform:scaleY(1)}}',
@@ -160,7 +165,7 @@
     t.timer = later(function () { beginExit(t); }, TOAST_MS);
   }
 
-  /* ------------------------- clearance fanfare sweep --------------------- */
+  /* ---------------------------- auth sweep ------------------------------- */
 
   function sweep() {
     if (reduced()) return; // no sweep under reduced motion
@@ -184,29 +189,34 @@
 
   /* ----------------------------- event wiring ---------------------------- */
 
-  var STAGE_LABELS = { 1: 'LV.01', 2: 'LV.02', 3: 'LV.03', 4: 'LV.04', 5: 'FINAL LEVEL', 6: 'CLEAR' };
-
-  function onLevelCleared(e) {
+  function onRedacted(e) {
     var d = (e && e.detail) || {};
-    var label = STAGE_LABELS[d.n] || d.label || d.id || '';
-    pushToast('LEVEL CLEARED' + (label ? ' // ' + label : ''), false);
+    var file = (d.file == null ? '' : String(d.file)).replace(/\s+/g, ' ').trim();
+    pushToast('DOSSIER DECLASSIFIED' + (file ? ' // ' + file : ''), false);
   }
 
   function onKonami() {
     pushToast('ACHIEVEMENT: OLD SCHOOL', false);
   }
 
-  function onClearance() {
+  // x:auth-granted and x:clearance-granted share one celebration that may
+  // run at most once per session, no matter how many of either event fire.
+  var authCelebrated = false;
+
+  function onAuth() {
+    if (authCelebrated) return;
+    authCelebrated = true;
     sweep();
-    pushToast('CLEARANCE GRANTED // CHANNEL UNSEALED', true);
+    pushToast('ANALYST VERIFIED // CHANNEL OPEN', true);
   }
 
   function init() {
     if (document.querySelector('.xg-stack')) return; // already running
     injectStyle();
-    document.addEventListener('x:stage-passed', onLevelCleared);
+    document.addEventListener('x:redacted', onRedacted);
     document.addEventListener('x:konami', onKonami);
-    document.addEventListener('x:clearance-granted', onClearance);
+    document.addEventListener('x:auth-granted', onAuth);
+    document.addEventListener('x:clearance-granted', onAuth);
     document.addEventListener('visibilitychange', onVisibility);
   }
 

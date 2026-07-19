@@ -1,9 +1,9 @@
-/* XENITH v4 — disclosures drawer mechanics (lane 7, edge surfaces)
+/* XENITH v5 — disclosures drawer mechanics (lane 7, edge surfaces)
    Self-contained IIFE. Zero globals. No dependencies.
    Opens/closes #x-disc, traps focus, veils background siblings,
-   locks body scroll. #x-disc-open is a fixed body-level button, so the
-   drawer opens from any stage and floats above stages via the existing
-   #x-disc z-layer contract in xenith.css (no JS z-index work here).
+   locks body scroll. #x-disc-open sits in the page footer; the drawer
+   floats above the dossier via the existing #x-disc z-layer contract in
+   xenith.css (no JS z-index work here).
    All motion-deferred steps are instant under prefers-reduced-motion. */
 (function () {
   'use strict';
@@ -22,17 +22,21 @@
     if (!panel) return;
 
     // Background siblings veiled with aria-hidden while the dialog is open.
-    // v4 body children: #x-boot, canvas#fx-bg, .x-scanlines, #x-cursor(-ring),
-    // #x-home, #x-pips, main#x-stage-root, #x-disc-open, #x-disc, noscript.
-    // #x-boot/canvas/scanlines/cursors are decorative and already aria-hidden
-    // in markup, so only the four content siblings below need veiling.
+    // v5 body children: #x-boot, canvas#fx-bg, .x-scanlines, .x-watermark,
+    // header#x-topbar, aside#x-rail, main#x-main, footer#x-footer (holds
+    // #x-disc-open), #x-disc, noscript.
+    // #x-boot/canvas/scanlines are decorative and already aria-hidden in
+    // markup; #x-rail and .x-watermark arrive aria-hidden as well, so each
+    // node's pre-open state is captured and restored rather than assumed.
     // Missing nodes are skipped silently by setLandmarksHidden.
     var landmarks = [
-      document.getElementById('x-home'),
-      document.getElementById('x-pips'),
-      document.getElementById('x-stage-root'),
+      document.getElementById('x-topbar'),
+      document.getElementById('x-rail'),
+      document.querySelector('.x-watermark'),
+      document.getElementById('x-main'),
       document.getElementById('x-disc-open')
     ];
+    var landmarkWasHidden = [];
 
     // Live media query — evaluated at close time so an OS-level toggle
     // mid-session is honored.
@@ -49,6 +53,12 @@
         var el = landmarks[i];
         if (!el) continue;
         if (hide) {
+          // Capture pre-open state so decorative nodes that carry
+          // aria-hidden in markup (#x-rail, .x-watermark) restore to
+          // hidden — never to an exposed state they never had.
+          landmarkWasHidden[i] = el.hasAttribute('aria-hidden');
+          el.setAttribute('aria-hidden', 'true');
+        } else if (landmarkWasHidden[i]) {
           el.setAttribute('aria-hidden', 'true');
         } else {
           // These elements carry no aria-hidden in markup; removal is the restore.

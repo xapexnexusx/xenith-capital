@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GAME OVER // 404 — XENITH CAPITAL</title>
-<meta name="description" content="Signal lost: the requested coordinate does not exist on this grid. Return to Xenith Capital.">
+<title>DOCUMENT NOT FOUND // 404 — XENITH CAPITAL</title>
+<meta name="description" content="Route not found: the requested coordinate does not exist on this grid. Return to Xenith Capital.">
 <meta name="theme-color" content="#04060a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +14,7 @@
   --x-void:#04060a;
   --x-panel:#0a0f16;
   --x-cyan:#00f0ff;
-  --x-magenta:#ff2d78;
+  --x-red:#ff2d3c;
   --x-text:#d7e3ee;
   --x-dim:#8fa8c4;
   --x-line:rgba(0,240,255,.14);
@@ -47,7 +47,7 @@ body::after{
   background:repeating-linear-gradient(0deg, rgba(0,240,255,.028) 0 1px, transparent 1px 3px);
 }
 ::selection{background:rgba(0,240,255,.28);color:#ffffff}
-.stage{
+.deck{
   position:relative;
   z-index:1;
   flex:1;
@@ -94,14 +94,14 @@ h1{
   color:var(--x-dim);
   margin-bottom:2.75rem;
 }
-.continue{
+.extraction{
   font-family:var(--x-font-m);
   font-size:.78rem;
   font-weight:500;
   letter-spacing:.5em;
   text-indent:.5em;
-  color:var(--x-magenta);
-  text-shadow:0 0 14px rgba(255,45,120,.5);
+  color:var(--x-red);
+  text-shadow:0 0 14px rgba(255,45,60,.5);
   margin-bottom:1.6rem;
 }
 .actions{
@@ -173,18 +173,18 @@ h1{
 </style>
 </head>
 <body>
-<main class="stage">
+<main class="deck">
   <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
     <path d="M16 2 L29 9.5 V22.5 L16 30 L3 22.5 V9.5 Z" stroke="currentColor" stroke-width="1.5"/>
     <path d="M10 10 L22 22 M22 10 L10 22" stroke="currentColor" stroke-width="2"/>
   </svg>
-  <p class="eyebrow">SIGNAL LOST // 404</p>
-  <h1>GAME OVER</h1>
+  <p class="eyebrow">ROUTE NOT FOUND // SIGNAL REDACTED</p>
+  <h1>DOCUMENT NOT FOUND</h1>
   <p class="subline">the requested coordinate does not exist on this grid</p>
-  <p class="continue">CONTINUE?</p>
+  <p class="extraction">SELECT EXTRACTION ROUTE</p>
   <div class="actions">
     <a class="btn" href="/">&gt; RETURN TO BASE</a>
-    <a class="btn btn-ghost" href="/">&gt; REPLAY THE TRIALS</a>
+    <a class="btn btn-ghost" href="/#b01">&gt; OPEN THE DOSSIER</a>
   </div>
 </main>
 <footer class="foot">XENITH CAPITAL // EST 2021</footer>

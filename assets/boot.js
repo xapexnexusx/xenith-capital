@@ -1,13 +1,15 @@
 /* ============================================================================
    XENITH CAPITAL — assets/boot.js
-   Boot preloader sequence (v4, Lane 6 — SIGNAL TRIALS). Vanilla JS, zero
-   dependencies, single IIFE. Owns: the #x-boot overlay lifecycle — game boot
-   log typing (7 lines), progress bar/pct sync, blinking PRESS ENTER prompt
-   gated on BOTH the typed sequence and window load, Enter/click/Escape finish,
-   hard runtime failsafe, reduced-motion bypass, and timer pause while the tab
-   is hidden. Every terminal exit (finish, skip, failsafe, reduced-motion
-   removal) dispatches the document event `x:boot-done` exactly once —
-   stage.js listens for it to enter stage 0. Exposes nothing globally.
+   Quick boot preloader (v5, Lane 5 — CLASSIFIED DOSSIER). Vanilla JS, zero
+   dependencies, single IIFE. Owns: the #x-boot overlay lifecycle — 4-line
+   secure-link log typing, progress bar/pct sync, AUTO-DISMISS 500ms after
+   BOTH the typed sequence and window load have settled (no keypress gate —
+   the overlay never waits on the visitor), click/Enter/Escape instant skip,
+   hard 6s runtime failsafe, reduced-motion instant removal, and timer pause
+   while the tab is hidden. Every terminal exit (auto-dismiss, skip, failsafe,
+   reduced-motion removal) dispatches the document event `x:boot-done`
+   exactly once — main.js listens for it to arm the scroll engine. Exposes
+   nothing globally.
    ========================================================================== */
 (function () {
   'use strict';
@@ -15,27 +17,17 @@
   /* ------------------------------ configuration -------------------------- */
 
   var LINES = [
-    '> initializing XENITH core… OK',
-    '> loading LEVEL 01 // ARCHITECTURE… OK',
-    '> loading LEVEL 02 // RESEARCH… OK',
-    '> loading LEVEL 03 // RISK… OK',
-    '> loading LEVEL 04 // JUDGMENT… OK',
-    '> FINAL LEVEL // CLEARANCE… SEALED',
-    '> XENITH // SIGNAL TRIALS — SYSTEM ONLINE'
+    '> establishing secure link… OK',
+    '> decrypting dossier… OK',
+    '> threat surface: NARRATIVE',
+    '> XENITH CAPITAL // SYSTEM ONLINE'
   ];
-
-  var PROMPT_TEXT = 'PRESS ENTER TO INITIALIZE';
 
   var TYPE_MS = 10;       // per character while typing
   var LINE_MS = 120;      // pause between completed lines
+  var HOLD_MS = 500;      // auto-dismiss delay once typed AND loaded
   var DONE_MS = 600;      // .is-done transition window before node removal
-  var FAILSAFE_MS = 8000; // absolute cap on total overlay lifetime
-
-  // One injected style, scoped to .xb-blink only (contract allowance).
-  var BLINK_CSS =
-    '.xb-blink{animation:xb-blink 1s steps(1,end) infinite}' +
-    '@keyframes xb-blink{0%{opacity:1}50%{opacity:0}100%{opacity:1}}' +
-    '@media (prefers-reduced-motion:reduce){.xb-blink{animation:none}}';
+  var FAILSAFE_MS = 6000; // absolute cap on total overlay lifetime
 
   var reduceMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -66,7 +58,7 @@
 
     var typedDone = false;
     var loadDone = document.readyState === 'complete';
-    var promptShown = false;
+    var dismissArmed = false;
     var finished = false;
     var bootDoneSent = false;
 
@@ -74,7 +66,6 @@
     var charIdx = 0;
     var typedChars = 0;
     var currentLineEl = null;
-    var styleEl = null;
 
     /* ------------------------ pausable timer pool ------------------------ */
     // All boot timers live here so they freeze while the tab is hidden.
@@ -83,16 +74,11 @@
     var timers = [];
     var timersPaused = false;
 
-    // Reduced motion: no typing, no prompt — drop the overlay immediately.
+    // Reduced motion: no typing, no hold — drop the overlay immediately.
     if (reduceMotionMQ.matches) {
       detach();
       return;
     }
-
-    // Inject the single scoped blink style (removed again on detach).
-    styleEl = document.createElement('style');
-    styleEl.textContent = BLINK_CSS;
-    document.head.appendChild(styleEl);
 
     function later(fn, ms) {
       var t = { id: 0, fn: fn, due: Date.now() + ms, msLeft: ms };
@@ -147,7 +133,7 @@
       if (finished) return;
       if (lineIdx >= LINES.length) {
         typedDone = true;
-        maybeShowPrompt();
+        maybeAutoDismiss();
         return;
       }
       var line = LINES[lineIdx];
@@ -179,18 +165,15 @@
       }
     }
 
-    /* -------------------------- PRESS ENTER prompt ----------------------- */
+    /* ---------------------------- auto-dismiss --------------------------- */
 
-    // Shown only once BOTH the typed sequence and window load have settled.
-    function maybeShowPrompt() {
-      if (finished || promptShown || !typedDone || !loadDone) return;
-      promptShown = true;
-      setProgress(1); // guarantee an exact 100% beside the prompt
-      if (!log) return;
-      var el = document.createElement('div');
-      el.className = 'xb-blink';
-      el.textContent = PROMPT_TEXT;
-      log.appendChild(el);
+    // Armed only once BOTH the typed sequence and window load have settled;
+    // the overlay then holds for HOLD_MS and finishes on its own.
+    function maybeAutoDismiss() {
+      if (finished || dismissArmed || !typedDone || !loadDone) return;
+      dismissArmed = true;
+      setProgress(1); // guarantee an exact 100% for the hold window
+      later(finish, HOLD_MS);
     }
 
     /* ------------------------------- finish ------------------------------ */
@@ -198,12 +181,12 @@
     function finish() {
       if (finished) return;
       finished = true;
-      cancelAllTimers(); // kills typing chain + failsafe
+      cancelAllTimers(); // kills typing chain, hold timer + failsafe
       boot.classList.add('is-done'); // CSS owns the fade/scale-out
       later(detach, DONE_MS);
     }
 
-    // Enter/click/Escape and the failsafe finish immediately, ignoring gates.
+    // Click/Enter/Escape and the failsafe finish immediately, ignoring gates.
     function forceFinish() {
       if (finished) return;
       if (!typedDone) {
@@ -216,16 +199,15 @@
     function detach() {
       cancelAllTimers();
       unbind();
-      if (styleEl && styleEl.parentNode) styleEl.parentNode.removeChild(styleEl);
       if (boot.parentNode) boot.parentNode.removeChild(boot);
       announceDone();
     }
 
-    // stage.js enters stage 0 on `x:boot-done`. Fired exactly once from every
-    // terminal path (normal finish, skip, failsafe, reduced-motion removal).
-    // Deferred by a tick: this script precedes stage.js in the deferred chain,
-    // so a synchronous dispatch during initial evaluation (the reduced-motion
-    // path) could outrun a listener that is not bound yet.
+    // main.js arms the scroll engine on `x:boot-done`. Fired exactly once from
+    // every terminal path (auto-dismiss, skip, failsafe, reduced-motion
+    // removal). Deferred by a tick: this script precedes main.js in the
+    // deferred chain, so a synchronous dispatch during initial evaluation
+    // (the reduced-motion path) could outrun a listener that is not bound yet.
     function announceDone() {
       if (bootDoneSent) return;
       bootDoneSent = true;
@@ -247,7 +229,7 @@
 
     function onLoad() {
       loadDone = true;
-      maybeShowPrompt();
+      maybeAutoDismiss();
     }
 
     function onVisibility() {
@@ -278,7 +260,7 @@
       reduceMotionMQ.addEventListener('change', onMotionPrefChange);
     }
 
-    later(forceFinish, FAILSAFE_MS); // never let the overlay outlive 8s
+    later(forceFinish, FAILSAFE_MS); // never let the overlay outlive 6s
     later(typeStep, TYPE_MS);
 
     // Loaded into a background tab: hold the whole sequence until visible.
