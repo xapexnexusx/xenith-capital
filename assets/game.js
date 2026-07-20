@@ -1,15 +1,16 @@
 /* ============================================================================
-   XENITH CAPITAL — assets/game.js  (v5, Lane 6: toasts + auth sweep)
-   Dossier-event toasts + ANALYST VERIFIED sweep. Vanilla JS, zero
+   XENITH CAPITAL — assets/game.js  (v6, Lane 6: toasts + auth sweep)
+   Field-instrument toasts + ANALYST VERIFIED sweep. Vanilla JS, zero
    dependencies, single IIFE, exposes nothing globally. Injects ONE <style>
    scoped exclusively to .xg-* classes; touches no other lane's selectors.
-   (Filename kept for the v5 script order in index.html; this lane ships
-   toasts only and the v4 arcade vocabulary is gone.)
+   (Module name kept for the v6 script order in index.html; this lane ships
+   toasts only and the v4/v5 arcade + military vocabulary is gone.)
 
    Listens on document for CustomEvents dispatched by main.js / terminal.js:
-     x:redacted           -> toast "DOSSIER DECLASSIFIED // <file>"
-                             (detail.file, e.g. "FILE 01"; suffix omitted if
-                             the detail carries no usable file label)
+     x:object-inspected   -> toast "OBJECT INSPECTED // <name>"
+                             (detail.obj is the object name; deduped per
+                             object name per session in a Set — each context
+                             object announces once, repeats stay quiet)
      x:konami             -> toast "ACHIEVEMENT: OLD SCHOOL"
      x:auth-granted       -> shared handler with x:clearance-granted,
      x:clearance-granted    deduped to ONCE per session: full-screen
@@ -189,14 +190,20 @@
 
   /* ----------------------------- event wiring ---------------------------- */
 
-  function onRedacted(e) {
+  // Each context object announces its first inspection only; repeat
+  // selections of the same object stay quiet for the rest of the session.
+  var inspectedObjs = new Set();
+
+  function onInspected(e) {
     var d = (e && e.detail) || {};
-    var file = (d.file == null ? '' : String(d.file)).replace(/\s+/g, ' ').trim();
-    pushToast('DOSSIER DECLASSIFIED' + (file ? ' // ' + file : ''), false);
+    var obj = (d.obj == null ? '' : String(d.obj)).replace(/\s+/g, ' ').trim();
+    if (!obj || inspectedObjs.has(obj)) return;
+    inspectedObjs.add(obj);
+    pushToast('OBJECT INSPECTED // ' + obj, false);
   }
 
   function onKonami() {
-    pushToast('ACHIEVEMENT: OLD SCHOOL', false);
+    pushToast('SIGNAL FOUND: OLD SCHOOL', false);
   }
 
   // x:auth-granted and x:clearance-granted share one celebration that may
@@ -213,7 +220,7 @@
   function init() {
     if (document.querySelector('.xg-stack')) return; // already running
     injectStyle();
-    document.addEventListener('x:redacted', onRedacted);
+    document.addEventListener('x:object-inspected', onInspected);
     document.addEventListener('x:konami', onKonami);
     document.addEventListener('x:auth-granted', onAuth);
     document.addEventListener('x:clearance-granted', onAuth);

@@ -1,15 +1,15 @@
 /* ============================================================================
    XENITH CAPITAL — assets/boot.js
-   Quick boot preloader (v5, Lane 5 — CLASSIFIED DOSSIER). Vanilla JS, zero
+   Quick boot preloader (v6, Lane 5 — FIELD INSTRUMENT). Vanilla JS, zero
    dependencies, single IIFE. Owns: the #x-boot overlay lifecycle — 4-line
-   secure-link log typing, progress bar/pct sync, AUTO-DISMISS 500ms after
-   BOTH the typed sequence and window load have settled (no keypress gate —
-   the overlay never waits on the visitor), click/Enter/Escape instant skip,
-   hard 6s runtime failsafe, reduced-motion instant removal, and timer pause
-   while the tab is hidden. Every terminal exit (auto-dismiss, skip, failsafe,
-   reduced-motion removal) dispatches the document event `x:boot-done`
-   exactly once — main.js listens for it to arm the scroll engine. Exposes
-   nothing globally.
+   console bring-up log typing, progress bar/pct sync, AUTO-DISMISS 400ms
+   after BOTH the typed sequence and window load have settled (no keypress
+   gate — the overlay never waits on the visitor), click/Enter/Escape instant
+   skip, hard 6s runtime failsafe, reduced-motion instant removal, and timer
+   pause while the tab is hidden. Every terminal exit (auto-dismiss, skip,
+   failsafe, reduced-motion removal) dispatches the document event
+   `x:boot-done` exactly once — main.js listens for it to enter scene 1 and
+   lift x-preload. Exposes nothing globally.
    ========================================================================== */
 (function () {
   'use strict';
@@ -17,15 +17,15 @@
   /* ------------------------------ configuration -------------------------- */
 
   var LINES = [
-    '> establishing secure link… OK',
-    '> decrypting dossier… OK',
-    '> threat surface: NARRATIVE',
-    '> XENITH CAPITAL // SYSTEM ONLINE'
+    '> initializing field instrument… OK',
+    '> calibrating formation… OK',
+    '> loading context objects… OK',
+    '> XENITH CAPITAL // CONSOLE ONLINE'
   ];
 
   var TYPE_MS = 10;       // per character while typing
   var LINE_MS = 120;      // pause between completed lines
-  var HOLD_MS = 500;      // auto-dismiss delay once typed AND loaded
+  var HOLD_MS = 400;      // auto-dismiss delay once typed AND loaded
   var DONE_MS = 600;      // .is-done transition window before node removal
   var FAILSAFE_MS = 6000; // absolute cap on total overlay lifetime
 

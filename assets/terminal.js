@@ -1,16 +1,25 @@
 /* ==========================================================================
-   XENITH CAPITAL — UPLINK TERMINAL v5 (CLASSIFIED DOSSIER)
-   assets/terminal.js — owns #x-terminal inside #uplink. Vanilla JS, zero deps.
+   XENITH CAPITAL — UPLINK TERMINAL v6 (FIELD INSTRUMENT)
+   assets/terminal.js — owns #x-terminal inside #uplink (scene 05). Vanilla
+   JS, zero deps.
    Public API: window.XenithTerminal = { init(sel, opts), boot(), version }
 
-   v5: the uplink is a dossier surface. The v4 multi-step clearance
-   protocol — its state machine, persistence keys, and external event
-   wiring — is deleted. What remains is the dossier uplink.
+   v6: the uplink is the console's secure-channel surface inside the FIELD
+   INSTRUMENT scene grammar. The v4 multi-step clearance protocol — its
+   state machine, persistence keys, and external event wiring — stays
+   retired. What remains is the single-question analyst uplink.
 
    LAZY BOOT: nothing initializes at DOMContentLoaded. The terminal boots on
-   IntersectionObserver of #uplink (threshold .25, once), or on the first
+   IntersectionObserver of #uplink (threshold .2, once), or on the first
    focus/click/touch into the terminal — whichever comes first. boot() is
    idempotent and never steals focus on a scroll-driven boot.
+
+   v6 CHROME SYNC (runs at load, ahead of the lazy boot): the scene markup
+   is frozen, so .x-term-title is corrected to 'XENITH // UPLINK v6.0' from
+   here, and the inspector auth chip (#xi-auth-state, in the scene-05
+   inspector) flips SEALED → VERIFIED (adds .is-verified) the moment the
+   channel is granted — and immediately at load when this tab already holds
+   xv_auth=granted.
 
    AUTHENTICATE — one question: 'what survives contact: signal or noise?'
    Answer 'signal' → analyst verified: sessionStorage xv_auth=granted, and
@@ -31,7 +40,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '5.0.0';
+  var VERSION = '6.0.0';
   var DEFAULT_EMAIL = 'inquiry@xenithcap.io';
   var TYPE_MS = 12;            /* per-character cadence for system lines */
   var BOOT_GAP_MS = 130;       /* stagger between boot lines */
@@ -145,6 +154,16 @@
     try {
       if (window.sessionStorage) window.sessionStorage.setItem(key, value);
     } catch (e) { /* storage unavailable — gate simply does not persist */ }
+  }
+
+  /* Inspector auth chip: #xi-auth-state lives in the scene-05 inspector,
+     outside the terminal root. Flips SEALED → VERIFIED on grant, and
+     restores at load when the tab already holds the grant. Idempotent. */
+  function setAuthChipVerified() {
+    var chip = document.getElementById('xi-auth-state');
+    if (!chip) return;
+    chip.textContent = 'VERIFIED';
+    if (chip.classList) chip.classList.add('is-verified');
   }
 
   /* One dispatch path for page-level contract events. */
@@ -275,10 +294,10 @@
       }, 1000);
     }
 
-    /* v5.0 banner — printed once per page view, on lazy boot. */
+    /* v6.0 banner — printed once per page view, on lazy boot. */
     function bootLines() {
       return [
-        'XENITH CAPITAL // UPLINK v5.0',
+        'XENITH CAPITAL // UPLINK v6.0',
         'secure channel: READY',
         "type 'help' for command list"
       ];
@@ -434,6 +453,7 @@
       setPlaceholder(null);
       granted = true;
       storageSet(STORAGE_AUTH, 'granted');
+      setAuthChipVerified();
       printer.print('analyst verified. channel open.', 'xt-ok');
       printer.print("type 'contact' for the direct channel — 'mandate' for the guided inquiry");
       emit('x:auth-granted');
@@ -628,7 +648,7 @@
           if (granted) startMandate(); else sealLine();
           break;
         case 'iddqd':
-          printer.print('GOD MODE: narrative immunity already active', 'xt-ok');
+          printer.print('IDDQD: narrative immunity already active', 'xt-ok');
           if (window.XENITH_FX && window.XENITH_FX.burst) {
             window.XENITH_FX.burst();
           }
@@ -715,7 +735,7 @@
     return api;
   }
 
-  /* ---------------- v5 lazy boot ---------------- */
+  /* ---------------- v6 lazy boot ---------------- */
 
   var termApi = null;
   var booted = false;
@@ -736,8 +756,16 @@
   var rootEl = document.getElementById('x-terminal');
   var uplinkEl = document.getElementById('uplink');
 
+  /* v6 chrome sync at load, ahead of the lazy boot: the scene markup is
+     frozen with the v5 title, so it is corrected from here; a tab that
+     already holds the grant gets the VERIFIED chip immediately — both are
+     visible the first time scene 05 enters, booted or not. */
+  var titleEl = rootEl ? rootEl.querySelector('.x-term-title') : null;
+  if (titleEl) titleEl.textContent = 'XENITH // UPLINK v6.0';
+  if (storageGet(STORAGE_AUTH) === 'granted') setAuthChipVerified();
+
   /* Direct engagement beats the observer: if the user reaches the terminal
-     before it scrolls a quarter into view, boot on first contact. */
+     before the scene scrolls into view, boot on first contact. */
   if (rootEl) {
     rootEl.addEventListener('focusin', boot);
     rootEl.addEventListener('click', boot);
@@ -753,7 +781,7 @@
           break;
         }
       }
-    }, { threshold: 0.25 });
+    }, { threshold: 0.2 });
     io.observe(uplinkEl);
   } else if (rootEl && typeof IntersectionObserver !== 'function') {
     /* Legacy engines without an observer boot immediately. */
