@@ -14,17 +14,18 @@
   <rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="#00f0ff" stroke-opacity="0.14"/>
 
   <g clip-path="url(#frame)">
-    <!-- THE VIGIL: machine-aperture eye -->
+    <!-- THE ORBITAL: perspective ring around the core, broken behind it -->
     <!-- soft glow pass -->
     <g filter="url(#glow)" opacity="0.6">
-      <path d="M6 32 Q32 9 58 32 Q32 55 6 32 Z" fill="none" stroke="#00f0ff" stroke-width="3.6" stroke-linejoin="round"/>
-      <circle cx="32" cy="32" r="12.8" fill="none" stroke="#00f0ff" stroke-width="3.4"
-              stroke-dasharray="15.7 4.4" stroke-dashoffset="7.8" transform="rotate(45 32 32)"/>
+      <g transform="rotate(-16 32 32)">
+        <path d="M22.8 23.5 A 24 9.2 0 1 0 41.2 23.5" fill="none" stroke="#00f0ff" stroke-width="4" stroke-linecap="round"/>
+      </g>
+      <circle cx="32" cy="32" r="6.8" fill="#00f0ff"/>
     </g>
     <!-- crisp pass -->
-    <path d="M6 32 Q32 9 58 32 Q32 55 6 32 Z" fill="none" stroke="#00f0ff" stroke-width="3.2" stroke-linejoin="round"/>
-    <circle cx="32" cy="32" r="12.8" fill="none" stroke="#00f0ff" stroke-width="3"
-            stroke-dasharray="15.7 4.4" stroke-dashoffset="7.8" transform="rotate(45 32 32)"/>
-    <circle cx="32" cy="32" r="5.2" fill="#cffaff"/>
+    <g transform="rotate(-16 32 32)">
+      <path d="M22.8 23.5 A 24 9.2 0 1 0 41.2 23.5" fill="none" stroke="#00f0ff" stroke-width="3.6" stroke-linecap="round"/>
+    </g>
+    <circle cx="32" cy="32" r="6.4" fill="#cffaff"/>
   </g>
 </svg>
