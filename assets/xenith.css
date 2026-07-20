@@ -44,9 +44,20 @@
   --x-glow-cyan: 0 0 18px rgba(0, 240, 255, .35);
   --x-ease-out: cubic-bezier(.22, 1, .36, 1);
 
-  /* liquid-glass recipe */
-  --x-glass-bg: rgba(8, 12, 20, .55);
-  --x-glass-blur: blur(16px) saturate(1.25);
+  /* liquid-glass recipe (v7): clear enough that the formation reads
+     THROUGH the panel; saturate+brighten makes what's behind bloom like
+     light through curved glass instead of graying out. */
+  --x-glass-bg: rgba(9, 14, 24, .47);
+  --x-glass-blur: blur(20px) saturate(1.55) brightness(1.02);
+  --x-glass-edge: rgba(151, 214, 255, .17);   /* rim hairline */
+  --x-glass-rim: rgba(255, 255, 255, .16);    /* lit top edge */
+  /* cursor-tracked specular (ui-fx.js writes --gx/--gy per panel) */
+  --gx: 50%;
+  --gy: 18%;
+  --glare: 0;      /* 0 idle -> 1 hovered */
+  /* card tilt (ui-fx.js writes per card) */
+  --tx: 0deg;
+  --ty: 0deg;
 
   /* fixed chrome metrics */
   --x-topbar-h: 54px;
@@ -216,6 +227,31 @@ body.x-preload *::after {
   50%      { opacity: .3; }
 }
 
+/* v7: a slow radar sweep — one soft cyan band traveling down the console
+   every 9s. Reads as an idle sensor pass; barely-there by design. */
+.x-scanlines::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -22%;
+  height: 18%;
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(0, 240, 255, .028) 42%,
+    rgba(151, 214, 255, .075) 50%,
+    rgba(0, 240, 255, .028) 58%,
+    transparent 100%);
+  animation: x-scan-beam 9s cubic-bezier(.4, 0, .6, 1) infinite;
+}
+
+@keyframes x-scan-beam {
+  0%       { transform: translateY(0); opacity: 0; }
+  6%       { opacity: 1; }
+  62%      { opacity: 1; }
+  70%, 100% { transform: translateY(72vh) translateY(122%); opacity: 0; }
+}
+
 /* --------------------------------------------------------------------------
    4. BOOT OVERLAY — #x-boot (boot.js types lines, then adds .is-done)
    -------------------------------------------------------------------------- */
@@ -316,11 +352,24 @@ html:not(.js) #x-boot {
   gap: 1rem;
   min-height: var(--x-topbar-h);
   padding: calc(.5rem + env(safe-area-inset-top)) clamp(.8rem, 2.5vw, 1.4rem) .5rem;
-  background: rgba(4, 6, 10, .5);
-  -webkit-backdrop-filter: blur(12px) saturate(1.3);
-  backdrop-filter: blur(12px) saturate(1.3);
+  background: rgba(4, 6, 10, .42);
+  -webkit-backdrop-filter: blur(18px) saturate(1.55);
+  backdrop-filter: blur(18px) saturate(1.55);
   border-bottom: 1px solid var(--x-line);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
   transition: background .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+
+/* session telemetry readout (ui-fx.js ticks it) */
+#x-uptime {
+  font-family: var(--x-font-m);
+  font-size: .56rem;
+  letter-spacing: .18em;
+  color: var(--x-dim);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* kept for main.js: deepen the bar once the console is live */
@@ -465,14 +514,18 @@ html:not(.js) #x-boot {
   justify-content: center;
   gap: .42rem;
   padding: .75rem .25rem;
-  background: rgba(8, 12, 20, .4);
-  border: 1px solid rgba(0, 240, 255, .12);
+  background: rgba(10, 16, 27, .32);
+  -webkit-backdrop-filter: blur(18px) saturate(1.55);
+  backdrop-filter: blur(18px) saturate(1.55);
+  border: 1px solid rgba(151, 214, 255, .13);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
   user-select: none;
   -webkit-user-select: none;
-  transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
+  transition: border-color .25s ease, box-shadow .25s ease,
+              background .25s ease, transform .25s var(--x-ease-out);
 }
 
 .xr-num {
@@ -531,13 +584,21 @@ html:not(.js) #x-boot {
 
 @media (hover: hover) {
   .xr-item:hover {
-    border-color: rgba(0, 240, 255, .4);
-    background: rgba(0, 240, 255, .045);
+    border-color: rgba(0, 240, 255, .45);
+    background: rgba(0, 240, 255, .05);
+    transform: translateX(3px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14),
+                0 0 22px rgba(0, 240, 255, .16);
   }
 
   .xr-item:hover .xr-ico {
     color: var(--x-cyan);
     text-shadow: 0 0 10px rgba(0, 240, 255, .5);
+  }
+
+  .xr-item:hover .xr-name,
+  .xr-item:hover .xr-num {
+    color: var(--x-cyan);
   }
 }
 
@@ -593,51 +654,114 @@ html.js .x-scene.is-active {
 }
 
 /* --------------------------------------------------------------------------
-   9. LIQUID GLASS PANELS — shared recipe for .xs-panel-l / .xs-panel-r:
-      glass body, hairline border, top cyan gradient edge, corner ticks.
+   9. LIQUID GLASS PANELS (v7) — the formation shows THROUGH the panels.
+      Recipe, per panel:
+      · body: heavy blur + saturate/brighten (light blooms, never grays out)
+      · directional smoke tint: darker behind the text mass, clearing to
+        near-transparent on the edge that faces the formation — this is
+        what keeps "visibility perfect" while the glass goes clear
+      · micro-grain (inline SVG noise) so the surface reads as material
+      · lit top rim + dark seat + cyan light pooling at the bottom edge
+      · ::before — HUD chrome: corner brackets (extend on hover) + top edge
+      · ::after — cursor-tracked specular glare (ui-fx.js drives --gx/--gy;
+        :hover raises --glare)
    -------------------------------------------------------------------------- */
 .xs-panel-l,
 .xs-panel-r {
-  background: var(--x-glass-bg);
+  background:
+    radial-gradient(130% 90% at 8% 0%, rgba(151, 214, 255, .085), transparent 48%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),
+    var(--x-glass-bg);
   -webkit-backdrop-filter: var(--x-glass-blur);
   backdrop-filter: var(--x-glass-blur);
-  border: 1px solid var(--x-line);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, .34),
-              inset 0 1px 0 rgba(0, 240, 255, .07);
+  border: 1px solid var(--x-glass-edge);
+  box-shadow:
+    0 30px 70px rgba(0, 0, 0, .46),
+    0 0 48px -10px rgba(0, 240, 255, .14),
+    inset 0 1px 0 var(--x-glass-rim),
+    inset 0 -1px 0 rgba(0, 0, 0, .38),
+    inset -1px 0 0 rgba(151, 214, 255, .05),
+    inset 0 -26px 52px -32px rgba(0, 240, 255, .26);
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 240, 255, .25) transparent;
+  transition: border-color .35s ease, box-shadow .35s ease;
 }
 
-/* top cyan gradient edge */
+/* directional smoke: text side dense, formation side clear */
+.xs-panel-l {
+  background-image:
+    radial-gradient(130% 90% at 8% 0%, rgba(151, 214, 255, .085), transparent 48%),
+    linear-gradient(100deg, rgba(4, 8, 15, .64) 0%, rgba(5, 10, 18, .42) 58%, rgba(8, 14, 25, .12) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.xs-panel-r {
+  background-image:
+    radial-gradient(130% 90% at 92% 0%, rgba(151, 214, 255, .085), transparent 48%),
+    linear-gradient(260deg, rgba(4, 8, 15, .64) 0%, rgba(5, 10, 18, .42) 58%, rgba(8, 14, 25, .12) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (hover: hover) {
+  .xs-panel-l:hover,
+  .xs-panel-r:hover {
+    --glare: 1;
+    border-color: rgba(151, 214, 255, .30);
+    box-shadow:
+      0 30px 70px rgba(0, 0, 0, .46),
+      0 0 58px -8px rgba(0, 240, 255, .22),
+      inset 0 1px 0 rgba(255, 255, 255, .24),
+      inset 0 -1px 0 rgba(0, 0, 0, .38),
+      inset -1px 0 0 rgba(151, 214, 255, .05),
+      inset 0 -26px 52px -32px rgba(0, 240, 255, .34);
+  }
+}
+
+/* HUD chrome: top cyan edge + four corner brackets that extend on hover */
 .xs-panel-l::before,
 .xs-panel-r::before {
-  content: "";
-  position: absolute;
-  top: -1px;
-  left: 8%;
-  right: 8%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0, 240, 255, .75), transparent);
-  pointer-events: none;
-}
-
-/* four corner ticks drawn as background L-shapes on one pseudo */
-.xs-panel-l::after,
-.xs-panel-r::after {
   content: "";
   position: absolute;
   inset: -1px;
   pointer-events: none;
   background:
-    linear-gradient(rgba(0, 240, 255, .8), rgba(0, 240, 255, .8)) top left / 11px 1px,
-    linear-gradient(rgba(0, 240, 255, .8), rgba(0, 240, 255, .8)) top left / 1px 11px,
-    linear-gradient(rgba(0, 240, 255, .8), rgba(0, 240, 255, .8)) top right / 11px 1px,
-    linear-gradient(rgba(0, 240, 255, .8), rgba(0, 240, 255, .8)) top right / 1px 11px,
-    linear-gradient(rgba(0, 240, 255, .8), rgba(0, 240, 255, .8)) bottom left / 11px 1px,
-    linear-gradient(rgba(0, 240, 255, .8), rgba(0, 240, 255, .8)) bottom left / 1px 11px,
-    linear-gradient(rgba(0, 240, 255, .8), rgba(0, 240, 255, .8)) bottom right / 11px 1px,
-    linear-gradient(rgba(0, 240, 255, .8), rgba(0, 240, 255, .8)) bottom right / 1px 11px;
+    linear-gradient(90deg, transparent, rgba(0, 240, 255, .8), transparent) top center / 84% 1px,
+    linear-gradient(rgba(0, 240, 255, .85), rgba(0, 240, 255, .85)) top left / 13px 1px,
+    linear-gradient(rgba(0, 240, 255, .85), rgba(0, 240, 255, .85)) top left / 1px 13px,
+    linear-gradient(rgba(0, 240, 255, .85), rgba(0, 240, 255, .85)) top right / 13px 1px,
+    linear-gradient(rgba(0, 240, 255, .85), rgba(0, 240, 255, .85)) top right / 1px 13px,
+    linear-gradient(rgba(0, 240, 255, .85), rgba(0, 240, 255, .85)) bottom left / 13px 1px,
+    linear-gradient(rgba(0, 240, 255, .85), rgba(0, 240, 255, .85)) bottom left / 1px 13px,
+    linear-gradient(rgba(0, 240, 255, .85), rgba(0, 240, 255, .85)) bottom right / 13px 1px,
+    linear-gradient(rgba(0, 240, 255, .85), rgba(0, 240, 255, .85)) bottom right / 1px 13px;
   background-repeat: no-repeat;
+  transition: background-size .4s var(--x-ease-out);
+}
+
+@media (hover: hover) {
+  .xs-panel-l:hover::before,
+  .xs-panel-r:hover::before {
+    background-size:
+      84% 1px,
+      26px 1px, 1px 26px,
+      26px 1px, 1px 26px,
+      26px 1px, 1px 26px,
+      26px 1px, 1px 26px;
+  }
+}
+
+/* liquid specular: a soft light following the cursor across the glass */
+.xs-panel-l::after,
+.xs-panel-r::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--glare);
+  background:
+    radial-gradient(260px circle at var(--gx) var(--gy),
+      rgba(196, 236, 255, .15), rgba(151, 214, 255, .055) 42%, transparent 64%);
+  transition: opacity .35s ease;
 }
 
 .xs-panel-l::-webkit-scrollbar,
@@ -656,7 +780,7 @@ html.js .x-scene.is-active {
   left: var(--x-gutter-l);
   top: 50%;
   transform: translateY(-50%);
-  width: min(560px, 42vw);
+  width: min(530px, 38vw);
   max-height: calc(100vh - var(--x-topbar-h) - var(--x-footer-h) - 9.5rem);
   max-height: calc(100dvh - var(--x-topbar-h) - var(--x-footer-h) - 9.5rem);
   overflow-y: auto;
@@ -692,6 +816,48 @@ html.js .x-scene.is-active {
   letter-spacing: -.01em;
   color: var(--x-text);
   text-shadow: 0 0 38px rgba(0, 240, 255, .1);
+  /* idle signal instability: one 200ms chromatic tick every 12s */
+  animation: x-title-idle 12s linear infinite 6s;
+}
+
+/* scene entry: chromatic aberration settling into focus */
+.x-scene.is-in .xs-title {
+  animation: x-chroma .55s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes x-chroma {
+  0% {
+    text-shadow: -7px 0 rgba(255, 45, 60, .5), 7px 0 rgba(0, 240, 255, .55),
+                 0 0 38px rgba(0, 240, 255, .1);
+    transform: skewX(-1.2deg);
+  }
+  45% {
+    text-shadow: -2px 0 rgba(255, 45, 60, .35), 2px 0 rgba(0, 240, 255, .4),
+                 0 0 38px rgba(0, 240, 255, .1);
+    transform: skewX(0);
+  }
+  100% {
+    text-shadow: 0 0 rgba(255, 45, 60, 0), 0 0 rgba(0, 240, 255, 0),
+                 0 0 38px rgba(0, 240, 255, .1);
+    transform: none;
+  }
+}
+
+@keyframes x-title-idle {
+  0%, 97.1%, 98.9%, 100% {
+    text-shadow: 0 0 38px rgba(0, 240, 255, .1);
+    transform: none;
+  }
+  97.7% {
+    text-shadow: -4px 0 rgba(255, 45, 60, .38), 4px 0 rgba(0, 240, 255, .42),
+                 0 0 38px rgba(0, 240, 255, .1);
+    transform: translateX(1px);
+  }
+  98.3% {
+    text-shadow: 2px 0 rgba(255, 45, 60, .3), -2px 0 rgba(0, 240, 255, .34),
+                 0 0 38px rgba(0, 240, 255, .1);
+    transform: translateX(-1px);
+  }
 }
 
 .xs-copy {
@@ -765,7 +931,7 @@ html.js .x-scene.is-active {
   right: clamp(1.25rem, 3vw, 3rem);
   top: 50%;
   transform: translateY(-50%);
-  width: min(400px, 30vw);
+  width: min(370px, 27vw);
   max-height: calc(100vh - var(--x-topbar-h) - var(--x-footer-h) - 9.5rem);
   max-height: calc(100dvh - var(--x-topbar-h) - var(--x-footer-h) - 9.5rem);
   overflow-y: auto;
@@ -773,7 +939,7 @@ html.js .x-scene.is-active {
 }
 
 .x-insp {
-  transition: opacity .18s ease;
+  transition: opacity .18s ease, border-color .35s ease, box-shadow .35s ease;
 }
 
 /* inspector content swap: main.js fades the panel out, rewrites, fades in */
@@ -878,17 +1044,39 @@ html.js .x-scene.is-active {
   min-height: 64px;
   padding: .75rem .9rem .8rem;
   text-align: left;
-  background: rgba(8, 12, 20, .45);
-  -webkit-backdrop-filter: blur(12px) saturate(1.2);
-  backdrop-filter: blur(12px) saturate(1.2);
-  border: 1px solid rgba(0, 240, 255, .12);
+  background:
+    linear-gradient(115deg, rgba(5, 9, 17, .58), rgba(7, 12, 22, .38) 70%, rgba(9, 15, 26, .26)),
+    rgba(9, 14, 24, .40);
+  -webkit-backdrop-filter: blur(16px) saturate(1.55) brightness(1.02);
+  backdrop-filter: blur(16px) saturate(1.55) brightness(1.02);
+  border: 1px solid rgba(151, 214, 255, .14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .12),
+    inset 0 -1px 0 rgba(0, 0, 0, .3),
+    0 12px 30px rgba(0, 0, 0, .3);
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
   user-select: none;
   -webkit-user-select: none;
+  /* ui-fx.js drives --tx/--ty (3D tilt) and --gx/--gy (glare) per card */
+  transform: perspective(760px) rotateX(var(--tx)) rotateY(var(--ty));
   transition: transform .22s var(--x-ease-out), border-color .25s ease,
               box-shadow .25s ease, background .25s ease;
+  will-change: transform;
+}
+
+/* per-card cursor glare */
+.xo-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--glare);
+  background:
+    radial-gradient(150px circle at var(--gx) var(--gy),
+      rgba(196, 236, 255, .16), rgba(151, 214, 255, .05) 46%, transparent 68%);
+  transition: opacity .3s ease;
 }
 
 /* selected-card top tick */
@@ -941,9 +1129,14 @@ html.js .x-scene.is-active {
 
 @media (hover: hover) {
   .xo-card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(0, 240, 255, .45);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, .38), 0 0 18px rgba(0, 240, 255, .1);
+    --glare: 1;
+    transform: perspective(760px) rotateX(var(--tx)) rotateY(var(--ty)) translateY(-4px) scale(1.015);
+    border-color: rgba(0, 240, 255, .5);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .18),
+      inset 0 -1px 0 rgba(0, 0, 0, .3),
+      0 18px 40px rgba(0, 0, 0, .42),
+      0 0 26px rgba(0, 240, 255, .16);
   }
 }
 
@@ -1256,10 +1449,11 @@ html.js .x-scene.is-active {
   letter-spacing: .14em;
   color: var(--x-dim);
   white-space: nowrap;
-  background: rgba(4, 6, 10, .55);
-  -webkit-backdrop-filter: blur(10px) saturate(1.2);
-  backdrop-filter: blur(10px) saturate(1.2);
+  background: rgba(4, 6, 10, .44);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  backdrop-filter: blur(16px) saturate(1.5);
   border-top: 1px solid var(--x-line);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05);
 }
 
 .xf-l,
@@ -1657,6 +1851,16 @@ body.x-disc-lock {
              calc(var(--x-footer-h) + 96px + env(safe-area-inset-bottom));
   }
 
+  /* stacked panels cover the formation: densify the glass for reading */
+  .xs-panel-l,
+  .xs-panel-r {
+    --x-glass-bg: rgba(7, 12, 21, .64);
+  }
+
+  .xo-card {
+    background-color: rgba(7, 12, 21, .58);
+  }
+
   .xs-panel-l {
     position: relative; /* in flow as a flex child; keeps glass pseudos scoped */
     left: auto;
@@ -1734,7 +1938,8 @@ body.x-disc-lock {
     max-height: 20vh;
     max-height: 20dvh;
     overflow-y: auto;
-    padding: .8rem 1rem;
+    /* bottom padding lets content scroll clear of the fixed disclosures chip */
+    padding: .8rem 1rem 3.4rem;
   }
 
   .x-scene[data-scene="5"] .xi-title {
@@ -1905,6 +2110,23 @@ body.x-disc-lock {
   .x-scanlines::before {
     animation: none !important;
     opacity: .18 !important;
+  }
+
+  /* the radar sweep and title glitches never fire */
+  .x-scanlines::after {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  .xs-title,
+  .x-scene.is-in .xs-title {
+    animation: none !important;
+  }
+
+  /* glass stays lit but static: no tilt, no traveling glare */
+  .xo-card,
+  .xo-card:hover {
+    transform: none !important;
   }
 
   /* status dots keep their glow; the expanding ring never fires */

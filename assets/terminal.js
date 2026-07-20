@@ -15,7 +15,7 @@
    idempotent and never steals focus on a scroll-driven boot.
 
    v6 CHROME SYNC (runs at load, ahead of the lazy boot): the scene markup
-   is frozen, so .x-term-title is corrected to 'XENITH // UPLINK v6.0' from
+   is frozen, so .x-term-title is corrected to 'XENITH // UPLINK v7.0' from
    here, and the inspector auth chip (#xi-auth-state, in the scene-05
    inspector) flips SEALED → VERIFIED (adds .is-verified) the moment the
    channel is granted — and immediately at load when this tab already holds
@@ -297,7 +297,7 @@
     /* v6.0 banner — printed once per page view, on lazy boot. */
     function bootLines() {
       return [
-        'XENITH CAPITAL // UPLINK v6.0',
+        'XENITH CAPITAL // UPLINK v7.0',
         'secure channel: READY',
         "type 'help' for command list"
       ];
@@ -761,7 +761,7 @@
      already holds the grant gets the VERIFIED chip immediately — both are
      visible the first time scene 05 enters, booted or not. */
   var titleEl = rootEl ? rootEl.querySelector('.x-term-title') : null;
-  if (titleEl) titleEl.textContent = 'XENITH // UPLINK v6.0';
+  if (titleEl) titleEl.textContent = 'XENITH // UPLINK v7.0';
   if (storageGet(STORAGE_AUTH) === 'granted') setAuthChipVerified();
 
   /* Direct engagement beats the observer: if the user reaches the terminal
