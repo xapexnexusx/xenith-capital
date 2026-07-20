@@ -4,8 +4,8 @@
     <clipPath id="frame">
       <rect width="64" height="64" rx="14"/>
     </clipPath>
-    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="3"/>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="2.4"/>
     </filter>
   </defs>
 
@@ -14,18 +14,17 @@
   <rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="#00f0ff" stroke-opacity="0.14"/>
 
   <g clip-path="url(#frame)">
-    <!-- faint cyan glow: blurred duplicate hexagon beneath the mark -->
-    <path d="M32 4 L58 19 V45 L32 60 L6 45 V19 Z" fill="none" stroke="#00f0ff"
-          stroke-width="3" stroke-linejoin="round" filter="url(#glow)" opacity="0.55"/>
-
-    <!-- chromatic depth: magenta X shadow offset down-right -->
-    <path d="M20 20 L44 44 M44 20 L20 44" fill="none" stroke="#ff2d78" stroke-width="4"
-          stroke-linecap="round" opacity="0.5" transform="translate(1.5 1.5)"/>
-
-    <!-- core mark: neon hex-X -->
-    <path d="M32 4 L58 19 V45 L32 60 L6 45 V19 Z" fill="none" stroke="#00f0ff"
-          stroke-width="3" stroke-linejoin="round"/>
-    <path d="M20 20 L44 44 M44 20 L20 44" fill="none" stroke="#00f0ff" stroke-width="4"
-          stroke-linecap="round"/>
+    <!-- THE VIGIL: machine-aperture eye -->
+    <!-- soft glow pass -->
+    <g filter="url(#glow)" opacity="0.6">
+      <path d="M6 32 Q32 9 58 32 Q32 55 6 32 Z" fill="none" stroke="#00f0ff" stroke-width="3.6" stroke-linejoin="round"/>
+      <circle cx="32" cy="32" r="12.8" fill="none" stroke="#00f0ff" stroke-width="3.4"
+              stroke-dasharray="15.7 4.4" stroke-dashoffset="7.8" transform="rotate(45 32 32)"/>
+    </g>
+    <!-- crisp pass -->
+    <path d="M6 32 Q32 9 58 32 Q32 55 6 32 Z" fill="none" stroke="#00f0ff" stroke-width="3.2" stroke-linejoin="round"/>
+    <circle cx="32" cy="32" r="12.8" fill="none" stroke="#00f0ff" stroke-width="3"
+            stroke-dasharray="15.7 4.4" stroke-dashoffset="7.8" transform="rotate(45 32 32)"/>
+    <circle cx="32" cy="32" r="5.2" fill="#cffaff"/>
   </g>
 </svg>

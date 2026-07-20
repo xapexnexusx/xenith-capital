@@ -291,6 +291,14 @@ html:not(.js) #x-boot {
   gap: 1.25rem;
 }
 
+.x-boot-mark {
+  width: 46px;
+  height: 46px;
+  align-self: center;
+  color: var(--x-cyan);
+  filter: drop-shadow(0 0 12px rgba(0, 240, 255, .6));
+}
+
 .x-boot-brand {
   font-family: var(--x-font-d);
   font-weight: 700;
