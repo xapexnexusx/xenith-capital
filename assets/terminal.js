@@ -61,7 +61,7 @@
     'Informational only — not an offer or solicitation.',
     'Investing involves risk. Past performance is not indicative of future results.',
     'Form ADV Part 2 (brochure): https://reports.adviserinfo.sec.gov/reports/ADV/316844/PDF/316844.pdf',
-    'Form CRS + firm record: https://adviserinfo.sec.gov/firm/summary/316844'
+    'Firm record (SEC IAPD, CRD #316844): https://adviserinfo.sec.gov/firm/summary/316844'
   ];
 
   var SCAN_LINES = [

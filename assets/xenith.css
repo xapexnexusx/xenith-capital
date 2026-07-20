@@ -1027,7 +1027,7 @@ html.js .x-scene.is-active {
 .xs-objects {
   position: absolute;
   left: var(--x-gutter-l);
-  right: max(clamp(1.25rem, 3vw, 3rem), 12.5rem); /* clears #x-disc-open */
+  right: max(clamp(1.25rem, 3vw, 3rem), 9.5rem); /* clears #x-disc-open */
   bottom: calc(var(--x-footer-h) + .9rem);
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1481,34 +1481,39 @@ html.js .x-scene.is-active {
        #x-disc drawer block preserved from v5 (drawer.js toggles .is-open and
        waits on the .x-disc-panel 450ms transition — keep in sync).
    -------------------------------------------------------------------------- */
+/* quiet chip: present for anyone who looks for it, invisible to everyone
+   else. Neutral glass, dim mono, no red, no glow at rest. */
 .x-disc-btn {
   -webkit-appearance: none;
   appearance: none;
   font-family: var(--x-font-m);
-  font-size: .58rem;
+  font-size: .56rem;
   letter-spacing: .2em;
   color: var(--x-dim);
-  background: rgba(255, 45, 60, .04);
-  border: 1px solid rgba(255, 45, 60, .32);
-  padding: .6rem .85rem;
+  background: rgba(10, 16, 27, .32);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+  border: 1px solid rgba(151, 214, 255, .12);
+  padding: .55rem .8rem;
   min-height: 44px;
   cursor: pointer;
   transition: color .25s ease, border-color .25s ease,
-              box-shadow .25s ease, background .25s ease, text-shadow .25s ease;
+              box-shadow .25s ease, background .25s ease;
 }
 
 .x-disc-btn:hover {
-  color: var(--x-red);
-  border-color: rgba(255, 45, 60, .7);
-  background: var(--x-red-faint);
-  box-shadow: 0 0 20px rgba(255, 45, 60, .22);
-  text-shadow: 0 0 12px rgba(255, 45, 60, .65);
+  color: var(--x-text);
+  border-color: rgba(151, 214, 255, .3);
+  background: rgba(0, 240, 255, .04);
+  box-shadow: 0 0 16px rgba(0, 240, 255, .1);
 }
 
+/* right edge shares the footer's padding line; bottom sits one clean gap
+   above the footer strip — visually seated in the corner. */
 #x-disc-open {
   position: fixed;
-  right: calc(.8rem + env(safe-area-inset-right));
-  bottom: calc(var(--x-footer-h) + .7rem + env(safe-area-inset-bottom));
+  right: calc(clamp(.8rem, 2.5vw, 1.4rem) + env(safe-area-inset-right));
+  bottom: calc(var(--x-footer-h) + .55rem + env(safe-area-inset-bottom));
   z-index: 890;
 }
 
@@ -1611,9 +1616,9 @@ html.js .x-scene.is-active {
 
 .x-disc-lead {
   font-family: var(--x-font-m);
-  color: var(--x-red);
+  color: var(--x-amber);
   letter-spacing: .06em;
-  text-shadow: 0 0 12px rgba(255, 45, 60, .45);
+  text-shadow: 0 0 12px rgba(255, 176, 0, .3);
 }
 
 .x-disc-links {

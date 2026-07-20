@@ -56,7 +56,8 @@
     pulse: function () {},
     preview: function () {},
     previewEnd: function () {},
-    excite: function () {}
+    excite: function () {},
+    focus: function () {}
   };
 
   var canvas = document.getElementById('fx-bg');
@@ -185,6 +186,11 @@
   var pX = 0, pY = 0, spX = 0, spY = 0, pointerOn = false;
   var exX = 0, exY = 0, exT = 0, exStr = 1;
 
+  /* subsystem focus: the inspector inspects. focus(g) spotlights particle
+     group g (others recede); cleared on any shape change. */
+  var focusG = -1;
+  var focusBlend = 0;
+
   var glowGrad = null, vignette = null;
 
   var mq = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
@@ -221,6 +227,8 @@
   var pulseP = new Float32Array(G_MAX);
   var gScale = new Float32Array(G_MAX);
   var gAlpha = new Float32Array(G_MAX);
+  var gFocusA = new Float32Array(G_MAX);   /* focus alpha factor per group */
+  var gFocusS = new Float32Array(G_MAX);   /* focus size factor per group */
   var riseH = new Float32Array(G_MAX);   /* wrap band height for current shape */
   var riseC = new Float32Array(G_MAX);   /* wrap band center for current shape */
 
@@ -530,6 +538,7 @@
   function setDisplayedShape(idx, fast) {
     if (idx === shape) return;
     shape = idx;
+    focusG = -1;                        /* a new formation enters unfocused */
     sampleShape(mTX, mTY, mTZ, shape, POOL_MAX);
     beginMorph(fast);
   }
@@ -628,6 +637,19 @@
         gScale[g] = 1;
         gAlpha[g] = 1;
       }
+      /* subsystem focus: spotlight one group, recede the rest */
+      if (focusBlend > 0.005 && focusG >= 0) {
+        if (g === focusG) {
+          gFocusA[g] = 1 + 0.18 * focusBlend;
+          gFocusS[g] = 1 + 0.16 * focusBlend;
+        } else {
+          gFocusA[g] = 1 - 0.60 * focusBlend;
+          gFocusS[g] = 1 - 0.07 * focusBlend;
+        }
+      } else {
+        gFocusA[g] = 1;
+        gFocusS[g] = 1;
+      }
     }
   }
 
@@ -659,6 +681,8 @@
     spY += (pY - spY) * k;
     if (pulseT > 0) { pulseT -= dt; if (pulseT < 0) pulseT = 0; }
     if (exT > 0) { exT -= dt; if (exT < 0) exT = 0; }
+    var fTarget = focusG >= 0 ? 1 : 0;
+    focusBlend += (fTarget - focusBlend) * (1 - Math.exp(-7 * dt));
   }
 
   /* ---------- particle pass (zero allocations) ---------- */
@@ -763,8 +787,9 @@
       var tw = live
         ? 0.70 + 0.28 * Math.sin(t * (0.5 + pSeed[i] * 1.3) + pSeed[i] * TAU)
         : 0.85;
-      var a = tw * depthA * gAlpha[g];
-      var size = pSize[i] * (0.50 + persp * 0.68);
+      var a = tw * depthA * gAlpha[g] * gFocusA[g];
+      if (a > 1) a = 1;
+      var size = pSize[i] * (0.50 + persp * 0.68) * gFocusS[g];
 
       ctx.globalAlpha = a;
       ctx.fillRect(x - size * 0.5, y - size * 0.5, size, size);
@@ -971,6 +996,7 @@
     retargetCount();
     if (!pointerOn) { spX = pX = cx; spY = pY = cy; }
     previewing = false;
+    focusG = -1;
     shape = committedShape;
     sampleShape(mTX, mTY, mTZ, shape, POOL_MAX);
     beginMorph(false);
@@ -1028,6 +1054,23 @@
     exT = EXCITE_TTL;
   }
 
+  function focus(g) {
+    /* spotlight particle group g of the CURRENT formation; -1 releases.
+       State, not motion sugar — applies under reduced motion too (as a
+       static re-render). */
+    g = Number(g);
+    if (!isFinite(g)) return;
+    g = Math.round(g);
+    if (g < 0 || g >= G_MAX) g = -1;
+    if (g === focusG) return;
+    if (focusG >= 0 && g >= 0) focusBlend *= 0.55;   /* soft dip on switch */
+    focusG = g;
+    if (reduced) {
+      focusBlend = g >= 0 ? 1 : 0;
+      drawStatic();
+    }
+  }
+
   function onPointerMove(e) {
     pX = e.clientX;
     pY = e.clientY;
@@ -1062,6 +1105,7 @@
       exT = 0;
       zeroDisplacements();
       previewing = false;
+      focusBlend = focusG >= 0 ? 1 : 0;   /* freeze focus at its resolved state */
       if (shape !== committedShape) {
         shape = committedShape;
         sampleShape(mTX, mTY, mTZ, shape, POOL_MAX);
@@ -1099,7 +1143,8 @@
     pulse: pulse,
     preview: preview,
     previewEnd: previewEnd,
-    excite: excite
+    excite: excite,
+    focus: focus
   };
 
   if (document.readyState === 'loading') {

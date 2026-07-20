@@ -23,6 +23,11 @@
      hover — 420ms, guaranteed to land on the original text, one run at
      a time per element.
    - TELEMETRY: #x-uptime ticks 'T+HH:MM:SS' once per second.
+   - SUBSYSTEM FOCUS: selecting an object card (x:object-inspected from
+     main.js) spotlights that object's particle subsystem in the formation
+     via XENITH_FX.focus(group) — the inspector actually inspects. Mapped
+     semantically per scene (FOCUS_MAP); NOT gated on hover/reduced-motion
+     (it is state, and fx renders it statically under reduced motion).
 
    Boot gate: effects arm only after body.x-preload lifts (main.js removes
    it on x:boot-done), checked live — no duplicated boot state.
@@ -227,6 +232,37 @@
     }
   }
 
+  /* ---------------------------- subsystem focus --------------------------- */
+  // FOCUS_MAP[scene][objectIndex] -> fx particle group of that subsystem.
+  //  S1 ORBITAL FRAME:  Mandate->hub/struts(1)  Research->survey dust(3)
+  //                     Construction->torus band(0)  Review->halo ring(2)
+  //  S2 SIGNAL FUNNEL:  Sources->noise field(0)  Signals->funnel(1)
+  //                     Synthesis->signal column(2)  Positions->column(2)
+  //  S3 GYRO SHIELD:    Risk Budget->protected core(0)  Drawdown->ring(1)
+  //                     Liquidity->ring(2)  Concentration->ring(3)
+  //  S4 SINGULARITY:    Independence->core+disc(0)  Access->satellites(1)
+  //                     Registration->outer ring(2)  Alignment->polar jets(3)
+
+  var FOCUS_MAP = {
+    1: [1, 3, 0, 2],
+    2: [0, 1, 2, 2],
+    3: [0, 1, 2, 3],
+    4: [0, 1, 2, 3]
+  };
+
+  function onInspected(e) {
+    var sc = e && e.detail && e.detail.scene;
+    var map = FOCUS_MAP[sc];
+    if (!map) return;
+    var sceneEl = document.querySelector('.x-scene.is-active[data-scene="' + sc + '"]');
+    if (!sceneEl) return;
+    var sel = sceneEl.querySelector('.xo-card.is-sel');
+    if (!sel) return;
+    var idx = parseInt(sel.getAttribute('data-obj'), 10);
+    if (isNaN(idx) || idx < 0 || idx >= map.length) return;
+    fx('focus', map[idx]);
+  }
+
   /* ------------------------------- telemetry ----------------------------- */
 
   function bindUptime() {
@@ -253,6 +289,7 @@
     bindPanels();
     bindDecode();
     bindUptime();
+    document.addEventListener('x:object-inspected', onInspected);
   }
 
   if (document.readyState === 'loading') {
