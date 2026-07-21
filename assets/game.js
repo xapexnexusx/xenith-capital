@@ -19,7 +19,8 @@
 
    Toasts: fixed top-right stack below the topbar, mono .7rem, cyan hairline
    border, void-translucent bg, slide in from the right, auto-dismiss after
-   3.5s, max 3 concurrent (oldest drops). Reduced motion: toasts appear and
+   3.5s, one at a time (the newest replaces the previous notice). Reduced
+   motion: toasts appear and
    dismiss instantly, sweep suppressed. Every timer pauses while the tab is
    hidden and resumes on return. No-ops silently if no event ever fires.
    ========================================================================== */
@@ -30,7 +31,7 @@
 
   var TOAST_MS = 3500;    // visible time before auto-dismiss
   var EXIT_MS = 280;      // slide-out time before the node leaves the DOM
-  var MAX_TOASTS = 3;     // concurrent cap; oldest drops
+  var MAX_TOASTS = 1;     // keep interaction feedback from covering content
   var SWEEP_MS = 600;     // auth sweep duration (must match the CSS)
 
   var reduceMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');

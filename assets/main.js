@@ -15,7 +15,7 @@
      hidden tab: instant class swap, no transition classes, no timers.
    - Chrome sync on every scene change: rail .is-active (+aria-current),
      #x-field-label 'XC / FIELD 0N — NAME', #x-scene-pager '0N / 05', and
-     XENITH_FX.morphTo(n-1) whenever the fx lane exposes it.
+     XENITH_FX.morphTo(n) whenever the fx lane exposes it.
    - Input: wheel (700ms debounce, |deltaY| > 24 after line/page
      normalization, down=next up=prev, clamped 1..5), vertical touch swipe
      > 48px (vertical-dominant, up=next), ArrowUp/ArrowDown + PageUp/
