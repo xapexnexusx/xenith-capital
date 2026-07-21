@@ -40,7 +40,7 @@
     'RESEARCH ENGINE',
     'RISK DOCTRINE',
     'THE FIRM',
-    'UPLINK'
+    'DIRECT CHANNEL'
   ];
 
   var DECODE_GLYPHS = '▓▒░<>/|\\=+*#%&@01';

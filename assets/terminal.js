@@ -1,5 +1,5 @@
 /* ==========================================================================
-   XENITH CAPITAL — UPLINK TERMINAL v6 (FIELD INSTRUMENT)
+   XENITH CAPITAL — SECURE CHANNEL TERMINAL v7 (FIELD INSTRUMENT)
    assets/terminal.js — owns #x-terminal inside #uplink (scene 05). Vanilla
    JS, zero deps.
    Public API: window.XenithTerminal = { init(sel, opts), boot(), version }
@@ -14,12 +14,9 @@
    focus/click/touch into the terminal — whichever comes first. boot() is
    idempotent and never steals focus on a scroll-driven boot.
 
-   v6 CHROME SYNC (runs at load, ahead of the lazy boot): the scene markup
-   is frozen, so .x-term-title is corrected to 'XENITH // UPLINK v7.0' from
-   here, and the inspector auth chip (#xi-auth-state, in the scene-05
-   inspector) flips SEALED → VERIFIED (adds .is-verified) the moment the
-   channel is granted — and immediately at load when this tab already holds
-   xv_auth=granted.
+   CHROME SYNC (runs at load, ahead of the lazy boot): the terminal title and
+   session readout stay synchronized with the channel state. Authorization is
+   session-scoped and never initializes the terminal before the scene is used.
 
    AUTHENTICATE — one question: 'what survives contact: signal or noise?'
    Answer 'signal' → analyst verified: sessionStorage xv_auth=granted, and
@@ -60,8 +57,8 @@
     'Registration does not imply a certain level of skill or training.',
     'Informational only — not an offer or solicitation.',
     'Investing involves risk. Past performance is not indicative of future results.',
-    'Form ADV Part 2 (brochure): https://reports.adviserinfo.sec.gov/reports/ADV/316844/PDF/316844.pdf',
-    'Firm record (SEC IAPD, CRD #316844): https://adviserinfo.sec.gov/firm/summary/316844'
+    'Form ADV public filing: https://reports.adviserinfo.sec.gov/reports/ADV/316844/PDF/316844.pdf',
+    'Public firm record (SEC IAPD): https://adviserinfo.sec.gov/firm/summary/316844'
   ];
 
   var SCAN_LINES = [
@@ -277,7 +274,7 @@
 
     /* ---------------- uplink uptime clock ---------------- */
 
-    /* Appends a live "· UPLINK …" counter into the window title. The span is
+    /* Appends a live session counter into the terminal title. The span is
        decorative chrome, so it is hidden from assistive tech; the 1s tick
        formats as mm:ss under an hour, then h:mm:ss. No work while hidden. */
     function startUplink() {
@@ -285,21 +282,21 @@
       if (!title) return;
       var clock = document.createElement('span');
       clock.setAttribute('aria-hidden', 'true');
-      clock.textContent = ' · UPLINK 00:00';
+      clock.textContent = ' · SESSION 00:00';
       title.appendChild(clock);
       window.setInterval(function () {
         if (document.hidden) return;
         var s = Math.floor((Date.now() - uplinkT0) / 1000);
-        clock.textContent = ' · UPLINK ' + formatUplink(s);
+        clock.textContent = ' · SESSION ' + formatUplink(s);
       }, 1000);
     }
 
     /* v6.0 banner — printed once per page view, on lazy boot. */
     function bootLines() {
       return [
-        'XENITH CAPITAL // UPLINK v7.0',
-        'secure channel: READY',
-        "type 'help' for command list"
+        'channel state: READY',
+        'direct to: XENITH CAPITAL',
+        "type 'help' to inspect the command set"
       ];
     }
 
@@ -515,7 +512,7 @@
         'Capital band: ' + d.band,
         'Objective: ' + d.objective,
         '',
-        '— composed via the xenithcap.io mandate uplink'
+        '— composed via the xenithcap.io secure channel'
       ].join('\n');
 
       ready.then(function () {
@@ -595,7 +592,7 @@
         'scan          doctrinal exposure sweep',
         'matrix        signal saturation (8s)',
         'whoami        analyst identity + clearance state',
-        'uptime        uplink clock readout',
+        'uptime        session clock readout',
         'banner        reprint boot banner',
         'clear         clear terminal output',
         'exit          close session'
@@ -634,7 +631,7 @@
           startRain();
           break;
         case 'uptime':
-          printer.print('uplink ' +
+          printer.print('session ' +
             formatUplink(Math.floor((Date.now() - uplinkT0) / 1000)) +
             ' // sys.online');
           break;
@@ -761,7 +758,7 @@
      already holds the grant gets the VERIFIED chip immediately — both are
      visible the first time scene 05 enters, booted or not. */
   var titleEl = rootEl ? rootEl.querySelector('.x-term-title') : null;
-  if (titleEl) titleEl.textContent = 'XENITH // UPLINK v7.0';
+  if (titleEl) titleEl.textContent = 'XENITH // SECURE CHANNEL v7.1';
   if (storageGet(STORAGE_AUTH) === 'granted') setAuthChipVerified();
 
   /* Direct engagement beats the observer: if the user reaches the terminal

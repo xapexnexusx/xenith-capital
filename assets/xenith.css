@@ -839,8 +839,8 @@ html.js .x-scene.is-active {
 .xs-title {
   margin-top: 1rem;
   font-weight: 400;
-  font-size: clamp(2rem, 4.6vw, 4rem);
-  line-height: 1.04;
+  font-size: clamp(2rem, 4vw, 3.45rem);
+  line-height: 1.06;
   letter-spacing: -.01em;
   color: var(--x-text);
   text-shadow: 0 0 38px rgba(0, 240, 255, .1);
@@ -894,7 +894,7 @@ html.js .x-scene.is-active {
   color: var(--x-copy);
   font-weight: 300;
   font-size: 1.05rem;
-  line-height: 1.75;
+  line-height: 1.62;
 }
 
 .xs-micro {
@@ -938,7 +938,9 @@ html.js .x-scene.is-active {
 }
 
 .x-fact-word {
-  letter-spacing: .02em;
+  font-size: clamp(1rem, 1.8vw, 1.4rem);
+  letter-spacing: .07em;
+  overflow-wrap: anywhere;
 }
 
 .x-fact-label {
@@ -992,16 +994,25 @@ html.js .x-scene.is-active {
   color: var(--x-text);
 }
 
-.xi-role {
-  margin: .85rem 0 1rem;
-  padding: .55rem 0;
+.xi-kicker {
+  margin-top: .9rem;
   font-family: var(--x-font-m);
-  font-size: .62rem;
+  font-size: .55rem;
   letter-spacing: .22em;
-  line-height: 1.7;
+  line-height: 1.5;
   color: var(--x-cyan);
-  text-shadow: 0 0 10px rgba(0, 240, 255, .35);
-  border-top: 1px solid var(--x-line);
+  text-shadow: 0 0 10px rgba(0, 240, 255, .3);
+}
+
+.xi-role {
+  margin: .3rem 0 1rem;
+  padding: 0 0 .85rem;
+  font-family: var(--x-font-d);
+  font-size: 1.08rem;
+  font-weight: 400;
+  letter-spacing: -.01em;
+  line-height: 1.4;
+  color: var(--x-text);
   border-bottom: 1px solid var(--x-line);
 }
 
@@ -1169,35 +1180,45 @@ html.js .x-scene.is-active {
 }
 
 /* --------------------------------------------------------------------------
-   12. UPLINK SCENE — terminal positioned right-of-center, inspector docks
-       top-right above it (right column reads as one instrument stack).
+   12. DIRECT CHANNEL — the terminal is the scene, not a widget beneath two
+       competing explanations. It occupies the center of the available field.
    -------------------------------------------------------------------------- */
 .xs-terminal-wrap {
   position: absolute;
-  right: max(5rem, calc(clamp(1.25rem, 3vw, 3rem) + env(safe-area-inset-right)));
-  bottom: calc(var(--x-footer-h) + 1rem);
-  width: min(680px, calc(100vw - 45rem));
+  left: calc(50% + 28px);
+  top: calc(var(--x-topbar-h) + clamp(2.5rem, 8vh, 5rem));
+  bottom: calc(var(--x-footer-h) + clamp(3.2rem, 7vh, 5rem));
+  transform: translateX(-50%);
+  width: min(1040px, calc(100vw - var(--x-gutter-l) - 8rem));
   min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-.x-scene[data-scene="5"] .xs-panel-r.x-insp {
-  top: calc(var(--x-topbar-h) + 1.1rem);
-  transform: none;
-  padding: 1.3rem 1.4rem;
-  max-height: none;
-  overflow: visible;
+.x-channel-label {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-bottom: .75rem;
+  padding: 0 .15rem;
+  font-family: var(--x-font-m);
+  font-size: .58rem;
+  letter-spacing: .22em;
+  color: var(--x-dim);
 }
 
-.x-scene[data-scene="5"] .xi-title {
-  font-size: 1.6rem;
+.x-scene[data-scene="5"] #x-terminal {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
-/* keep the terminal body clear of the top-anchored inspector at any height */
 .x-scene[data-scene="5"] .x-term-body {
-  min-height: clamp(80px, calc(100vh - 550px), 200px);
-  min-height: clamp(80px, calc(100dvh - 550px), 200px);
-  max-height: min(300px, calc(100vh - 550px));
-  max-height: min(300px, calc(100dvh - 550px));
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
 }
 
 /* --- mandate terminal (v5 block, preserved) -------------------------------- */
@@ -1245,6 +1266,7 @@ html.js .x-scene.is-active {
 }
 
 .x-term-title {
+  min-width: 0;
   margin-left: .6rem;
   font-family: var(--x-font-m);
   font-size: .62rem;
@@ -1253,6 +1275,19 @@ html.js .x-scene.is-active {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.x-term-auth {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  margin-left: auto;
+  font-family: var(--x-font-m);
+  font-size: .55rem;
+  letter-spacing: .18em;
+  color: var(--x-dim);
+  white-space: nowrap;
 }
 
 .x-term-body {
@@ -1309,6 +1344,8 @@ html.js .x-scene.is-active {
 .x-term-form {
   flex: 1;
   display: flex;
+  align-items: center;
+  gap: .75rem;
   min-width: 0;
 }
 
@@ -1328,6 +1365,28 @@ html.js .x-scene.is-active {
 
 #x-term-input::placeholder {
   color: var(--x-dim); /* contrast floor — do not lower */
+}
+
+.x-term-submit {
+  flex: none;
+  min-width: 54px;
+  min-height: 44px;
+  padding: 0 .7rem;
+  font-family: var(--x-font-m);
+  font-size: .54rem;
+  letter-spacing: .18em;
+  color: var(--x-cyan);
+  background: rgba(0, 240, 255, .045);
+  border: 1px solid rgba(0, 240, 255, .24);
+  cursor: pointer;
+  transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.x-term-submit:hover,
+.x-term-submit:focus-visible {
+  background: rgba(0, 240, 255, .1);
+  border-color: rgba(0, 240, 255, .58);
+  box-shadow: 0 0 18px rgba(0, 240, 255, .12);
 }
 
 /* --- contact side panel (v5 block, preserved) ------------------------------ */
@@ -1814,18 +1873,8 @@ body.x-disc-lock {
     width: min(360px, 32vw);
   }
 
-  /* uplink scene: slimmer narrative panel buys the terminal its room */
-  .x-scene[data-scene="5"] .xs-panel-l {
-    width: min(320px, 34vw);
-  }
-
   .xs-terminal-wrap {
-    width: min(680px, calc(100vw - 32rem));
-  }
-
-  .x-scene[data-scene="5"] .x-term-body {
-    max-height: min(260px, calc(100vh - 550px));
-    max-height: min(260px, calc(100dvh - 550px));
+    width: min(920px, calc(100vw - var(--x-gutter-l) - 4rem));
   }
 }
 
@@ -1954,20 +2003,14 @@ body.x-disc-lock {
     padding: .55rem .7rem .6rem;
   }
 
-  /* uplink scene: terminal takes the flexible middle, inspector docks below */
-  .x-scene[data-scene="5"] .xs-panel-l {
-    width: 100%;
-    max-height: 22vh;
-    max-height: 22dvh;
-    margin-bottom: 0;
-  }
-
   .xs-terminal-wrap {
     position: static;
+    inset: auto;
+    transform: none;
     width: 100%;
     flex: 1 1 auto;
     min-height: 0;
-    order: 2;
+    order: initial;
     display: flex;
     flex-direction: column;
   }
@@ -1983,19 +2026,8 @@ body.x-disc-lock {
     max-height: none;
   }
 
-  .x-scene[data-scene="5"] .xs-panel-r.x-insp {
-    order: 3;
-    flex: 0 1 auto;
-    min-height: 0;
-    max-height: 20vh;
-    max-height: 20dvh;
-    overflow-y: auto;
-    /* bottom padding lets content scroll clear of the fixed disclosures chip */
-    padding: .8rem 1rem 3.4rem;
-  }
-
-  .x-scene[data-scene="5"] .xi-title {
-    font-size: 1.3rem;
+  .x-scene[data-scene="5"] .x-channel-label {
+    margin-bottom: .6rem;
   }
 
   /* disclosures trigger rides in its own band above the rail bar */
@@ -2037,8 +2069,7 @@ body.x-disc-lock {
   }
 
   .xs-micro {
-    font-size: .56rem;
-    letter-spacing: .16em;
+    display: none;
   }
 
   .xi-title {
@@ -2047,15 +2078,112 @@ body.x-disc-lock {
 
   .xi-desc {
     font-size: .86rem;
+    line-height: 1.5;
+  }
+
+  .xi-head {
+    margin-bottom: .55rem;
+  }
+
+  .xi-kicker {
+    margin-top: .65rem;
+  }
+
+  .xi-role {
+    margin: .2rem 0 .7rem;
+    padding-bottom: .65rem;
+    font-size: 1rem;
+  }
+
+  .xi-system,
+  .xi-auth {
+    gap: .25rem;
+    margin-top: .75rem;
+    padding-top: .65rem;
+    font-size: .56rem;
+  }
+
+  .xs-panel-r {
+    padding: .9rem 1rem;
+  }
+
+  .x-term-title {
+    margin-left: .3rem;
+    font-size: .52rem;
+    letter-spacing: .14em;
+  }
+
+  /* The live session clock remains in the desktop title. On phones the
+     channel name is the useful identity; hiding the decorative clock keeps
+     that identity readable instead of truncating it behind the auth chip. */
+  .x-term-title > span {
+    display: none;
+  }
+
+  .x-term-auth {
+    gap: .35rem;
+    font-size: .5rem;
+    letter-spacing: .12em;
+  }
+
+  .x-term-auth > span:first-child {
+    display: none;
+  }
+
+  .x-channel-label {
+    font-size: .5rem;
+    letter-spacing: .14em;
   }
 
   .x-fact-num {
     font-size: 1.8rem;
   }
 
+  .x-fact-num.x-fact-word {
+    font-size: clamp(.78rem, 3.7vw, 1rem);
+    line-height: 1.12;
+    letter-spacing: .04em;
+    white-space: nowrap;
+    overflow-wrap: normal;
+  }
+
+  .x-fact-label {
+    font-size: .48rem;
+    letter-spacing: .14em;
+  }
+
   .x-fact {
     min-height: 4.6rem;
     padding: .65rem .7rem;
+  }
+
+  .x-scene[data-scene="4"] .xo-facts {
+    margin-top: .45rem;
+    gap: .3rem;
+  }
+
+  .x-scene[data-scene="4"] .xs-copy {
+    margin-top: .7rem;
+    font-size: .86rem;
+    line-height: 1.48;
+  }
+
+  .x-scene[data-scene="4"] .x-fact {
+    min-height: 2.75rem;
+    gap: .15rem;
+    padding: .25rem .5rem;
+  }
+
+  .x-scene[data-scene="4"] .x-fact-num {
+    font-size: 1.3rem;
+  }
+
+  .x-scene[data-scene="4"] .x-fact-num.x-fact-word {
+    font-size: .72rem;
+  }
+
+  .x-scene[data-scene="4"] .x-fact-label {
+    font-size: .4rem;
   }
 
   /* footer: coordinates give way; colophon + pager remain */
@@ -2105,10 +2233,54 @@ body.x-disc-lock {
   }
 }
 
+/* Very short portrait phones use one continuous scene viewport. Two nested
+   scroll panes made copy appear amputated at rest; a single field scroll keeps
+   every layer intact while preserving the fixed operating-system chrome. */
+@media (max-width: 400px) and (max-height: 700px) and (orientation: portrait) {
+  .x-scene:not([data-scene="5"]) {
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: calc(var(--x-topbar-h) + .6rem + env(safe-area-inset-top)) .8rem
+             calc(var(--x-footer-h) + 72px + env(safe-area-inset-bottom));
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 240, 255, .28) transparent;
+  }
+
+  .x-scene:not([data-scene="5"]) .xs-panel-l,
+  .x-scene:not([data-scene="5"]) .xs-panel-r {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    margin: 0 0 .6rem;
+    transform: none;
+    overflow: visible;
+  }
+
+  .x-scene:not([data-scene="5"]) .xs-objects {
+    position: static;
+    grid-template-columns: 1fr 1fr;
+    margin: 0 52px 0 0;
+  }
+}
+
 /* phone landscape is its own console, not a compressed portrait stack.
    The portrait layout above spends height on two stacked panels; on a short
    landscape viewport that collapsed the readable area to a few pixels. */
 @media (max-height: 700px) and (orientation: landscape) {
+  :root {
+    --x-topbar-h: 44px;
+    --x-footer-h: 28px;
+  }
+
+  .xtb-tags {
+    display: none;
+  }
+
   /* Short landscape viewports need one coherent grid regardless of width.
      Device-width cutoffs created collision cliffs when a wide phone or short
      desktop window crossed back into the absolute-positioned layout. */
@@ -2132,7 +2304,7 @@ body.x-disc-lock {
     flex: 1 1 0;
     width: auto;
     min-width: 44px;
-    min-height: 54px;
+    min-height: 48px;
     gap: .15rem;
     padding: .35rem .1rem;
     background: transparent;
@@ -2171,19 +2343,19 @@ body.x-disc-lock {
   }
 
   #x-disc-open {
-    bottom: calc(var(--x-footer-h) + 62px + env(safe-area-inset-bottom));
+    bottom: calc(var(--x-footer-h) + 54px + env(safe-area-inset-bottom));
     right: calc(.6rem + env(safe-area-inset-right));
   }
 
   .x-scene {
     display: grid;
     grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr);
-    grid-template-rows: minmax(0, 1fr) 54px;
-    gap: .5rem .6rem;
-    padding: calc(var(--x-topbar-h) + .45rem + env(safe-area-inset-top))
-             calc(.7rem + env(safe-area-inset-right))
-             calc(var(--x-footer-h) + 62px + env(safe-area-inset-bottom))
-             calc(.7rem + env(safe-area-inset-left));
+    grid-template-rows: minmax(0, 1fr) 48px;
+    gap: .4rem .5rem;
+    padding: calc(var(--x-topbar-h) + .35rem + env(safe-area-inset-top))
+             calc(.55rem + env(safe-area-inset-right))
+             calc(var(--x-footer-h) + 54px + env(safe-area-inset-bottom))
+             calc(.55rem + env(safe-area-inset-left));
   }
 
   .xs-panel-l,
@@ -2197,7 +2369,7 @@ body.x-disc-lock {
     margin: 0;
     transform: none;
     overflow-y: auto;
-    padding: .8rem .95rem;
+    padding: .62rem .78rem;
   }
 
   .xs-panel-l {
@@ -2211,61 +2383,78 @@ body.x-disc-lock {
   }
 
   .xs-title {
-    margin-top: .55rem;
-    font-size: clamp(1.15rem, 4vw, 2rem);
-    line-height: 1.08;
+    margin-top: .38rem;
+    font-size: clamp(1.1rem, 2.8vw, 1.45rem);
+    line-height: 1.06;
   }
 
   .xs-copy {
-    margin-top: .65rem;
-    font-size: .8rem;
-    line-height: 1.45;
+    margin-top: .42rem;
+    font-size: .72rem;
+    line-height: 1.35;
   }
 
   .xs-micro {
-    margin-top: .65rem;
-    padding-top: .55rem;
+    display: none;
+  }
+
+  .xs-tab {
     font-size: .48rem;
+    letter-spacing: .2em;
   }
 
   .xi-head {
-    margin-bottom: .45rem;
+    margin-bottom: .24rem;
+    font-size: .48rem;
   }
 
   .xi-title,
   .x-scene[data-scene="5"] .xi-title {
-    font-size: 1.2rem;
+    font-size: 1rem;
+  }
+
+  .xi-kicker {
+    display: none;
   }
 
   .xi-role {
-    margin: .45rem 0;
-    padding: .35rem 0;
+    margin: .22rem 0 .35rem;
+    padding: .24rem 0 .35rem;
+    font-size: .8rem;
+    line-height: 1.3;
   }
 
   .xi-desc {
-    font-size: .76rem;
-    line-height: 1.45;
+    font-size: .68rem;
+    line-height: 1.35;
   }
 
   .xi-system,
   .xi-auth {
-    margin-top: .55rem;
-    padding-top: .45rem;
-    font-size: .52rem;
+    display: none;
   }
 
   .xo-facts {
-    margin-top: .7rem;
-    gap: .4rem;
+    margin-top: .4rem;
+    gap: .3rem;
   }
 
   .x-fact {
-    min-height: 3.2rem;
-    padding: .4rem .5rem;
+    min-height: 2.6rem;
+    padding: .25rem .4rem;
   }
 
   .x-fact-num {
-    font-size: 1.25rem;
+    font-size: 1rem;
+  }
+
+  .x-fact-num.x-fact-word {
+    font-size: .72rem;
+  }
+
+  .x-fact-label {
+    font-size: .4rem;
+    letter-spacing: .1em;
   }
 
   .xs-objects {
@@ -2279,45 +2468,25 @@ body.x-disc-lock {
 
   .xo-card {
     min-height: 0;
-    height: 54px;
-    padding: .4rem .55rem;
+    height: 48px;
+    padding: .3rem .5rem;
   }
 
   .xo-line {
     display: none;
   }
 
-  /* Uplink becomes a true three-pane instrument: context, terminal, status. */
+  /* Direct channel remains one coherent instrument in short landscape. */
   .x-scene[data-scene="5"] {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
-  }
-
-  .x-scene[data-scene="5"] .xs-panel-l {
-    grid-column: 1;
-    grid-row: 1;
-    width: 100%;
-    height: 100%;
-    max-height: none;
-    margin: 0;
-  }
-
-  .x-scene[data-scene="5"] .xs-panel-r.x-insp {
-    grid-column: 3;
-    grid-row: 1;
-    inset: auto;
-    width: 100%;
-    height: 100%;
-    max-height: none;
-    transform: none;
-    order: initial;
-    overflow-y: auto;
-    padding: .8rem .85rem 3rem;
   }
 
   .xs-terminal-wrap {
     position: static;
-    grid-column: 2;
+    inset: auto;
+    transform: none;
+    grid-column: 1;
     grid-row: 1;
     width: 100%;
     height: 100%;
@@ -2364,6 +2533,54 @@ body.x-disc-lock {
     font-size: .5rem;
     letter-spacing: .24em;
   }
+}
+
+/* --------------------------------------------------------------------------
+   NO-JS FALLBACK — one coherent static field, no dead controls or false
+   online status. The first scene remains the concise public explanation;
+   the noscript band explains how to enter the full console.
+   -------------------------------------------------------------------------- */
+html:not(.js) #x-rail,
+html:not(.js) #x-disc-open,
+html:not(.js) .xtb-r,
+html:not(.js) .xs-panel-r,
+html:not(.js) .xs-objects,
+html:not(.js) .x-scene:not([data-scene="1"]) {
+  display: none;
+}
+
+html:not(.js) .x-scene[data-scene="1"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--x-topbar-h) + 1rem + env(safe-area-inset-top)) 1rem
+           calc(var(--x-footer-h) + 5rem + env(safe-area-inset-bottom));
+}
+
+html:not(.js) .x-scene[data-scene="1"] .xs-panel-l {
+  position: relative;
+  inset: auto;
+  width: min(720px, 100%);
+  max-height: none;
+  margin: 0;
+  transform: none;
+  overflow: visible;
+}
+
+html:not(.js) noscript p {
+  position: fixed;
+  z-index: 920;
+  right: 0;
+  bottom: calc(var(--x-footer-h) + env(safe-area-inset-bottom));
+  left: 0;
+  padding: .8rem 1rem !important;
+  background: rgba(4, 6, 10, .92);
+  border-top: 1px solid var(--x-line);
+  color: var(--x-dim);
+  font-family: var(--x-font-m) !important;
+  font-size: .66rem;
+  line-height: 1.5;
+  letter-spacing: .08em;
 }
 
 /* --------------------------------------------------------------------------

@@ -63,86 +63,86 @@
     'RESEARCH ENGINE',
     'RISK DOCTRINE',
     'THE FIRM',
-    'UPLINK'
+    'DIRECT CHANNEL'
   ];
 
-  // Inspector copy model — contract copy deck, FINAL. OBJECTS[scene] with
-  // scene 1-based; scene 5 (UPLINK) carries the terminal, no objects. The
-  // role line is the all-caps twin of the card's .xo-line, matching the
-  // server-rendered inspector markup in index.html.
+  // Inspector copy model. Each selected card names a system layer; the
+  // inspector adds a different level of information: the operating question,
+  // how Xenith answers it, and the resulting decision effect. Scene 5 is the
+  // terminal itself and therefore carries no inspector model.
   var OBJECTS = [
     null,
     [ // 01 — PORTFOLIO ARCHITECTURE
       { name: 'Mandate',
-        role: 'DEFINE THE JOB OF THE CAPITAL.',
-        desc: 'Objectives, constraints, time horizon, liquidity needs, and risk tolerance are defined before holdings are selected.',
-        system: 'Sets the portfolio’s purpose and operating boundaries.' },
+        question: 'What must the capital accomplish?',
+        operation: 'Objectives, constraints, horizon, liquidity, tax context, and risk tolerance are defined before securities enter the conversation.',
+        effect: 'Narrows the opportunity set before preference can distort it.' },
       { name: 'Research',
-        role: 'BUILD THE THESIS FROM EVIDENCE.',
-        desc: 'Independent fundamental sources, cross-verified. Disconfirming evidence is weighted first.',
-        system: 'Supplies the verified inputs construction may use.' },
+        question: 'What evidence earns consideration?',
+        operation: 'Independent fundamental sources are cross-verified, with the strongest disconfirming evidence tested before conviction advances.',
+        effect: 'Limits construction to theses that survive a real countercase.' },
       { name: 'Construction',
-        role: 'SELECT, SIZE, AND COMBINE.',
-        desc: 'Positions sized by conviction within the risk budget; correlation and concentration constrained.',
-        system: 'Turns evidence into an allocation.' },
+        question: 'What role does each position serve?',
+        operation: 'Selection, size, concentration, correlation, and portfolio fit are decided together rather than security by security.',
+        effect: 'Turns individual theses into one coherent allocation.' },
       { name: 'Review',
-        role: 'TRACK THE CONDITIONS THAT MATTER.',
-        desc: 'Thesis, constraints, and drift monitored at portfolio level.',
-        system: 'Keeps the mandate honest over time.' }
+        question: 'What evidence would change the decision?',
+        operation: 'Thesis conditions, portfolio drift, and mandate constraints remain visible after capital is committed.',
+        effect: 'Makes revision evidence-led instead of reactionary.' }
     ],
     [ // 02 — RESEARCH ENGINE
       { name: 'Sources',
-        role: 'COLLECT THE RAW MATERIAL.',
-        desc: 'Filings, transcripts, macro data, primary documents. Independent inputs, cross-verified.',
-        system: 'Grounds every thesis in primary evidence.' },
+        question: 'What is known first-hand?',
+        operation: 'Filings, transcripts, macro data, and primary documents establish the evidence base before interpretation begins.',
+        effect: 'Separates observable fact from inherited narrative.' },
       { name: 'Signals',
-        role: 'SCORE THESES AGAINST EVIDENCE.',
-        desc: 'Theses scored against evidence, not headlines. Disconfirming data weighted first.',
-        system: 'Ranks what deserves capital.' },
+        question: 'Which changes are decision-relevant?',
+        operation: 'Evidence is tested for durability, materiality, and contradiction rather than rewarded for novelty or volume.',
+        effect: 'Ranks what deserves deeper work—and what should stop.' },
       { name: 'Synthesis',
-        role: 'SEE THE WHOLE BOARD.',
-        desc: 'Portfolio-level view: correlation, concentration, constraint interaction.',
-        system: 'Catches what single theses miss.' },
+        question: 'How do the pieces interact?',
+        operation: 'Company evidence is placed beside valuation, macro regime, correlation, concentration, and mandate constraints.',
+        effect: 'Exposes portfolio consequences that a standalone thesis cannot.' },
       { name: 'Positions',
-        role: 'SIZE BY CONVICTION, CONSTRAINED.',
-        desc: 'Sized by conviction within the risk budget. Judgment retains final authority.',
-        system: 'Turns signal into exposure.' }
+        question: 'How much conviction has been earned?',
+        operation: 'Evidence strength informs size only inside the portfolio’s risk, liquidity, and concentration boundaries.',
+        effect: 'Translates research into exposure without surrendering judgment.' }
     ],
     [ // 03 — RISK DOCTRINE
       { name: 'Risk Budget',
-        role: 'ALLOCATED BEFORE RETURN TARGETS.',
-        desc: 'The budget is committed before any position exists. A return target never writes a constraint.',
-        system: 'Caps what the portfolio is allowed to lose.' },
+        question: 'How much loss can the mandate absorb?',
+        operation: 'The portfolio’s risk capacity is defined before position-level return expectations are allowed to influence size.',
+        effect: 'Turns tolerance into a construction boundary.' },
       { name: 'Drawdown',
-        role: 'SURVIVAL COMPOUNDS.',
-        desc: 'Drawdown awareness over return chasing. The first rule of compounding is existing.',
-        system: 'Keeps the portfolio alive to compound.' },
+        question: 'What can break the compounding path?',
+        operation: 'Scenario behavior and recovery requirements are considered before an attractive upside case can dominate the decision.',
+        effect: 'Protects the mandate from losses it cannot practically endure.' },
       { name: 'Liquidity',
-        role: 'EXIT BEFORE ENTRY.',
-        desc: 'Liquidity and concentration limits hold at all times. The exit is priced before the entry.',
-        system: 'Prevents being trapped in own positions.' },
+        question: 'Can the position be changed when the thesis changes?',
+        operation: 'Exit conditions, market depth, account size, and implementation constraints are evaluated before entry.',
+        effect: 'Keeps judgment actionable when evidence moves.' },
       { name: 'Concentration',
-        role: 'NO SINGLE POINT OF FAILURE.',
-        desc: 'Correlation and concentration constrained before return targets are set.',
-        system: 'One bad node cannot sink the book.' }
+        question: 'Where can one error become a portfolio error?',
+        operation: 'Position weight, shared drivers, and role overlap are tested across the full portfolio rather than in isolation.',
+        effect: 'Contains the damage one incorrect thesis can create.' }
     ],
     [ // 04 — THE FIRM
       { name: 'Independence',
-        role: 'NO OUTSIDE AGENDA.',
-        desc: 'Founder-owned, fee-aligned, answerable to clients and evidence — not to a parent company’s quarter.',
-        system: 'Removes the conflicts structure usually hides.' },
+        question: 'Who sets the agenda?',
+        operation: 'No parent platform or product shelf dictates the portfolio. Evidence and the mandate determine the opportunity set.',
+        effect: 'Reduces structural pressure to own what does not belong.' },
       { name: 'Access',
-        role: '1:1 WITH THE DECISION-MAKER.',
-        desc: 'You speak with the person who makes the decision. No layers, no hand-offs.',
-        system: 'Judgment is one call away.' },
-      { name: 'Registration',
-        role: 'TEXAS STATE SECURITIES BOARD.',
-        desc: 'State-registered investment adviser, Austin, Texas. Records public on SEC IAPD, CRD #316844.',
-        system: 'Accountable by statute and by record.' },
+        question: 'Who explains the decision?',
+        operation: 'The person with decision authority is the person accountable for the rationale. There is no service layer between them.',
+        effect: 'Questions travel directly to judgment.' },
+      { name: 'Continuity',
+        question: 'What keeps the process coherent?',
+        operation: 'Research, construction, monitoring, and explanation remain inside one accountable investment process.',
+        effect: 'Preserves the thesis from origin through review.' },
       { name: 'Alignment',
-        role: 'BUILT AND DEFENDED BY ONE MIND.',
-        desc: 'The same mind that builds the research defends the portfolio.',
-        system: 'Incentives point one direction.' }
+        question: 'What is the firm built to serve?',
+        operation: 'The operating structure centers the advisory mandate rather than transactions, proprietary products, or asset gathering.',
+        effect: 'Keeps decision ownership attached to the portfolio.' }
     ]
   ];
 
@@ -254,10 +254,17 @@
   }
 
   function applyInspector(insp, obj) {
+    var sceneEl = insp.closest ? insp.closest('.x-scene') : null;
+    var cards = sceneEl ? sceneEl.querySelectorAll('.xo-card') : [];
+    var activeIndex = 0;
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i].classList.contains('is-sel')) { activeIndex = i; break; }
+    }
+    setField(insp, '.xi-head', 'DECISION LAYER / ' + pad2(activeIndex + 1));
     setField(insp, '.xi-title', obj.name);
-    setField(insp, '.xi-role', obj.role);
-    setField(insp, '.xi-desc', obj.desc);
-    setField(insp, '.xi-system-v', obj.system);
+    setField(insp, '.xi-role', obj.question);
+    setField(insp, '.xi-desc', obj.operation);
+    setField(insp, '.xi-system-v', obj.effect);
   }
 
   // Renders object idx of sceneN into that scene's inspector. User-driven
@@ -357,6 +364,23 @@
     return Math.max(1, Math.min(SCENE_COUNT, n));
   }
 
+  // Keep only the committed scene in the accessibility and focus trees.
+  // The outgoing scene may remain visually present for 400ms, but it is
+  // immediately inert so a transition never exposes duplicate controls.
+  function syncSceneAccess(n) {
+    for (var i = 0; i < sceneEls.length; i++) {
+      var active = i === n - 1;
+      if (!sceneEls[i]) continue;
+      if (active) {
+        sceneEls[i].removeAttribute('aria-hidden');
+        sceneEls[i].removeAttribute('inert');
+      } else {
+        sceneEls[i].setAttribute('aria-hidden', 'true');
+        sceneEls[i].setAttribute('inert', '');
+      }
+    }
+  }
+
   function show(n) {
     n = clampScene(n);
     var from = state.current;
@@ -364,6 +388,7 @@
 
     flushPending(); // an in-flight transition settles before the next begins
     state.current = n;
+    syncSceneAccess(n);
 
     var outEl = sceneEls[from - 1] || null;
     var inEl = sceneEls[n - 1] || null;
@@ -405,6 +430,7 @@
     state.current = 1;
     state.obj = 0;
     if (sceneEl) sceneEl.classList.add('is-active'); // idempotent with SSR
+    syncSceneAccess(1);
     syncChrome(1);
     fxCall('morphTo', 1);
     if (sceneEl && OBJECTS[1]) renderObject(sceneEl, 1, 0, false);
