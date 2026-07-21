@@ -292,11 +292,31 @@ html:not(.js) #x-boot {
 }
 
 .x-boot-mark {
-  width: 46px;
-  height: 46px;
+  width: 84px;
+  height: 84px;
   align-self: center;
   color: var(--x-cyan);
-  filter: drop-shadow(0 0 12px rgba(0, 240, 255, .6));
+  filter: drop-shadow(0 0 14px rgba(0, 240, 255, .55));
+}
+
+/* the seal is a live instrument: bezel and shell counter-rotate slowly.
+   Reduced motion freezes both via the global animation clamp. */
+.x-boot-mark .xsl-bezel {
+  animation: x-seal-spin 70s linear infinite;
+  transform-origin: 16px 16px;
+}
+
+.x-boot-mark .xsl-shell {
+  animation: x-seal-spin-r 110s linear infinite;
+  transform-origin: 16px 16px;
+}
+
+@keyframes x-seal-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes x-seal-spin-r {
+  to { transform: rotate(-360deg); }
 }
 
 .x-boot-brand {
