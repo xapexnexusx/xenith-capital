@@ -2,9 +2,9 @@
    XENITH CAPITAL — SECURE CHANNEL TERMINAL v7 (FIELD INSTRUMENT)
    assets/terminal.js — owns #x-terminal inside #uplink (scene 05). Vanilla
    JS, zero deps.
-   Public API: window.XenithTerminal = { init(sel, opts), boot(), version }
+   Public API: window.XenithTerminal = { init(sel), boot(), version }
 
-   v6: the uplink is the console's secure-channel surface inside the FIELD
+   v7: the uplink is the console's secure-channel surface inside the FIELD
    INSTRUMENT scene grammar. The v4 multi-step clearance protocol — its
    state machine, persistence keys, and external event wiring — stays
    retired. What remains is the single-question analyst uplink.
@@ -18,15 +18,10 @@
    session readout stay synchronized with the channel state. Authorization is
    session-scoped and never initializes the terminal before the scene is used.
 
-   AUTHENTICATE — one question: 'what survives contact: signal or noise?'
-   Answer 'signal' → analyst verified: sessionStorage xv_auth=granted, and
-   both x:auth-granted and x:clearance-granted (legacy listener) dispatch.
-   Anything else → denied, retry allowed; ESC aborts. contact and mandate
-   stay SEALED until granted. inquiry@xenithcap.io exists ONLY inside the
-   contact/mandate flows (guided mandate: name → email → capital band
-   [1] $1M–$5M [2] $5M–$25M [3] $25M+ [4] below $1M — band 4 prints the
-   fixed not-a-fit line and closes gracefully; bands 1–3 hand off to the
-   mail client).
+   AUTHENTICATE — one local-console question: 'what survives contact: signal
+   or noise?' Answer 'signal' marks the session verified and dispatches the
+   existing visual event. The public console has no contact, inquiry, form,
+   application, transmission, or mailto path.
 
    Kept from v4: ordered print pipeline + per-character typing, reduced-
    motion instant print, hidden-tab rain pause, uptime clock, scan, matrix
@@ -37,11 +32,9 @@
 (function () {
   'use strict';
 
-  var VERSION = '6.0.0';
-  var DEFAULT_EMAIL = 'inquiry@xenithcap.io';
+  var VERSION = '7.1.0';
   var TYPE_MS = 12;            /* per-character cadence for system lines */
   var BOOT_GAP_MS = 130;       /* stagger between boot lines */
-  var SEND_DELAY_MS = 1500;    /* pause before handing off to the mail client */
   var SCAN_GAP_MS = 400;       /* stagger between doctrinal scan lines */
   var MATRIX_TICK_MS = 90;     /* rain re-render cadence */
   var MATRIX_MS = 8000;        /* total rain duration */
@@ -53,7 +46,7 @@
   var AUTH_QUESTION = 'what survives contact: signal or noise?';
 
   var DISCLOSURE_LINES = [
-    'Xenith Capital is a state-registered investment adviser.',
+    'Xenith Capital is an investment adviser registered with the Texas State Securities Board.',
     'Registration does not imply a certain level of skill or training.',
     'Informational only — not an offer or solicitation.',
     'Investing involves risk. Past performance is not indicative of future results.',
@@ -75,34 +68,6 @@
     'ハヒフヘホマミムメモヤユヨラリルレロワヲン０１２３４５６７８９';
   var RAIN_COL_PX = 12;
   var RAIN_ROW_PX = 15;
-
-  /* Capital bands live ONLY inside this mandate flow — never on a screen. */
-  var BAND_LABELS = {
-    '1': '$1M–$5M',
-    '2': '$5M–$25M',
-    '3': '$25M+',
-    '4': 'below $1M'
-  };
-
-  var BAND_MENU = [
-    '  [1] $1M–$5M',
-    '  [2] $5M–$25M',
-    '  [3] $25M+',
-    '  [4] below $1M'
-  ];
-
-  /* Band 4 prints exactly this line, then the flow ends gracefully. */
-  var BAND4_LINE = 'xenith is built for concentrated evidence-directed mandates; below $1M the fit is usually wrong — the doctrine is free, take it with you.';
-
-  var EMAIL_RE = /.+@.+\..+/;
-
-  /* Guided-flow steps: name → email → capital band → objective. */
-  var STEPS = [
-    { key: 'name',      prompt: 'step 1/4 — full name:',            placeholder: 'full name' },
-    { key: 'email',     prompt: 'step 2/4 — contact email:',        placeholder: 'you@domain.tld' },
-    { key: 'band',      prompt: 'step 3/4 — capital band:',         placeholder: 'enter 1-4' },
-    { key: 'objective', prompt: 'step 4/4 — objective (one line):', placeholder: 'one-line objective' }
-  ];
 
   /* ONE style block, scoped strictly to this widget's own line classes and
      the rain overlay. Colors mirror the v5 palette (phosphor cyan / alert
@@ -174,6 +139,7 @@
      lines, echoes, and queued responses always render in order. */
   function makePrinter(body) {
     var chain = Promise.resolve();
+    var generation = 0;
 
     function scroll() {
       body.scrollTop = body.scrollHeight;
@@ -186,9 +152,14 @@
       return el;
     }
 
-    function typeInto(el, text, done) {
+    function typeInto(el, text, ticket, done) {
       var i = 0;
       var timer = window.setInterval(function () {
+        if (ticket !== generation) {
+          window.clearInterval(timer);
+          done();
+          return;
+        }
         i += 1;
         el.textContent = text.slice(0, i);
         scroll();
@@ -204,15 +175,20 @@
     function print(text, cls) {
       var instant = prefersReduced() ||
         cls === 'xt-user' || cls === 'xt-err' || !text;
+      var ticket = generation;
       chain = chain.then(function () {
         return new Promise(function (resolve) {
+          if (ticket !== generation) {
+            resolve();
+            return;
+          }
           var el = makeLine(cls);
           if (instant) {
             el.textContent = text;
             scroll();
             resolve();
           } else {
-            typeInto(el, text, resolve);
+            typeInto(el, text, ticket, resolve);
           }
         });
       });
@@ -235,24 +211,24 @@
     }
 
     function clear() {
+      generation += 1;
+      chain = Promise.resolve();
       body.textContent = '';
     }
 
     return { print: print, printAll: printAll, wait: wait, clear: clear };
   }
 
-  function createTerminal(root, opts) {
+  function createTerminal(root) {
     var body = root.querySelector('.x-term-body');
     var form = root.querySelector('form.x-term-form');
     var input = root.querySelector('#x-term-input');
     if (!body || !form || !input) return null;
 
-    var email = (opts && opts.email) || DEFAULT_EMAIL;
     var printer = makePrinter(body);
 
-    /* State machine: { mode:'idle' } | { mode:'auth' } |
-       { mode:'mandate', step:0..3, data }. */
-    var state = { mode: 'idle', step: -1, data: {} };
+    /* State machine: idle or the local analyst-verification question. */
+    var state = { mode: 'idle' };
 
     /* Clearance gate: per-tab persistence. */
     var granted = storageGet(STORAGE_AUTH) === 'granted';
@@ -291,7 +267,7 @@
       }, 1000);
     }
 
-    /* v6.0 banner — printed once per page view, on lazy boot. */
+  /* v7 banner — printed once per page view, on lazy boot. */
     function bootLines() {
       return [
         'channel state: READY',
@@ -429,7 +405,7 @@
     function startAuth() {
       if (granted) {
         printer.print('channel already open — analyst verified', 'xt-ok');
-        printer.print("type 'contact' or 'mandate'");
+        printer.print('local research console ready');
         return;
       }
       state.mode = 'auth';
@@ -452,7 +428,7 @@
       storageSet(STORAGE_AUTH, 'granted');
       setAuthChipVerified();
       printer.print('analyst verified. channel open.', 'xt-ok');
-      printer.print("type 'contact' for the direct channel — 'mandate' for the guided inquiry");
+      printer.print('local research console unlocked — no outbound channel connected');
       emit('x:auth-granted');
       emit('x:clearance-granted'); /* legacy listener (toast lane) */
     }
@@ -464,130 +440,14 @@
       printer.print('authentication aborted — channel remains sealed', 'xt-err');
     }
 
-    /* ---------------- mandate guided flow ---------------- */
-
-    function askStep() {
-      var s = STEPS[state.step];
-      printer.print(s.prompt);
-      if (s.key === 'band') printer.printAll(BAND_MENU);
-      setPlaceholder(s.placeholder);
-    }
-
-    function startMandate() {
-      state.mode = 'mandate';
-      state.step = 0;
-      state.data = {};
-      printer.print('MANDATE INQUIRY // guided transmission — 4 steps // ESC aborts');
-      askStep();
-    }
-
-    function abortMandate() {
-      state.mode = 'idle';
-      state.step = -1;
-      state.data = {};
-      input.value = '';
-      setPlaceholder(null);
-      printer.print('mandate flow aborted', 'xt-err');
-    }
-
-    function completeMandate() {
-      var d = state.data;
-      state.mode = 'idle';
-      state.step = -1;
-      setPlaceholder(null);
-
-      printer.print('TRANSMISSION PREPARED', 'xt-ok');
-      printer.printAll([
-        '  name ...... ' + d.name,
-        '  email ..... ' + d.email,
-        '  band ...... ' + d.band,
-        '  objective . ' + d.objective
-      ]);
-      var ready = printer.print('opening secure mail channel → ' + email, 'xt-ok');
-
-      var subject = 'Mandate inquiry — ' + d.name;
-      var bodyText = [
-        'Name: ' + d.name,
-        'Email: ' + d.email,
-        'Capital band: ' + d.band,
-        'Objective: ' + d.objective,
-        '',
-        '— composed via the xenithcap.io secure channel'
-      ].join('\n');
-
-      ready.then(function () {
-        window.setTimeout(function () {
-          window.location.href = 'mailto:' + email +
-            '?subject=' + encodeURIComponent(subject) +
-            '&body=' + encodeURIComponent(bodyText);
-          printer.print('if no mail client opened, write directly: ' + email);
-        }, SEND_DELAY_MS);
-      });
-    }
-
-    function handleMandateInput(v) {
-      var s = STEPS[state.step];
-      if (!s) {
-        state.mode = 'idle';
-        state.step = -1;
-        setPlaceholder(null);
-        return;
-      }
-      switch (s.key) {
-        case 'name':
-          if (!v) { printer.print('name required — full name:', 'xt-err'); return; }
-          state.data.name = v;
-          break;
-        case 'email':
-          if (!EMAIL_RE.test(v)) {
-            printer.print('invalid email format — expected user@domain.tld:', 'xt-err');
-            return;
-          }
-          state.data.email = v;
-          break;
-        case 'band':
-          if (!BAND_LABELS[v]) {
-            printer.print('select a band — 1, 2, 3 or 4:', 'xt-err');
-            return;
-          }
-          if (v === '4') {
-            /* Below-fit band: print the exact not-a-fit line and end the
-               flow gracefully — no transmission prepared, no mail handoff. */
-            state.mode = 'idle';
-            state.step = -1;
-            state.data = {};
-            setPlaceholder(null);
-            printer.print(BAND4_LINE);
-            printer.print('mandate flow closed — no transmission sent');
-            return;
-          }
-          state.data.band = BAND_LABELS[v];
-          break;
-        case 'objective':
-          if (!v) { printer.print('objective required — one line:', 'xt-err'); return; }
-          state.data.objective = v;
-          completeMandate();
-          return;
-      }
-      state.step += 1;
-      askStep();
-    }
-
     /* ---------------- idle-mode command dispatch ---------------- */
 
-    function sealLine() {
-      printer.print('channel sealed — type authenticate', 'xt-err');
-    }
-
     function helpLines() {
-      var gate = granted ? 'OPEN' : 'SEALED';
       return [
         'command       function',
         '-------       --------',
         'help          show this command list',
         'authenticate  verify analyst clearance',
-        'contact       direct contact channel [' + gate + ']',
-        'mandate       guided mandate inquiry [' + gate + ']',
         'disclosures   regulatory disclosures',
         'scan          doctrinal exposure sweep',
         'matrix        signal saturation (8s)',
@@ -597,13 +457,6 @@
         'clear         clear terminal output',
         'exit          close session'
       ];
-    }
-
-    function printContact() {
-      printer.printAll([
-        'direct channel: ' + email,
-        'every transmission read personally'
-      ]);
     }
 
     function runCommand(cmd) {
@@ -617,9 +470,6 @@
           break;
         case 'authenticate':
           startAuth();
-          break;
-        case 'contact':
-          if (granted) printContact(); else sealLine();
           break;
         case 'disclosures':
           printer.printAll(DISCLOSURE_LINES);
@@ -641,9 +491,6 @@
         case 'clear':
           printer.clear();
           break;
-        case 'mandate':
-          if (granted) startMandate(); else sealLine();
-          break;
         case 'iddqd':
           printer.print('IDDQD: narrative immunity already active', 'xt-ok');
           if (window.XENITH_FX && window.XENITH_FX.burst) {
@@ -654,9 +501,8 @@
           printer.print('a hollow voice says: EVIDENCE.');
           break;
         case 'exit':
-          printer.print(granted
-            ? 'channel remains open — type contact'
-            : 'channel remains sealed — type authenticate');
+          printer.print('local session remains ' +
+            (granted ? 'verified' : 'sealed') + ' — no outbound channel connected');
           break;
         default:
           printer.print("unrecognized command — type 'help'", 'xt-err');
@@ -669,11 +515,6 @@
       e.preventDefault();
       var raw = input.value;
       input.value = '';
-      if (state.mode === 'mandate') {
-        printer.print('> ' + raw, 'xt-user');
-        handleMandateInput(raw.trim());
-        return;
-      }
       if (state.mode === 'auth') {
         printer.print('> ' + raw, 'xt-user');
         handleAuthInput(raw.trim());
@@ -686,12 +527,16 @@
     });
 
     input.addEventListener('keydown', function (e) {
-      if (e.key !== 'Escape') return;
-      if (state.mode === 'mandate') {
-        abortMandate();
-      } else if (state.mode === 'auth') {
-        abortAuth();
+      if (e.key === 'Enter' && !e.isComposing) {
+        e.preventDefault();
+        if (typeof form.requestSubmit === 'function') form.requestSubmit();
+        else {
+          var submit = form.querySelector('[type="submit"]');
+          if (submit) submit.click();
+        }
+        return;
       }
+      if (e.key === 'Escape' && state.mode === 'auth') abortAuth();
     });
 
     /* Freeze the rain while the tab is hidden; the uptime tick skips hidden
@@ -722,17 +567,17 @@
     };
   }
 
-  function init(sel, opts) {
+  function init(sel) {
     var root = typeof sel === 'string' ? document.querySelector(sel) : sel;
     if (!root || !root.querySelector) return null;
     if (root.__xenithTerminal) return root.__xenithTerminal;
     injectStyles();
-    var api = createTerminal(root, opts || {});
+    var api = createTerminal(root);
     if (api) root.__xenithTerminal = api;
     return api;
   }
 
-  /* ---------------- v6 lazy boot ---------------- */
+  /* ---------------- v7 lazy boot ---------------- */
 
   var termApi = null;
   var booted = false;
@@ -742,7 +587,7 @@
      driven boots stay passive, and click/focus boots already have the
      user's cursor. */
   function boot() {
-    if (!termApi) termApi = init('#x-terminal', { email: DEFAULT_EMAIL });
+    if (!termApi) termApi = init('#x-terminal');
     if (termApi && !booted) {
       booted = true;
       termApi.boot();
@@ -753,7 +598,7 @@
   var rootEl = document.getElementById('x-terminal');
   var uplinkEl = document.getElementById('uplink');
 
-  /* v6 chrome sync at load, ahead of the lazy boot: the scene markup is
+  /* v7 chrome sync at load, ahead of the lazy boot: the scene markup is
      frozen with the v5 title, so it is corrected from here; a tab that
      already holds the grant gets the VERIFIED chip immediately — both are
      visible the first time scene 05 enters, booted or not. */
@@ -769,10 +614,18 @@
     rootEl.addEventListener('touchstart', boot, { passive: true });
   }
 
+  function channelActive() {
+    return !!(uplinkEl && !uplinkEl.hasAttribute('aria-hidden'));
+  }
+
+  document.addEventListener('x:field-selected', function (e) {
+    if (e && e.detail && e.detail.scene === 5) boot();
+  });
+
   if (uplinkEl && typeof IntersectionObserver === 'function') {
     var io = new IntersectionObserver(function (entries) {
       for (var i = 0; i < entries.length; i++) {
-        if (entries[i].isIntersecting) {
+        if (entries[i].isIntersecting && channelActive()) {
           io.disconnect();
           boot();
           break;
@@ -780,8 +633,8 @@
       }
     }, { threshold: 0.2 });
     io.observe(uplinkEl);
-  } else if (rootEl && typeof IntersectionObserver !== 'function') {
-    /* Legacy engines without an observer boot immediately. */
+  } else if (rootEl && typeof IntersectionObserver !== 'function' && channelActive()) {
+    /* Legacy engines still respect the active-field gate. */
     boot();
   }
 

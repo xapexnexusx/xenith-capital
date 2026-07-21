@@ -22,8 +22,8 @@
     if (!panel) return;
 
     // Background siblings veiled with aria-hidden while the dialog is open.
-    // v6 body children: #x-boot, canvas#fx-bg, .x-scanlines,
-    // header#x-topbar, nav#x-rail, main#x-scene-root, #x-footer-strip,
+    // Body landmarks: #x-boot, canvas#fx-bg, .x-scanlines,
+    // header#x-topbar, main#x-scene-root, #x-footer-strip,
     // #x-disc-open, #x-disc, noscript.
     // #x-boot/canvas/scanlines are decorative and already aria-hidden in
     // markup, so they need no veil; every veiled node's pre-open state is
@@ -31,7 +31,6 @@
     // Missing nodes are skipped silently by setLandmarksHidden.
     var landmarks = [
       document.getElementById('x-topbar'),
-      document.getElementById('x-rail'),
       document.getElementById('x-scene-root'),
       document.getElementById('x-footer-strip'),
       document.getElementById('x-disc-open')

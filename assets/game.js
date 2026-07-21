@@ -1,5 +1,5 @@
 /* ============================================================================
-   XENITH CAPITAL — assets/game.js  (v6, Lane 6: toasts + auth sweep)
+   XENITH CAPITAL — assets/game.js  (auth + discovery feedback)
    Field-instrument toasts + ANALYST VERIFIED sweep. Vanilla JS, zero
    dependencies, single IIFE, exposes nothing globally. Injects ONE <style>
    scoped exclusively to .xg-* classes; touches no other lane's selectors.
@@ -7,11 +7,7 @@
    toasts only and the v4/v5 arcade + military vocabulary is gone.)
 
    Listens on document for CustomEvents dispatched by main.js / terminal.js:
-     x:object-inspected   -> toast "OBJECT INSPECTED // <name>"
-                             (detail.obj is the object name; deduped per
-                             object name per session in a Set — each context
-                             object announces once, repeats stay quiet)
-     x:konami             -> toast "ACHIEVEMENT: OLD SCHOOL"
+     x:konami             -> toast "SIGNAL FOUND: OLD SCHOOL"
      x:auth-granted       -> shared handler with x:clearance-granted,
      x:clearance-granted    deduped to ONCE per session: full-screen
                              cyan->alert-red sweep (~600ms), then a .xg-win
@@ -191,18 +187,6 @@
 
   /* ----------------------------- event wiring ---------------------------- */
 
-  // Each context object announces its first inspection only; repeat
-  // selections of the same object stay quiet for the rest of the session.
-  var inspectedObjs = new Set();
-
-  function onInspected(e) {
-    var d = (e && e.detail) || {};
-    var obj = (d.obj == null ? '' : String(d.obj)).replace(/\s+/g, ' ').trim();
-    if (!obj || inspectedObjs.has(obj)) return;
-    inspectedObjs.add(obj);
-    pushToast('OBJECT INSPECTED // ' + obj, false);
-  }
-
   function onKonami() {
     pushToast('SIGNAL FOUND: OLD SCHOOL', false);
   }
@@ -221,7 +205,6 @@
   function init() {
     if (document.querySelector('.xg-stack')) return; // already running
     injectStyle();
-    document.addEventListener('x:object-inspected', onInspected);
     document.addEventListener('x:konami', onKonami);
     document.addEventListener('x:auth-granted', onAuth);
     document.addEventListener('x:clearance-granted', onAuth);

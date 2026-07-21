@@ -1,20 +1,20 @@
 /* ==========================================================================
-   XENITH v6 — FIELD INSTRUMENT · CONSOLE THEME
+   XENITH — FIELD INSTRUMENT · CONSOLE THEME
    assets/xenith.css — Lane 1, full rewrite around the v6 DOM (index.html FINAL).
 
    v6 is a research console: deep blue-black field, a living particle formation
-   at center (owned by fx.js), liquid-glass side panels, a vertical icon rail,
-   a top field bar, a bottom context-object row per scene, and the uplink
-   terminal. Amber micro-labels, cyan primary, electric-blue accents, pulsing
-   red for alert states only.
+   at center (owned by fx.js), liquid-glass side panels, an expanding field
+   map in the top bar, contextual inspector tabs, and the uplink terminal.
+   Amber micro-labels, cyan primary, electric-blue accents, pulsing red for
+   alert states only.
 
    Kept from v5: design-token core, boot overlay chrome, scanlines/CRT film
-   (subtler), mandate terminal block (.x-term-*), terminal line fallbacks +
-   widget chrome (.xt-*), disclosures drawer block, contact panel, buttons,
+   (subtler), terminal block (.x-term-*), terminal line fallbacks +
+   widget chrome (.xt-*), disclosures drawer block, buttons,
    thin scrollbar, ::selection, reduced-motion discipline. Everything else is
    new. Vanilla CSS, zero build. Fonts via Google Fonts in index.html.
 
-   Layer map: #fx-bg 0 · .x-scanlines 1 · #x-scene-root 2 · #x-rail 80/850 ·
+   Layer map: #fx-bg 0 · .x-scanlines 1 · #x-scene-root 2 · field map 910 ·
    #x-disc-open 890 · #x-footer-strip 900 · #x-topbar 900 · drawer 9500 ·
    boot 10000. (Toasts/sweep are injected by game.js at 9000/9400.)
    ========================================================================== */
@@ -55,16 +55,10 @@
   --gx: 50%;
   --gy: 18%;
   --glare: 0;      /* 0 idle -> 1 hovered */
-  /* card tilt (ui-fx.js writes per card) */
-  --tx: 0deg;
-  --ty: 0deg;
-
   /* fixed chrome metrics */
   --x-topbar-h: 54px;
   --x-footer-h: 34px;
-  --x-rail-w: 56px;
-  /* left content gutter clears the rail on desktop */
-  --x-gutter-l: clamp(6rem, 8vw, 8.5rem);
+  --x-gutter-l: clamp(2rem, 4.5vw, 5rem);
 }
 
 /* --------------------------------------------------------------------------
@@ -1389,58 +1383,6 @@ html.js .x-scene.is-active {
   box-shadow: 0 0 18px rgba(0, 240, 255, .12);
 }
 
-/* --- contact side panel (v5 block, preserved) ------------------------------ */
-.x-contact {
-  padding: 1rem 1.15rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-  background: var(--x-glass-bg);
-  -webkit-backdrop-filter: var(--x-glass-blur);
-  backdrop-filter: var(--x-glass-blur);
-  border: 1px solid var(--x-line);
-}
-
-.x-contact-row {
-  display: grid;
-  grid-template-columns: 96px 1fr;
-  gap: .8rem;
-  align-items: baseline;
-  padding: .8rem 0;
-  border-bottom: 1px solid var(--x-line);
-}
-
-.x-contact-row:last-child {
-  border-bottom: none;
-}
-
-.x-contact-k {
-  font-family: var(--x-font-m);
-  font-size: .58rem;
-  letter-spacing: .22em;
-  color: var(--x-dim);
-}
-
-.x-contact-row span:not(.x-contact-k) {
-  font-size: .88rem;
-  color: var(--x-text);
-}
-
-.x-contact a {
-  color: var(--x-cyan);
-  font-family: var(--x-font-m);
-  font-size: .85rem;
-  border-bottom: 1px solid rgba(0, 240, 255, .35);
-  padding-bottom: 2px;
-  transition: text-shadow .25s ease, border-color .25s ease;
-}
-
-.x-contact a:hover {
-  text-shadow: 0 0 14px rgba(0, 240, 255, .75);
-  border-bottom-color: var(--x-cyan);
-}
-
 /* --------------------------------------------------------------------------
    13. BUTTONS (v5 block, preserved)
    -------------------------------------------------------------------------- */
@@ -1854,14 +1796,13 @@ body.x-disc-lock {
   .xs-panel-l,
   .xs-panel-r,
   .xo-card,
-  .x-contact,
   #x-disc {
     background: rgba(8, 12, 20, .94);
   }
 }
 
 /* --------------------------------------------------------------------------
-   18. RESPONSIVE — 1100 panels narrow / 860 panels stack + rail becomes a
+   18. RESPONSIVE — 1100 panels narrow / 860 panels stack into a compact
        bottom bar / 640 type clamps. Contract floor: flawless at 360×640.
    -------------------------------------------------------------------------- */
 @media (max-width: 1100px) {
@@ -2429,10 +2370,17 @@ body.x-disc-lock {
     line-height: 1.35;
   }
 
-  .xi-system,
-  .xi-auth {
-    display: none;
+  .xi-auth { display: none; }
+
+  .xi-system {
+    gap: .22rem;
+    margin-top: .42rem;
+    padding-top: .38rem;
+    font-size: .44rem;
+    line-height: 1.35;
   }
+
+  .xi-system-v { font-size: .48rem; }
 
   .xo-facts {
     margin-top: .4rem;
@@ -2536,16 +2484,625 @@ body.x-disc-lock {
 }
 
 /* --------------------------------------------------------------------------
+   18A. FIELD MAP + INSPECTOR HIERARCHY
+
+   This block supersedes the retired left rail and bottom object strip. The
+   scene formation remains the visual center; a single expandable field map
+   owns global navigation, while local layers stay inside the inspector.
+   -------------------------------------------------------------------------- */
+#x-field-nav {
+  position: relative;
+  isolation: isolate;
+}
+
+#x-field-trigger {
+  position: relative;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .38rem .72rem .38rem .55rem;
+  text-align: left;
+  background:
+    linear-gradient(110deg, rgba(151, 214, 255, .055), transparent 46%),
+    rgba(5, 10, 18, .22);
+  border: 1px solid transparent;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: background .24s ease, border-color .24s ease,
+              box-shadow .24s ease, transform .24s var(--x-ease-out);
+}
+
+#x-field-trigger::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-left: .1rem;
+  border-right: 1px solid var(--x-cyan);
+  border-bottom: 1px solid var(--x-cyan);
+  opacity: .7;
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform .28s var(--x-ease-out), opacity .25s ease;
+}
+
+#x-field-nav.is-open #x-field-trigger::after {
+  opacity: 1;
+  transform: rotate(225deg) translate(-1px, -1px);
+}
+
+#x-field-trigger:disabled {
+  cursor: default;
+}
+
+@media (hover: hover) {
+  #x-field-trigger:not(:disabled):hover,
+  #x-field-nav.is-open #x-field-trigger {
+    background:
+      linear-gradient(110deg, rgba(151, 214, 255, .105), transparent 54%),
+      rgba(5, 11, 20, .52);
+    border-color: rgba(0, 240, 255, .24);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .09),
+                0 0 24px rgba(0, 240, 255, .09);
+  }
+}
+
+.xft-state {
+  min-width: 0;
+  display: grid;
+  gap: .02rem;
+  padding-left: .72rem;
+  border-left: 1px solid rgba(0, 240, 255, .16);
+  font-family: var(--x-font-m);
+  white-space: nowrap;
+}
+
+.xft-kicker {
+  font-size: .42rem;
+  letter-spacing: .25em;
+  color: var(--x-dim);
+}
+
+.xft-current {
+  font-size: .52rem;
+  letter-spacing: .16em;
+  color: var(--x-cyan);
+  text-shadow: 0 0 10px rgba(0, 240, 255, .28);
+}
+
+#x-field-menu {
+  --glare: 0;
+  position: absolute;
+  top: calc(100% + .7rem);
+  left: 0;
+  z-index: 20;
+  width: min(500px, calc(100vw - 2rem));
+  padding: .85rem;
+  overflow: hidden;
+  background:
+    radial-gradient(420px circle at var(--gx) var(--gy), rgba(151, 214, 255, calc(.11 * var(--glare))), transparent 64%),
+    linear-gradient(135deg, rgba(151, 214, 255, .085), transparent 34%),
+    linear-gradient(108deg, rgba(3, 8, 15, .94), rgba(7, 14, 25, .82) 62%, rgba(9, 17, 31, .72)),
+    rgba(5, 10, 18, .86);
+  -webkit-backdrop-filter: blur(24px) saturate(1.7) brightness(1.04);
+  backdrop-filter: blur(24px) saturate(1.7) brightness(1.04);
+  border: 1px solid rgba(151, 214, 255, .22);
+  box-shadow:
+    0 34px 90px rgba(0, 0, 0, .66),
+    0 0 62px -16px rgba(0, 240, 255, .25),
+    inset 0 1px 0 rgba(255, 255, 255, .16),
+    inset 0 -1px 0 rgba(0, 0, 0, .5),
+    inset 22px 0 52px -42px rgba(0, 240, 255, .3);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  clip-path: inset(0 72% 92% 0 round 2px);
+  transform: translate3d(-8px, -7px, 0) scale(.96);
+  transform-origin: top left;
+  transition: opacity .2s ease, visibility 0s linear .36s,
+              clip-path .42s var(--x-ease-out), transform .42s var(--x-ease-out);
+}
+
+#x-field-menu::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, var(--x-cyan), transparent 42%) top left / 42% 1px,
+    linear-gradient(var(--x-cyan), transparent 58%) top left / 1px 42%,
+    linear-gradient(270deg, rgba(79, 159, 255, .8), transparent 45%) bottom right / 36% 1px,
+    linear-gradient(0deg, rgba(79, 159, 255, .8), transparent 55%) bottom right / 1px 36%;
+  background-repeat: no-repeat;
+  opacity: .75;
+}
+
+#x-field-menu.is-open {
+  --glare: 1;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  clip-path: inset(0 0 0 0 round 2px);
+  transform: translate3d(0, 0, 0) scale(1);
+  transition-delay: 0s;
+}
+
+.xfm-head,
+.xfm-foot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--x-font-m);
+  font-size: .52rem;
+  letter-spacing: .18em;
+  color: var(--x-dim);
+}
+
+.xfm-head {
+  padding: .12rem .15rem .72rem;
+  border-bottom: 1px solid var(--x-line);
+}
+
+.xfm-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: .28rem;
+  padding: .45rem 0;
+}
+
+.xfm-item {
+  position: relative;
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 2.6rem minmax(0, 1fr);
+  align-items: center;
+  gap: .2rem;
+  width: 100%;
+  padding: .58rem .72rem;
+  text-align: left;
+  color: var(--x-text);
+  background: rgba(0, 240, 255, .018);
+  border: 1px solid rgba(151, 214, 255, .08);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  opacity: 0;
+  transform: translateX(-18px);
+  transition: opacity .3s ease, transform .34s var(--x-ease-out),
+              border-color .22s ease, background .22s ease, box-shadow .22s ease;
+}
+
+#x-field-menu.is-open .xfm-item {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+#x-field-menu.is-open .xfm-item:nth-child(1) { transition-delay: .045s; }
+#x-field-menu.is-open .xfm-item:nth-child(2) { transition-delay: .075s; }
+#x-field-menu.is-open .xfm-item:nth-child(3) { transition-delay: .105s; }
+#x-field-menu.is-open .xfm-item:nth-child(4) { transition-delay: .135s; }
+#x-field-menu.is-open .xfm-item:nth-child(5) { transition-delay: .165s; }
+
+.xfm-item::before {
+  content: "";
+  position: absolute;
+  top: 14%;
+  bottom: 14%;
+  left: -1px;
+  width: 2px;
+  background: var(--x-cyan);
+  box-shadow: 0 0 12px rgba(0, 240, 255, .65);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.xfm-item.is-active {
+  background: linear-gradient(90deg, rgba(0, 240, 255, .09), rgba(79, 159, 255, .025));
+  border-color: rgba(0, 240, 255, .34);
+  box-shadow: inset 0 0 24px rgba(0, 240, 255, .035);
+}
+
+.xfm-item.is-active::before { opacity: 1; }
+
+@media (hover: hover) {
+  .xfm-item:hover {
+    background: linear-gradient(90deg, rgba(0, 240, 255, .11), rgba(79, 159, 255, .04));
+    border-color: rgba(0, 240, 255, .46);
+    box-shadow: 0 0 22px rgba(0, 240, 255, .08), inset 0 1px 0 rgba(255, 255, 255, .06);
+    transform: translateX(4px);
+  }
+}
+
+.xfm-num {
+  font-family: var(--x-font-m);
+  font-size: .58rem;
+  letter-spacing: .2em;
+  color: var(--x-cyan);
+  opacity: .8;
+}
+
+.xfm-copy {
+  min-width: 0;
+  display: grid;
+  gap: .12rem;
+}
+
+.xfm-name {
+  font-family: var(--x-font-d);
+  font-size: .88rem;
+  font-weight: 500;
+  letter-spacing: .1em;
+  line-height: 1.2;
+  color: var(--x-text);
+}
+
+.xfm-desc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--x-font-m);
+  font-size: .5rem;
+  letter-spacing: .08em;
+  color: var(--x-dim);
+}
+
+.xfm-foot {
+  padding: .58rem .15rem .04rem;
+  border-top: 1px solid var(--x-line);
+  font-size: .46rem;
+}
+
+/* The retired global rail and scene-level object strip no longer participate
+   in layout even if stale markup is introduced by a cached document. */
+#x-rail,
+.xs-objects {
+  display: none !important;
+}
+
+.xs-panel-l {
+  max-height: calc(100vh - var(--x-topbar-h) - var(--x-footer-h) - 6rem);
+  max-height: calc(100dvh - var(--x-topbar-h) - var(--x-footer-h) - 6rem);
+}
+
+.xs-panel-r {
+  width: min(440px, 31vw);
+  max-height: calc(100vh - var(--x-topbar-h) - var(--x-footer-h) - 5rem);
+  max-height: calc(100dvh - var(--x-topbar-h) - var(--x-footer-h) - 5rem);
+  padding: 1.35rem 1.45rem 1.5rem;
+}
+
+.xi-nav,
+.xi-content {
+  position: relative;
+  z-index: 1;
+}
+
+.xi-nav {
+  margin: -.15rem 0 1.15rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--x-line);
+}
+
+.xi-nav-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .62rem;
+  font-family: var(--x-font-m);
+  font-size: .5rem;
+  letter-spacing: .2em;
+  color: var(--x-dim);
+}
+
+.xi-nav-count {
+  color: var(--x-cyan);
+  font-variant-numeric: tabular-nums;
+}
+
+.xi-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .42rem;
+}
+
+.xi-layer-tab {
+  position: relative;
+  min-width: 0;
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: .52rem;
+  padding: .52rem .62rem;
+  text-align: left;
+  background: rgba(0, 240, 255, .018);
+  border: 1px solid rgba(151, 214, 255, .1);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color .2s ease, background .2s ease,
+              box-shadow .2s ease, color .2s ease;
+}
+
+.xi-layer-tab::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: 18%;
+  left: 18%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--x-cyan), transparent);
+  box-shadow: 0 0 9px rgba(0, 240, 255, .55);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.xi-layer-tab .xo-num {
+  font-size: .5rem;
+  color: var(--x-cyan);
+  opacity: .7;
+}
+
+.xi-layer-tab .xo-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--x-font-m);
+  font-size: .58rem;
+  font-weight: 400;
+  letter-spacing: .09em;
+  color: var(--x-copy);
+}
+
+.xi-layer-tab.is-sel {
+  background: linear-gradient(110deg, rgba(0, 240, 255, .1), rgba(79, 159, 255, .025));
+  border-color: rgba(0, 240, 255, .46);
+  box-shadow: inset 0 0 16px rgba(0, 240, 255, .045), 0 0 18px rgba(0, 240, 255, .055);
+}
+
+.xi-layer-tab.is-sel::before { opacity: 1; }
+.xi-layer-tab.is-sel .xo-name { color: var(--x-text); }
+
+@media (hover: hover) {
+  .xi-layer-tab:hover {
+    background: rgba(0, 240, 255, .065);
+    border-color: rgba(0, 240, 255, .34);
+  }
+}
+
+.xi-content.xi-swap {
+  animation: x-inspector-resolve .24s var(--x-ease-out) both;
+}
+
+@keyframes x-inspector-resolve {
+  0%   { opacity: .38; transform: translateY(7px); filter: blur(3px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+.xi-head {
+  color: var(--x-cyan);
+  text-shadow: 0 0 10px rgba(0, 240, 255, .24);
+}
+
+.xs-terminal-wrap {
+  left: 50%;
+  width: min(1040px, calc(100vw - 8rem));
+}
+
+#x-disc-open {
+  bottom: calc(var(--x-footer-h) + .7rem + env(safe-area-inset-bottom));
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  #x-field-menu,
+  #x-field-trigger,
+  .xi-layer-tab {
+    background: rgba(8, 12, 20, .96);
+  }
+}
+
+@media (max-width: 1100px) {
+  .xs-panel-l { width: min(500px, 45vw); }
+  .xs-panel-r { width: min(400px, 36vw); }
+  .xs-terminal-wrap { width: min(920px, calc(100vw - 4rem)); }
+}
+
+@media (max-width: 860px) {
+  #x-field-menu {
+    position: fixed;
+    top: calc(var(--x-topbar-h) + .5rem + env(safe-area-inset-top));
+    right: calc(.65rem + env(safe-area-inset-right));
+    left: calc(.65rem + env(safe-area-inset-left));
+    width: auto;
+    max-height: calc(100dvh - var(--x-topbar-h) - var(--x-footer-h) - 1.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .x-scene:not([data-scene="5"]) {
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: calc(var(--x-topbar-h) + .72rem + env(safe-area-inset-top))
+             calc(.8rem + env(safe-area-inset-right))
+             calc(var(--x-footer-h) + 1.25rem + env(safe-area-inset-bottom))
+             calc(.8rem + env(safe-area-inset-left));
+  }
+
+  .x-scene:not([data-scene="5"]) .xs-panel-l,
+  .x-scene:not([data-scene="5"]) .xs-panel-r {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    margin: 0 0 .72rem;
+    transform: none;
+    overflow: visible;
+  }
+
+  .x-scene:not([data-scene="5"]) .xs-panel-l { padding: 1.25rem 1.3rem; }
+  .x-scene:not([data-scene="5"]) .xs-panel-r { padding: 1.15rem 1.25rem 1.3rem; }
+
+  .x-scene[data-scene="5"] {
+    display: flex;
+    padding: calc(var(--x-topbar-h) + .7rem + env(safe-area-inset-top))
+             calc(.8rem + env(safe-area-inset-right))
+             calc(var(--x-footer-h) + .8rem + env(safe-area-inset-bottom))
+             calc(.8rem + env(safe-area-inset-left));
+  }
+
+  .xi-nav { margin-bottom: 1rem; }
+}
+
+@media (max-width: 640px) {
+  .xtb-c { display: none; }
+  #x-field-trigger { min-height: 44px; gap: .5rem; padding-right: .58rem; }
+  .xft-state { padding-left: .55rem; }
+  .xft-kicker { display: none; }
+  .xft-current { font-size: .48rem; }
+  .xfm-item { min-height: 54px; }
+  .xi-tabs { gap: .35rem; }
+  .xi-layer-tab { padding: .48rem .5rem; gap: .4rem; }
+  .xi-layer-tab .xo-name { font-size: .54rem; }
+  .xi-title { font-size: 1.5rem; }
+  .xi-desc { font-size: .88rem; }
+}
+
+@media (max-width: 420px) {
+  #x-topbar { gap: .35rem; padding-right: .62rem; padding-left: .62rem; }
+  #x-field-trigger { padding-left: .4rem; }
+  .xtb-brand { font-size: .62rem; letter-spacing: .16em; }
+  .xft-state { display: none; }
+  #x-field-menu { right: .45rem; left: .45rem; }
+  .xfm-desc { font-size: .46rem; }
+  .xfm-foot span:first-child { display: none; }
+}
+
+@media (max-height: 700px) and (orientation: landscape) {
+  #x-field-menu {
+    top: calc(var(--x-topbar-h) + .35rem + env(safe-area-inset-top));
+    max-height: calc(100dvh - var(--x-topbar-h) - var(--x-footer-h) - .9rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    padding: .55rem;
+  }
+
+  .xfm-head { padding-bottom: .4rem; }
+  .xfm-grid { grid-template-columns: 1fr 1fr; gap: .25rem; padding: .3rem 0; }
+  .xfm-item { min-height: 42px; padding: .38rem .48rem; grid-template-columns: 2rem minmax(0, 1fr); }
+  .xfm-item:last-child { grid-column: 1 / -1; }
+  .xfm-desc { display: none; }
+  .xfm-foot { padding-top: .35rem; }
+
+  .x-scene:not([data-scene="5"]) {
+    display: grid;
+    grid-template-columns: minmax(0, 1.22fr) minmax(0, .78fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: .5rem;
+    overflow: hidden;
+    padding: calc(var(--x-topbar-h) + .35rem + env(safe-area-inset-top))
+             calc(.55rem + env(safe-area-inset-right))
+             calc(var(--x-footer-h) + .42rem + env(safe-area-inset-bottom))
+             calc(.55rem + env(safe-area-inset-left));
+  }
+
+  .x-scene:not([data-scene="5"]) .xs-panel-l,
+  .x-scene:not([data-scene="5"]) .xs-panel-r {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow-y: auto;
+    padding: .62rem .78rem;
+  }
+
+  .x-scene:not([data-scene="5"]) .xs-panel-l { grid-column: 1; grid-row: 1; }
+  .x-scene:not([data-scene="5"]) .xs-panel-r { grid-column: 2; grid-row: 1; }
+  .xi-nav { margin: -.05rem 0 .48rem; padding-bottom: .48rem; }
+  .xi-nav-head { margin-bottom: .32rem; font-size: .42rem; }
+  .xi-tabs { gap: .25rem; }
+  .xi-layer-tab { min-height: 34px; padding: .28rem .38rem; gap: .3rem; }
+  .xi-layer-tab .xo-num { font-size: .4rem; }
+  .xi-layer-tab .xo-name { font-size: .46rem; }
+  .xi-head { margin-bottom: .28rem; }
+  .x-scene[data-scene="5"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    padding: calc(var(--x-topbar-h) + .35rem + env(safe-area-inset-top))
+             calc(.55rem + env(safe-area-inset-right))
+             calc(var(--x-footer-h) + .42rem + env(safe-area-inset-bottom))
+             calc(.55rem + env(safe-area-inset-left));
+  }
+}
+
+@media (max-width: 860px), (max-height: 700px) and (orientation: landscape) {
+  #x-footer-strip {
+    padding-right: calc(3.4rem + env(safe-area-inset-right));
+  }
+
+  #x-disc-open {
+    right: calc(.25rem + env(safe-area-inset-right));
+    bottom: env(safe-area-inset-bottom);
+    z-index: 910;
+    background: transparent;
+    border-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  #x-disc-open::before {
+    content: "";
+    position: absolute;
+    inset: 7px;
+    border: 1px solid rgba(151, 214, 255, .18);
+    border-radius: 50%;
+    background: rgba(7, 13, 23, .86);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+  }
+
+  #x-disc-open::after { position: relative; z-index: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #x-field-menu,
+  .xfm-item,
+  .xi-content.xi-swap {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
    NO-JS FALLBACK — one coherent static field, no dead controls or false
    online status. The first scene remains the concise public explanation;
    the noscript band explains how to enter the full console.
    -------------------------------------------------------------------------- */
 html:not(.js) #x-rail,
+html:not(.js) #x-field-menu,
 html:not(.js) #x-disc-open,
 html:not(.js) .xtb-r,
 html:not(.js) .xs-panel-r,
 html:not(.js) .xs-objects,
 html:not(.js) .x-scene:not([data-scene="1"]) {
+  display: none;
+}
+
+html:not(.js) #x-field-trigger {
+  padding-left: 0;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+html:not(.js) #x-field-trigger::after,
+html:not(.js) .xft-state {
   display: none;
 }
 

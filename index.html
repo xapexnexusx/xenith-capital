@@ -18,6 +18,11 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xenithcap.io/">
 <meta property="og:image" content="https://xenithcap.io/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Xenith Capital — portfolio construction, directed by evidence">
+<meta property="og:site_name" content="Xenith Capital">
+<meta name="twitter:card" content="summary_large_image">
 <script>document.documentElement.className += ' js';</script>
 </head>
 <body class="x-preload">
@@ -61,7 +66,9 @@
 <div class="x-scanlines" aria-hidden="true"></div>
 
 <header id="x-topbar">
-  <div class="xtb-l">
+  <div class="xtb-l" id="x-field-nav">
+    <button id="x-field-trigger" type="button" aria-label="Open field map"
+            aria-expanded="false" aria-controls="x-field-menu" disabled>
     <svg class="x-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
       <!-- THE ORBITAL v2: an orbiting body and its tapered luminous trail,
            sweeping in true perspective behind the core -->
@@ -78,23 +85,44 @@
       </g>
       <circle cx="16" cy="16" r="3.2" fill="#cffaff"/>
     </svg>
-    <span class="xtb-brand">XENITH CAPITAL</span>
+      <span class="xtb-brand">XENITH CAPITAL</span>
+      <span class="xft-state" aria-hidden="true">
+        <span class="xft-kicker">FIELD MAP</span>
+        <span class="xft-current"><span id="x-nav-index">01</span> / <span id="x-nav-name">ARCHITECTURE</span></span>
+      </span>
+    </button>
+    <nav id="x-field-menu" aria-label="Primary fields" aria-hidden="true" inert>
+      <div class="xfm-head">
+        <span>FIELD MAP / SELECT DOMAIN</span>
+        <span id="x-field-progress">01 / 05</span>
+      </div>
+      <div class="xfm-grid">
+        <button class="xfm-item is-active" data-scene="1" type="button" aria-current="page">
+          <span class="xfm-num">01</span><span class="xfm-copy"><span class="xfm-name">ARCHITECTURE</span><span class="xfm-desc">Mandate to monitored portfolio</span></span>
+        </button>
+        <button class="xfm-item" data-scene="2" type="button">
+          <span class="xfm-num">02</span><span class="xfm-copy"><span class="xfm-name">RESEARCH</span><span class="xfm-desc">Evidence to earned conviction</span></span>
+        </button>
+        <button class="xfm-item" data-scene="3" type="button">
+          <span class="xfm-num">03</span><span class="xfm-copy"><span class="xfm-name">RISK</span><span class="xfm-desc">Loss capacity and portfolio bounds</span></span>
+        </button>
+        <button class="xfm-item" data-scene="4" type="button">
+          <span class="xfm-num">04</span><span class="xfm-copy"><span class="xfm-name">THE FIRM</span><span class="xfm-desc">Direct authority and accountability</span></span>
+        </button>
+        <button class="xfm-item" data-scene="5" type="button">
+          <span class="xfm-num">05</span><span class="xfm-copy"><span class="xfm-name">CHANNEL</span><span class="xfm-desc">Interactive research terminal</span></span>
+        </button>
+      </div>
+      <p class="xfm-foot"><span>SCROLL / KEYS</span><span>MOVE BETWEEN FIELDS</span></p>
+    </nav>
   </div>
-  <div class="xtb-c"><span id="x-field-label">XC / FIELD 01 — PORTFOLIO ARCHITECTURE</span></div>
+  <div class="xtb-c"><span id="x-field-label">FIELD 01 / ARCHITECTURE · LAYER 01 / MANDATE</span></div>
   <div class="xtb-r">
     <span class="xtb-tags">RESEARCH-DRIVEN&nbsp;•&nbsp;FOUNDER-LED</span>
     <span id="x-uptime" aria-hidden="true">T+00:00:00</span>
     <span class="xtb-status"><span class="x-pulse-dot" aria-hidden="true"></span>SYS.ONLINE</span>
   </div>
 </header>
-
-<nav id="x-rail" aria-label="Sections">
-  <button class="xr-item is-active" data-scene="1" type="button" aria-label="01 Architecture"><span class="xr-num">01</span><span class="xr-ico">◇</span><span class="xr-name">ARCHITECTURE</span></button>
-  <button class="xr-item" data-scene="2" type="button" aria-label="02 Research"><span class="xr-num">02</span><span class="xr-ico">≋</span><span class="xr-name">RESEARCH</span></button>
-  <button class="xr-item" data-scene="3" type="button" aria-label="03 Risk doctrine"><span class="xr-num">03</span><span class="xr-ico">⛨</span><span class="xr-name">DOCTRINE</span></button>
-  <button class="xr-item" data-scene="4" type="button" aria-label="04 The firm"><span class="xr-num">04</span><span class="xr-ico">◉</span><span class="xr-name">FIRM</span></button>
-  <button class="xr-item" data-scene="5" type="button" aria-label="05 Direct channel"><span class="xr-num">05</span><span class="xr-ico">⌁</span><span class="xr-name">CHANNEL</span></button>
-</nav>
 
 <main id="x-scene-root">
 
@@ -108,79 +136,94 @@
       because it belongs to a model.</p>
       <p class="xs-micro">MANDATE &rarr; EVIDENCE &rarr; CONSTRUCTION &rarr; REVIEW</p>
     </div>
-    <aside class="xs-panel-r x-insp">
-      <p class="xi-head">DECISION LAYER / 01</p>
-      <h2 class="xi-title">Mandate</h2>
-      <p class="xi-kicker">OPERATING QUESTION</p>
-      <p class="xi-role">What must the capital accomplish?</p>
-      <p class="xi-desc">Objectives, constraints, horizon, liquidity, tax context, and risk tolerance are defined before securities enter the conversation.</p>
-      <p class="xi-system"><span>DECISION EFFECT</span><span class="xi-system-v">Narrows the opportunity set before preference can distort it.</span></p>
+    <aside class="xs-panel-r x-insp" aria-label="Portfolio Architecture inspector">
+      <div class="xi-nav">
+        <div class="xi-nav-head"><span>INSPECT LAYER</span><span class="xi-nav-count">01 / 04</span></div>
+        <div class="xi-tabs" role="tablist" aria-label="Portfolio Architecture layers">
+          <button id="architecture-tab-1" class="xi-layer-tab is-sel" data-obj="0" type="button" role="tab" aria-selected="true" aria-controls="architecture-inspector" tabindex="0"><span class="xo-num">01</span><span class="xo-name">Mandate</span></button>
+          <button id="architecture-tab-2" class="xi-layer-tab" data-obj="1" type="button" role="tab" aria-selected="false" aria-controls="architecture-inspector" tabindex="-1"><span class="xo-num">02</span><span class="xo-name">Evidence</span></button>
+          <button id="architecture-tab-3" class="xi-layer-tab" data-obj="2" type="button" role="tab" aria-selected="false" aria-controls="architecture-inspector" tabindex="-1"><span class="xo-num">03</span><span class="xo-name">Construction</span></button>
+          <button id="architecture-tab-4" class="xi-layer-tab" data-obj="3" type="button" role="tab" aria-selected="false" aria-controls="architecture-inspector" tabindex="-1"><span class="xo-num">04</span><span class="xo-name">Review</span></button>
+        </div>
+      </div>
+      <div class="xi-content" id="architecture-inspector" role="tabpanel" aria-labelledby="architecture-tab-1">
+        <p class="xi-head">PORTFOLIO ARCHITECTURE / MANDATE</p>
+        <h2 class="xi-title">Mandate</h2>
+        <p class="xi-kicker">OPERATING QUESTION</p>
+        <p class="xi-role">What must the capital accomplish?</p>
+        <p class="xi-desc">Objectives, constraints, horizon, liquidity, tax context, and risk tolerance are defined before securities enter the conversation.</p>
+        <p class="xi-system"><span>DECISION EFFECT</span><span class="xi-system-v">Narrows the opportunity set before preference can distort it.</span></p>
+      </div>
     </aside>
-    <div class="xs-objects">
-      <button class="xo-card is-sel" data-obj="0" type="button" aria-label="Inspect mandate decision layer"><span class="xo-num">01</span><span class="xo-name">Mandate</span><span class="xo-line">Objective + bounds</span></button>
-      <button class="xo-card" data-obj="1" type="button" aria-label="Inspect research decision layer"><span class="xo-num">02</span><span class="xo-name">Research</span><span class="xo-line">Evidence + thesis</span></button>
-      <button class="xo-card" data-obj="2" type="button" aria-label="Inspect construction decision layer"><span class="xo-num">03</span><span class="xo-name">Construction</span><span class="xo-line">Selection + sizing</span></button>
-      <button class="xo-card" data-obj="3" type="button" aria-label="Inspect review decision layer"><span class="xo-num">04</span><span class="xo-name">Review</span><span class="xo-line">Conditions + change</span></button>
-    </div>
   </section>
 
   <!-- ============ 02 / RESEARCH ENGINE ============ -->
   <section class="x-scene" data-scene="2" id="s-research" aria-hidden="true" inert>
     <div class="xs-panel-l">
       <p class="xs-tab">02 / RESEARCH ENGINE</p>
-      <h2 class="xs-title">Conviction must be earned.</h2>
+      <h1 class="xs-title">Conviction must be earned.</h1>
       <p class="xs-copy">A thesis advances only when independent evidence converges and
       the strongest countercase has been taken seriously. Only decision-relevant
       signal reaches construction.</p>
       <p class="xs-micro">SOURCE &rarr; TEST &rarr; SYNTHESIS &rarr; THESIS</p>
     </div>
-    <aside class="xs-panel-r x-insp">
-      <p class="xi-head">DECISION LAYER / 01</p>
-      <h2 class="xi-title">Sources</h2>
-      <p class="xi-kicker">OPERATING QUESTION</p>
-      <p class="xi-role">What is known first-hand?</p>
-      <p class="xi-desc">Filings, transcripts, macro data, and primary documents establish the evidence base before interpretation begins.</p>
-      <p class="xi-system"><span>DECISION EFFECT</span><span class="xi-system-v">Separates observable fact from inherited narrative.</span></p>
+    <aside class="xs-panel-r x-insp" aria-label="Research Engine inspector">
+      <div class="xi-nav">
+        <div class="xi-nav-head"><span>INSPECT LAYER</span><span class="xi-nav-count">01 / 04</span></div>
+        <div class="xi-tabs" role="tablist" aria-label="Research Engine layers">
+          <button id="research-tab-1" class="xi-layer-tab is-sel" data-obj="0" type="button" role="tab" aria-selected="true" aria-controls="research-inspector" tabindex="0"><span class="xo-num">01</span><span class="xo-name">Sources</span></button>
+          <button id="research-tab-2" class="xi-layer-tab" data-obj="1" type="button" role="tab" aria-selected="false" aria-controls="research-inspector" tabindex="-1"><span class="xo-num">02</span><span class="xo-name">Signals</span></button>
+          <button id="research-tab-3" class="xi-layer-tab" data-obj="2" type="button" role="tab" aria-selected="false" aria-controls="research-inspector" tabindex="-1"><span class="xo-num">03</span><span class="xo-name">Synthesis</span></button>
+          <button id="research-tab-4" class="xi-layer-tab" data-obj="3" type="button" role="tab" aria-selected="false" aria-controls="research-inspector" tabindex="-1"><span class="xo-num">04</span><span class="xo-name">Positions</span></button>
+        </div>
+      </div>
+      <div class="xi-content" id="research-inspector" role="tabpanel" aria-labelledby="research-tab-1">
+        <p class="xi-head">RESEARCH ENGINE / SOURCES</p>
+        <h2 class="xi-title">Sources</h2>
+        <p class="xi-kicker">OPERATING QUESTION</p>
+        <p class="xi-role">What is known first-hand?</p>
+        <p class="xi-desc">Filings, transcripts, macro data, and primary documents establish the evidence base before interpretation begins.</p>
+        <p class="xi-system"><span>DECISION EFFECT</span><span class="xi-system-v">Separates observable fact from inherited narrative.</span></p>
+      </div>
     </aside>
-    <div class="xs-objects">
-      <button class="xo-card is-sel" data-obj="0" type="button" aria-label="Inspect sources decision layer"><span class="xo-num">01</span><span class="xo-name">Sources</span><span class="xo-line">Primary evidence</span></button>
-      <button class="xo-card" data-obj="1" type="button" aria-label="Inspect signals decision layer"><span class="xo-num">02</span><span class="xo-name">Signals</span><span class="xo-line">Decision relevance</span></button>
-      <button class="xo-card" data-obj="2" type="button" aria-label="Inspect synthesis decision layer"><span class="xo-num">03</span><span class="xo-name">Synthesis</span><span class="xo-line">Portfolio context</span></button>
-      <button class="xo-card" data-obj="3" type="button" aria-label="Inspect positions decision layer"><span class="xo-num">04</span><span class="xo-name">Positions</span><span class="xo-line">Conviction translated</span></button>
-    </div>
   </section>
 
   <!-- ============ 03 / RISK DOCTRINE ============ -->
   <section class="x-scene" data-scene="3" id="s-doctrine" aria-hidden="true" inert>
     <div class="xs-panel-l">
       <p class="xs-tab">03 / RISK DOCTRINE</p>
-      <h2 class="xs-title">Risk is designed into the portfolio.</h2>
+      <h1 class="xs-title">Risk is designed into the portfolio.</h1>
       <p class="xs-copy">Loss capacity, liquidity, concentration, and scenario behavior
       enter construction from the first decision. Risk is not a disclaimer added
       after capital moves.</p>
       <p class="xs-micro">BOUNDS &rarr; SIZE &rarr; INTERACTION &rarr; REVIEW</p>
     </div>
-    <aside class="xs-panel-r x-insp">
-      <p class="xi-head">DECISION LAYER / 01</p>
-      <h2 class="xi-title">Risk Budget</h2>
-      <p class="xi-kicker">OPERATING QUESTION</p>
-      <p class="xi-role">How much loss can the mandate absorb?</p>
-      <p class="xi-desc">The portfolio&rsquo;s risk capacity is defined before position-level return expectations are allowed to influence size.</p>
-      <p class="xi-system"><span>DECISION EFFECT</span><span class="xi-system-v">Turns tolerance into a construction boundary.</span></p>
+    <aside class="xs-panel-r x-insp" aria-label="Risk Doctrine inspector">
+      <div class="xi-nav">
+        <div class="xi-nav-head"><span>INSPECT LAYER</span><span class="xi-nav-count">01 / 04</span></div>
+        <div class="xi-tabs" role="tablist" aria-label="Risk Doctrine layers">
+          <button id="risk-tab-1" class="xi-layer-tab is-sel" data-obj="0" type="button" role="tab" aria-selected="true" aria-controls="risk-inspector" tabindex="0"><span class="xo-num">01</span><span class="xo-name">Risk Budget</span></button>
+          <button id="risk-tab-2" class="xi-layer-tab" data-obj="1" type="button" role="tab" aria-selected="false" aria-controls="risk-inspector" tabindex="-1"><span class="xo-num">02</span><span class="xo-name">Drawdown</span></button>
+          <button id="risk-tab-3" class="xi-layer-tab" data-obj="2" type="button" role="tab" aria-selected="false" aria-controls="risk-inspector" tabindex="-1"><span class="xo-num">03</span><span class="xo-name">Liquidity</span></button>
+          <button id="risk-tab-4" class="xi-layer-tab" data-obj="3" type="button" role="tab" aria-selected="false" aria-controls="risk-inspector" tabindex="-1"><span class="xo-num">04</span><span class="xo-name">Concentration</span></button>
+        </div>
+      </div>
+      <div class="xi-content" id="risk-inspector" role="tabpanel" aria-labelledby="risk-tab-1">
+        <p class="xi-head">RISK DOCTRINE / RISK BUDGET</p>
+        <h2 class="xi-title">Risk Budget</h2>
+        <p class="xi-kicker">OPERATING QUESTION</p>
+        <p class="xi-role">How much loss can the mandate absorb?</p>
+        <p class="xi-desc">The portfolio&rsquo;s risk capacity is defined before position-level return expectations are allowed to influence size.</p>
+        <p class="xi-system"><span>DECISION EFFECT</span><span class="xi-system-v">Turns tolerance into a construction boundary.</span></p>
+      </div>
     </aside>
-    <div class="xs-objects">
-      <button class="xo-card is-sel" data-obj="0" type="button" aria-label="Inspect risk budget decision layer"><span class="xo-num">01</span><span class="xo-name">Risk Budget</span><span class="xo-line">Loss capacity</span></button>
-      <button class="xo-card" data-obj="1" type="button" aria-label="Inspect drawdown decision layer"><span class="xo-num">02</span><span class="xo-name">Drawdown</span><span class="xo-line">Compounding defense</span></button>
-      <button class="xo-card" data-obj="2" type="button" aria-label="Inspect liquidity decision layer"><span class="xo-num">03</span><span class="xo-name">Liquidity</span><span class="xo-line">Exit conditions</span></button>
-      <button class="xo-card" data-obj="3" type="button" aria-label="Inspect concentration decision layer"><span class="xo-num">04</span><span class="xo-name">Concentration</span><span class="xo-line">Failure containment</span></button>
-    </div>
   </section>
 
   <!-- ============ 04 / THE FIRM ============ -->
   <section class="x-scene" data-scene="4" id="s-firm" aria-hidden="true" inert>
     <div class="xs-panel-l">
       <p class="xs-tab">04 / THE FIRM</p>
-      <h2 class="xs-title">Responsibility stays direct.</h2>
+      <h1 class="xs-title">Responsibility stays direct.</h1>
       <p class="xs-copy">Xenith is independent and founder-led. The same investment
       professional builds the research, constructs the portfolio, monitors the thesis,
       and explains the decision.</p>
@@ -191,20 +234,25 @@
         <div class="x-fact"><span class="x-fact-num x-fact-word">INDEPENDENT</span><span class="x-fact-label">OPERATING STRUCTURE</span></div>
       </div>
     </div>
-    <aside class="xs-panel-r x-insp">
-      <p class="xi-head">DECISION LAYER / 01</p>
-      <h2 class="xi-title">Independence</h2>
-      <p class="xi-kicker">OPERATING QUESTION</p>
-      <p class="xi-role">Who sets the agenda?</p>
-      <p class="xi-desc">No parent platform or product shelf dictates the portfolio. Evidence and the mandate determine the opportunity set.</p>
-      <p class="xi-system"><span>DECISION EFFECT</span><span class="xi-system-v">Reduces structural pressure to own what does not belong.</span></p>
+    <aside class="xs-panel-r x-insp" aria-label="The Firm inspector">
+      <div class="xi-nav">
+        <div class="xi-nav-head"><span>INSPECT LAYER</span><span class="xi-nav-count">01 / 04</span></div>
+        <div class="xi-tabs" role="tablist" aria-label="The Firm layers">
+          <button id="firm-tab-1" class="xi-layer-tab is-sel" data-obj="0" type="button" role="tab" aria-selected="true" aria-controls="firm-inspector" tabindex="0"><span class="xo-num">01</span><span class="xo-name">Independence</span></button>
+          <button id="firm-tab-2" class="xi-layer-tab" data-obj="1" type="button" role="tab" aria-selected="false" aria-controls="firm-inspector" tabindex="-1"><span class="xo-num">02</span><span class="xo-name">Access</span></button>
+          <button id="firm-tab-3" class="xi-layer-tab" data-obj="2" type="button" role="tab" aria-selected="false" aria-controls="firm-inspector" tabindex="-1"><span class="xo-num">03</span><span class="xo-name">Continuity</span></button>
+          <button id="firm-tab-4" class="xi-layer-tab" data-obj="3" type="button" role="tab" aria-selected="false" aria-controls="firm-inspector" tabindex="-1"><span class="xo-num">04</span><span class="xo-name">Alignment</span></button>
+        </div>
+      </div>
+      <div class="xi-content" id="firm-inspector" role="tabpanel" aria-labelledby="firm-tab-1">
+        <p class="xi-head">THE FIRM / INDEPENDENCE</p>
+        <h2 class="xi-title">Independence</h2>
+        <p class="xi-kicker">OPERATING QUESTION</p>
+        <p class="xi-role">Who sets the agenda?</p>
+        <p class="xi-desc">No parent platform or product shelf dictates the portfolio. Evidence and the mandate determine the opportunity set.</p>
+        <p class="xi-system"><span>DECISION EFFECT</span><span class="xi-system-v">Reduces structural pressure to own what does not belong.</span></p>
+      </div>
     </aside>
-    <div class="xs-objects">
-      <button class="xo-card is-sel" data-obj="0" type="button" aria-label="Inspect independence decision layer"><span class="xo-num">01</span><span class="xo-name">Independence</span><span class="xo-line">No product agenda</span></button>
-      <button class="xo-card" data-obj="1" type="button" aria-label="Inspect access decision layer"><span class="xo-num">02</span><span class="xo-name">Access</span><span class="xo-line">Direct explanation</span></button>
-      <button class="xo-card" data-obj="2" type="button" aria-label="Inspect continuity decision layer"><span class="xo-num">03</span><span class="xo-name">Continuity</span><span class="xo-line">One accountable process</span></button>
-      <button class="xo-card" data-obj="3" type="button" aria-label="Inspect alignment decision layer"><span class="xo-num">04</span><span class="xo-name">Alignment</span><span class="xo-line">Decision ownership</span></button>
-    </div>
   </section>
 
   <!-- ============ 05 / DIRECT CHANNEL ============ -->
@@ -216,7 +264,7 @@
       <div id="x-terminal">
         <div class="x-term-head">
           <span class="x-term-dot"></span><span class="x-term-dot"></span><span class="x-term-dot"></span>
-          <h2 id="x-channel-title" class="x-term-title">XENITH // SECURE CHANNEL v7.1</h2>
+          <h1 id="x-channel-title" class="x-term-title">XENITH // SECURE CHANNEL v7.1</h1>
           <span class="x-term-auth"><span>AUTH</span><span id="xi-auth-state">SEALED</span></span>
         </div>
         <div class="x-term-body" aria-live="polite" aria-atomic="false"></div>
