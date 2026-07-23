@@ -448,6 +448,8 @@
         '-------       --------',
         'help          show this command list',
         'authenticate  verify analyst clearance',
+        'fields        list the console fields',
+        'go <field>    navigate to a field',
         'disclosures   regulatory disclosures',
         'scan          doctrinal exposure sweep',
         'matrix        signal saturation (8s)',
@@ -459,10 +461,59 @@
       ];
     }
 
+    /* ---------------- field navigation (x:navigate -> main.js) ---------- */
+
+    var FIELD_ROUTES = [
+      { n: 1, slug: 'architecture', name: 'PORTFOLIO ARCHITECTURE' },
+      { n: 2, slug: 'research',     name: 'RESEARCH ENGINE' },
+      { n: 3, slug: 'risk',         name: 'RISK DOCTRINE' },
+      { n: 4, slug: 'firm',         name: 'THE FIRM' },
+      { n: 5, slug: 'channel',      name: 'DIRECT CHANNEL' }
+    ];
+
+    function printFields() {
+      printer.print('field  route         name');
+      printer.print('-----  -----         ----');
+      for (var i = 0; i < FIELD_ROUTES.length; i++) {
+        var f = FIELD_ROUTES[i];
+        printer.print('0' + f.n + '     ' +
+          (f.slug + '             ').slice(0, 14) + f.name);
+      }
+      printer.print("navigate: go <route|number> — e.g. 'go risk' or 'go 3'");
+    }
+
+    function runGo(arg) {
+      if (!arg) {
+        printer.print("usage: go <field> — type 'fields' for the map", 'xt-err');
+        return;
+      }
+      var target = null;
+      for (var i = 0; i < FIELD_ROUTES.length; i++) {
+        var f = FIELD_ROUTES[i];
+        if (arg === String(f.n) || arg === '0' + f.n || f.slug.indexOf(arg) === 0) {
+          target = f;
+          break;
+        }
+      }
+      if (!target) {
+        printer.print("unknown field '" + arg + "' — type 'fields'", 'xt-err');
+        return;
+      }
+      printer.print('navigating: field 0' + target.n + ' / ' + target.name, 'xt-ok');
+      emit('x:navigate', { scene: target.n });
+    }
+
     function runCommand(cmd) {
+      if (cmd === 'go' || cmd.indexOf('go ') === 0) {
+        runGo(cmd.slice(2).trim());
+        return;
+      }
       switch (cmd) {
         case 'help':
           printer.printAll(helpLines());
+          break;
+        case 'fields':
+          printFields();
           break;
         case 'whoami':
           printer.print('ANALYST // CLEARANCE: ' +

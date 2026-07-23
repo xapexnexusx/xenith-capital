@@ -20,7 +20,7 @@
   var GESTURE_GATE_MS = 400;
   var COUNT_MS = 1400;
   var BOOT_FAILSAFE_MS = 8000;
-  var MENU_LEAVE_MS = 170;
+  var MENU_LEAVE_MS = 380;
 
   var NAMES = [
     'PORTFOLIO ARCHITECTURE',
@@ -525,12 +525,19 @@
       fieldBtns[idx].focus();
     });
     fieldNavEl.addEventListener('mouseenter', function () {
-      if (booted && fineHoverMQ.matches && !menuOpen) openFieldMenu(false);
+      if (!fineHoverMQ.matches) return;
+      /* re-entry MUST cancel any pending leave-close, or the menu closes
+         under a cursor that already came back */
+      clearTimeout(menuLeaveTimer);
+      menuLeaveTimer = 0;
+      if (booted && !menuOpen) openFieldMenu(false);
     });
     fieldNavEl.addEventListener('mouseleave', function () {
       if (fineHoverMQ.matches) scheduleMenuClose();
     });
     fieldNavEl.addEventListener('focusin', function () {
+      clearTimeout(menuLeaveTimer);
+      menuLeaveTimer = 0;
       if (booted && !menuOpen) openFieldMenu(false);
     });
     fieldNavEl.addEventListener('focusout', function () {
@@ -568,6 +575,18 @@
       if (e.key === 'Escape' && menuOpen) {
         e.preventDefault();
         closeFieldMenu(true);
+      }
+    });
+    /* command-surface toggle: ⌘K / Ctrl+K opens the field map pinned */
+    document.addEventListener('keydown', function (e) {
+      if (!(e.metaKey || e.ctrlKey) || e.altKey || (e.key !== 'k' && e.key !== 'K')) return;
+      if (!booted || discOpen()) return;
+      e.preventDefault();
+      if (menuOpen) {
+        closeFieldMenu(true);
+      } else {
+        openFieldMenu(true);
+        if (fieldBtns.length) fieldBtns[0].focus();
       }
     });
   }
@@ -649,6 +668,12 @@
     window.addEventListener('touchcancel', function () { touchTracking = false; }, { passive: true });
     window.addEventListener('popstate', restoreFromLocation);
     window.addEventListener('hashchange', restoreFromLocation);
+    /* cross-lane navigation contract: terminal.js 'go <field>' dispatches this */
+    document.addEventListener('x:navigate', function (e) {
+      if (!booted || !e || !e.detail) return;
+      var n = clampScene(e.detail.scene);
+      if (n !== state.current) show(n, { history: 'push' });
+    });
 
     onMQChange(reduceMotionMQ, function () {
       if (!reduceMotionMQ.matches) return;
