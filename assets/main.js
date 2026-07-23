@@ -371,6 +371,8 @@
     menuPinned = menuOpen && !!pinned;
     fieldNavEl.classList.toggle('is-open', menuOpen);
     fieldMenuEl.classList.toggle('is-open', menuOpen);
+    /* the veil blurs the console behind the open map (#x-veil, xenith.css) */
+    document.body.classList.toggle('x-map-open', menuOpen);
     fieldTriggerEl.setAttribute('aria-expanded', menuOpen ? 'true' : 'false');
     fieldTriggerEl.setAttribute('aria-label', menuOpen ? 'Close field map' : 'Open field map');
     fieldMenuEl.setAttribute('aria-hidden', menuOpen ? 'false' : 'true');
@@ -482,6 +484,13 @@
     if (!booted || e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
     if (isEditable(e.target) || inside(e.target, '#x-terminal, #x-field-nav, .xi-tabs') || discOpen() || menuOpen) return;
     var k = e.key;
+    /* number row: 1-5 jumps straight to a field */
+    if (k >= '1' && k <= '5') {
+      e.preventDefault();
+      var direct = parseInt(k, 10);
+      if (direct !== state.current) show(direct, { history: 'push' });
+      return;
+    }
     if (k !== 'ArrowDown' && k !== 'PageDown' && k !== 'ArrowUp' && k !== 'PageUp') return;
     e.preventDefault();
     var now = Date.now();

@@ -32,7 +32,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '7.1.0';
+  var VERSION = '7.2.0';
   var TYPE_MS = 12;            /* per-character cadence for system lines */
   var BOOT_GAP_MS = 130;       /* stagger between boot lines */
   var SCAN_GAP_MS = 400;       /* stagger between doctrinal scan lines */
@@ -42,8 +42,25 @@
   var IDLE_PLACEHOLDER = "type 'help'";
   var IDLE_ARIA = 'Terminal input. Type help for commands.';
   var STORAGE_AUTH = 'xv_auth';
-  var AUTH_ANSWER = 'signal';
-  var AUTH_QUESTION = 'what survives contact: signal or noise?';
+  var CONTACT_EMAIL = 'inquiry@xenithcap.io';
+
+  /* THE VERIFICATION FLOW — three doctrine questions, zero personal data.
+     Passing opens the channel and reveals the direct line. Answers live in
+     the console's own field pages; misses earn a hint that points there. */
+  var FLOW_STEPS = [
+    { question: 'what survives contact: signal or noise?',
+      answers: ['signal'],
+      placeholder: 'signal or noise',
+      hint: 'hint: ninety percent of the feed is the other one. see field 02.' },
+    { question: 'what is committed first: constraints or conviction?',
+      answers: ['constraints', 'constraint'],
+      placeholder: 'constraints or conviction',
+      hint: 'hint: the budget exists before any position does. see field 03.' },
+    { question: 'what compounds: streaks or survival?',
+      answers: ['survival', 'surviving'],
+      placeholder: 'streaks or survival',
+      hint: 'hint: the first rule of compounding is existing. see field 03.' }
+  ];
 
   var DISCLOSURE_LINES = [
     'Xenith Capital is an investment adviser registered with the Texas State Securities Board.',
@@ -200,6 +217,22 @@
       return chain;
     }
 
+    /* Instant structured line: a prebuilt node joins the ordered chain.
+       Used for the CHANNEL OPEN block and the mailto line — the only
+       markup this terminal ever renders (never user input). */
+    function printNode(build) {
+      var ticket = generation;
+      chain = chain.then(function () {
+        if (ticket !== generation) return;
+        var el = build();
+        if (el) {
+          body.appendChild(el);
+          scroll();
+        }
+      });
+      return chain;
+    }
+
     function wait(ms) {
       if (prefersReduced()) return chain;
       chain = chain.then(function () {
@@ -216,7 +249,7 @@
       body.textContent = '';
     }
 
-    return { print: print, printAll: printAll, wait: wait, clear: clear };
+    return { print: print, printAll: printAll, printNode: printNode, wait: wait, clear: clear };
   }
 
   function createTerminal(root) {
@@ -227,8 +260,8 @@
 
     var printer = makePrinter(body);
 
-    /* State machine: idle or the local analyst-verification question. */
-    var state = { mode: 'idle' };
+    /* State machine: idle, or a step of the analyst-verification flow. */
+    var state = { mode: 'idle', step: 0, misses: 0 };
 
     /* Clearance gate: per-tab persistence. */
     var granted = storageGet(STORAGE_AUTH) === 'granted';
@@ -272,7 +305,7 @@
       return [
         'channel state: READY',
         'direct to: XENITH CAPITAL',
-        "type 'help' to inspect the command set"
+        "type 'begin' to open a direct channel — 'help' for the command set"
       ];
     }
 
@@ -400,44 +433,95 @@
       render();
     }
 
-    /* ---------------- authenticate (one question) ---------------- */
+    /* ---------------- the verification flow ---------------- */
 
-    function startAuth() {
-      if (granted) {
-        printer.print('channel already open — analyst verified', 'xt-ok');
-        printer.print('local research console ready');
-        return;
-      }
-      state.mode = 'auth';
-      setPlaceholder('signal or noise');
-      printer.print('AUTHENTICATE // one question', 'xt-ok');
-      printer.print(AUTH_QUESTION);
+    function referenceCode() {
+      var t = Date.now().toString(36).toUpperCase();
+      return 'XC-' + t.slice(-4);
     }
 
-    function handleAuthInput(v) {
-      v = v.toLowerCase();
-      if (!v) { printer.print(AUTH_QUESTION); return; }
-      if (v !== AUTH_ANSWER) {
-        printer.print('clearance denied. think like an analyst.', 'xt-err');
-        printer.print(AUTH_QUESTION);
+    /* The reveal: CHANNEL OPEN block, then the direct line as a real
+       mailto link. Only ever rendered from these constants. */
+    function revealChannel() {
+      printer.printNode(function () {
+        var win = document.createElement('div');
+        win.className = 'xt-win';
+        win.textContent = 'CHANNEL OPEN — ANALYST VERIFIED';
+        return win;
+      });
+      printer.printNode(function () {
+        var line = document.createElement('div');
+        line.className = 'xt-line xt-ok';
+        line.appendChild(document.createTextNode('direct line: '));
+        var a = document.createElement('a');
+        a.href = 'mailto:' + CONTACT_EMAIL + '?subject=' +
+          encodeURIComponent('Direct channel — ' + referenceCode());
+        a.textContent = CONTACT_EMAIL;
+        line.appendChild(a);
+        return line;
+      });
+      printer.print('every transmission is read personally by the founder.');
+      printer.print("reference this console when you write — you'll skip the usual triage.");
+    }
+
+    function startFlow() {
+      if (granted) {
+        printer.print('channel already open — analyst verified', 'xt-ok');
+        revealChannel();
         return;
       }
+      state.mode = 'flow';
+      state.step = 0;
+      state.misses = 0;
+      printer.print('VERIFICATION // three questions, straight from the doctrine', 'xt-ok');
+      printer.print('answers live in the fields of this console. no personal data — this is a filter, not a form.');
+      askStep();
+    }
+
+    function askStep() {
+      var s = FLOW_STEPS[state.step];
+      printer.print('[ ' + (state.step + 1) + ' / ' + FLOW_STEPS.length + ' ] ' + s.question);
+      setPlaceholder(s.placeholder);
+    }
+
+    function handleFlowInput(v) {
+      v = v.toLowerCase();
+      var s = FLOW_STEPS[state.step];
+      if (!v) { askStep(); return; }
+      var hit = false;
+      for (var i = 0; i < s.answers.length; i++) {
+        if (v === s.answers[i]) { hit = true; break; }
+      }
+      if (!hit) {
+        state.misses += 1;
+        printer.print('negative. think like an analyst.', 'xt-err');
+        if (state.misses >= 2) printer.print(s.hint);
+        askStep();
+        return;
+      }
+      printer.print('confirmed.', 'xt-ok');
+      state.misses = 0;
+      state.step += 1;
+      if (state.step < FLOW_STEPS.length) {
+        askStep();
+        return;
+      }
+      /* passed */
       state.mode = 'idle';
       setPlaceholder(null);
       granted = true;
       storageSet(STORAGE_AUTH, 'granted');
       setAuthChipVerified();
-      printer.print('analyst verified. channel open.', 'xt-ok');
-      printer.print('local research console unlocked — no outbound channel connected');
+      revealChannel();
       emit('x:auth-granted');
       emit('x:clearance-granted'); /* legacy listener (toast lane) */
     }
 
-    function abortAuth() {
+    function abortFlow() {
       state.mode = 'idle';
       input.value = '';
       setPlaceholder(null);
-      printer.print('authentication aborted — channel remains sealed', 'xt-err');
+      printer.print('verification aborted — channel remains sealed', 'xt-err');
     }
 
     /* ---------------- idle-mode command dispatch ---------------- */
@@ -447,7 +531,8 @@
         'command       function',
         '-------       --------',
         'help          show this command list',
-        'authenticate  verify analyst clearance',
+        'begin         verification flow -> direct channel',
+        'contact       direct line (once verified)',
         'fields        list the console fields',
         'go <field>    navigate to a field',
         'disclosures   regulatory disclosures',
@@ -519,8 +604,16 @@
           printer.print('ANALYST // CLEARANCE: ' +
             (granted ? 'GRANTED' : 'NONE'));
           break;
-        case 'authenticate':
-          startAuth();
+        case 'begin':
+        case 'connect':
+        case 'authenticate': /* legacy alias */
+          startFlow();
+          break;
+        case 'contact':
+          if (granted) revealChannel();
+          else {
+            printer.print("the direct line opens after verification — type 'begin'", 'xt-err');
+          }
           break;
         case 'disclosures':
           printer.printAll(DISCLOSURE_LINES);
@@ -566,9 +659,9 @@
       e.preventDefault();
       var raw = input.value;
       input.value = '';
-      if (state.mode === 'auth') {
+      if (state.mode === 'flow') {
         printer.print('> ' + raw, 'xt-user');
-        handleAuthInput(raw.trim());
+        handleFlowInput(raw.trim());
         return;
       }
       var cmd = raw.trim();
@@ -587,7 +680,7 @@
         }
         return;
       }
-      if (e.key === 'Escape' && state.mode === 'auth') abortAuth();
+      if (e.key === 'Escape' && state.mode === 'flow') abortFlow();
     });
 
     /* Freeze the rain while the tab is hidden; the uptime tick skips hidden
@@ -654,7 +747,7 @@
      already holds the grant gets the VERIFIED chip immediately — both are
      visible the first time scene 05 enters, booted or not. */
   var titleEl = rootEl ? rootEl.querySelector('.x-term-title') : null;
-  if (titleEl) titleEl.textContent = 'XENITH // SECURE CHANNEL v7.1';
+  if (titleEl) titleEl.textContent = 'XENITH // SECURE CHANNEL v7.2';
   if (storageGet(STORAGE_AUTH) === 'granted') setAuthChipVerified();
 
   /* Direct engagement beats the observer: if the user reaches the terminal

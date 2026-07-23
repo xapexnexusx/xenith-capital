@@ -115,11 +115,76 @@
     setInterval(tick, 1000);
   }
 
+  /* Market-session readout — a REAL status, replacing the SYS.ONLINE prop.
+     NYSE regular session 09:30–16:00 ET Mon–Fri (cyan, pulsing), extended
+     04:00–09:30 PRE / 16:00–20:00 AFTER (amber), otherwise CLOSED (dim,
+     still dot). Clock-derived fact; scheduled market holidays are not
+     modeled — the title attribute scopes the claim to session hours. */
+  function bindMarket() {
+    var root = document.getElementById('x-mkt');
+    var dot = document.getElementById('x-mkt-dot');
+    var label = document.getElementById('x-mkt-label');
+    if (!root || !dot || !label) return;
+
+    var fmt;
+    try {
+      fmt = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/New_York',
+        weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: false
+      });
+    } catch (err) {
+      root.style.display = 'none'; /* no zone data: drop the readout, no lies */
+      return;
+    }
+
+    function readout() {
+      var parts = fmt.formatToParts(new Date());
+      var map = {};
+      for (var i = 0; i < parts.length; i++) map[parts[i].type] = parts[i].value;
+      var wd = map.weekday;
+      var mins = (parseInt(map.hour, 10) % 24) * 60 + parseInt(map.minute, 10);
+      var weekend = wd === 'Sat' || wd === 'Sun';
+      var state, cls;
+      if (!weekend && mins >= 570 && mins < 960) { state = 'NYSE&nbsp;&middot;&nbsp;OPEN'; cls = 'open'; }
+      else if (!weekend && mins >= 240 && mins < 570) { state = 'NYSE&nbsp;&middot;&nbsp;PRE'; cls = 'ext'; }
+      else if (!weekend && mins >= 960 && mins < 1200) { state = 'NYSE&nbsp;&middot;&nbsp;AFTER'; cls = 'ext'; }
+      else { state = 'NYSE&nbsp;&middot;&nbsp;CLOSED'; cls = 'closed'; }
+
+      label.innerHTML = state;
+      dot.className = 'x-pulse-dot' +
+        (cls === 'ext' ? ' x-pulse-amber' : cls === 'closed' ? ' x-pulse-off' : '');
+      root.className = 'xtb-status' +
+        (cls === 'ext' ? ' is-extended' : cls === 'closed' ? ' is-closed' : '');
+    }
+
+    readout();
+    setInterval(readout, 30000);
+  }
+
+  /* Field-map hover intelligence: hovering a map entry live-morphs the
+     formation toward that field's shape; leaving or committing glides back. */
+  function bindMenuPreview() {
+    var items = document.querySelectorAll('.xfm-item');
+    for (var i = 0; i < items.length; i++) {
+      (function (item) {
+        var n = parseInt(item.getAttribute('data-scene'), 10);
+        if (!(n >= 1 && n <= 5)) return;
+        item.addEventListener('mouseenter', function () {
+          if (motionOK()) fx('preview', n);
+        });
+        item.addEventListener('mouseleave', function () { fx('previewEnd'); });
+        item.addEventListener('click', function () { fx('previewEnd'); });
+      })(items[i]);
+    }
+  }
+
   function init() {
     bindPanels();
     bindDecodeGroup('.xfm-item', '.xfm-name');
     bindDecodeGroup('.xi-layer-tab', '.xo-name');
     bindUptime();
+    bindMarket();
+    bindMenuPreview();
     document.addEventListener('x:layer-selected', onLayerSelected);
   }
 

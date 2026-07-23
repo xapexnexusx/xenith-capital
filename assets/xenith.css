@@ -517,6 +517,36 @@ html:not(.js) #x-boot {
   border-color: rgba(255, 45, 60, .7);
 }
 
+/* market-session variants: amber = extended hours, off = closed (静 dot) */
+.x-pulse-amber {
+  background: var(--x-amber);
+  box-shadow: 0 0 8px rgba(255, 176, 0, .85);
+}
+
+.x-pulse-amber::after {
+  border-color: rgba(255, 176, 0, .65);
+}
+
+.x-pulse-off {
+  background: #3f4d66;
+  box-shadow: none;
+}
+
+.x-pulse-off::after {
+  animation: none;
+  opacity: 0;
+}
+
+#x-mkt.is-closed {
+  color: var(--x-dim);
+  text-shadow: none;
+}
+
+#x-mkt.is-extended {
+  color: var(--x-amber);
+  text-shadow: 0 0 10px rgba(255, 176, 0, .4);
+}
+
 @keyframes x-pulse-ring {
   0%   { transform: scale(1);   opacity: .9; }
   60%  { transform: scale(2.2); opacity: .28; }
@@ -1231,12 +1261,38 @@ html.js .x-scene.is-active {
 #x-terminal {
   position: relative; /* scopes the terminal's injected .xt-rain overlay */
   overflow: hidden;
-  background: #05080d;
-  border: 1px solid var(--x-line);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, .5), 0 0 42px rgba(0, 240, 255, .06);
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgba(0, 240, 255, .05), transparent 55%),
+    linear-gradient(180deg, #060a11 0%, #05080d 100%);
+  border: 1px solid rgba(0, 240, 255, .22);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, .5),
+    0 0 52px -6px rgba(0, 240, 255, .14),
+    inset 0 1px 0 rgba(255, 255, 255, .05),
+    inset 0 -20px 44px -30px rgba(0, 240, 255, .18);
   display: flex;
   flex-direction: column;
   min-width: 0;
+}
+
+/* HUD corner brackets on the channel itself */
+#x-terminal::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  z-index: 3;
+  background:
+    linear-gradient(var(--x-cyan), var(--x-cyan)) top left / 16px 1px,
+    linear-gradient(var(--x-cyan), var(--x-cyan)) top left / 1px 16px,
+    linear-gradient(var(--x-cyan), var(--x-cyan)) top right / 16px 1px,
+    linear-gradient(var(--x-cyan), var(--x-cyan)) top right / 1px 16px,
+    linear-gradient(var(--x-cyan), var(--x-cyan)) bottom left / 16px 1px,
+    linear-gradient(var(--x-cyan), var(--x-cyan)) bottom left / 1px 16px,
+    linear-gradient(var(--x-cyan), var(--x-cyan)) bottom right / 16px 1px,
+    linear-gradient(var(--x-cyan), var(--x-cyan)) bottom right / 1px 16px;
+  background-repeat: no-repeat;
+  opacity: .8;
 }
 
 .x-term-head {
@@ -1345,6 +1401,12 @@ html.js .x-scene.is-active {
   color: var(--x-cyan);
   text-shadow: 0 0 10px rgba(0, 240, 255, .6);
   flex: none;
+  animation: x-prompt-breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes x-prompt-breathe {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .45; }
 }
 
 .x-term-form {
@@ -2492,6 +2554,38 @@ body.x-disc-lock {
   .xr-name {
     font-size: .5rem;
     letter-spacing: .24em;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   17A. THE VEIL — while the field map is open, the whole console behind it
+        blurs and dims so the map is the only sharp object. Sits above the
+        scenes (z 2) and below the topbar (z 900) that hosts the map itself.
+        main.js toggles body.x-map-open in setFieldMenu.
+   -------------------------------------------------------------------------- */
+#x-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  pointer-events: none;
+  background: rgba(3, 5, 9, .42);
+  -webkit-backdrop-filter: blur(0px);
+  backdrop-filter: blur(0px);
+  opacity: 0;
+  transition: opacity .32s ease,
+              -webkit-backdrop-filter .32s ease;
+  transition: opacity .32s ease, backdrop-filter .32s ease;
+}
+
+body.x-map-open #x-veil {
+  opacity: 1;
+  -webkit-backdrop-filter: blur(9px) saturate(.85);
+  backdrop-filter: blur(9px) saturate(.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #x-veil {
+    transition: none !important;
   }
 }
 
