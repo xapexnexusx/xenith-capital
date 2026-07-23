@@ -539,6 +539,7 @@
         'scan          doctrinal exposure sweep',
         'matrix        signal saturation (8s)',
         'whoami        analyst identity + clearance state',
+        'sound         toggle ui audio (off by default)',
         'uptime        session clock readout',
         'banner        reprint boot banner',
         'clear         clear terminal output',
@@ -627,8 +628,19 @@
         case 'uptime':
           printer.print('session ' +
             formatUplink(Math.floor((Date.now() - uplinkT0) / 1000)) +
-            ' // sys.online');
+            ' // channel steady');
           break;
+        case 'sound': {
+          var snd = window.XENITH_SOUND;
+          if (!snd) {
+            printer.print('sound lane offline', 'xt-err');
+            break;
+          }
+          var soundOn = snd.toggle();
+          printer.print('ui audio: ' + (soundOn ? 'ON — subtle by design' : 'OFF'),
+            soundOn ? 'xt-ok' : undefined);
+          break;
+        }
         case 'banner':
           bootBanner();
           break;

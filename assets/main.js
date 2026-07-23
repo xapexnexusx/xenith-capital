@@ -378,6 +378,7 @@
     fieldMenuEl.setAttribute('aria-hidden', menuOpen ? 'false' : 'true');
     if (menuOpen) fieldMenuEl.removeAttribute('inert');
     else fieldMenuEl.setAttribute('inert', '');
+    dispatch('x:map-toggled', { open: menuOpen }); /* sound lane listens */
   }
 
   function openFieldMenu(pinned) { setFieldMenu(true, pinned); }

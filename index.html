@@ -25,6 +25,9 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="color-scheme" content="dark">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="XENITH">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FinancialService","name":"Xenith Capital","legalName":"Ray Capital Advisors LLC","alternateName":"Xenith Capital","url":"https://xenithcap.io/","logo":"https://xenithcap.io/assets/og.png","image":"https://xenithcap.io/assets/og.png","description":"Independent, founder-led registered investment adviser in Austin, Texas. Portfolio construction, directed by evidence.","foundingDate":"2021","address":{"@type":"PostalAddress","addressLocality":"Austin","addressRegion":"TX","addressCountry":"US"},"identifier":{"@type":"PropertyValue","propertyID":"CRD","value":"316844"},"sameAs":["https://adviserinfo.sec.gov/firm/summary/316844"]}
 </script>
@@ -342,5 +345,13 @@
 <script src="assets/terminal.js" defer></script>
 <script src="assets/game.js" defer></script>
 <script src="assets/drawer.js" defer></script>
+<script src="assets/sound.js" defer></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/sw.js').catch(function () {});
+  });
+}
+</script>
 </body>
 </html>
