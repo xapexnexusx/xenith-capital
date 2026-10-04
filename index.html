@@ -3,1280 +3,190 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Xenith Capital · Built on AI. Decided by a fiduciary.</title>
-<meta name="description" content="Xenith Capital is a fee-only investment adviser in Austin, registered in Texas and Virginia. Three portfolios, researched with an AI system; one accountable adviser makes every decision.">
-<meta name="theme-color" content="#030306">
+<title>Xenith Capital · Every dollar here survives an argument.</title>
+<meta name="description" content="Xenith Capital is a fee-only investment firm in Austin. A research system built on AI argues the case against every idea. Logan Jackson, a fiduciary, makes the call.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#050507">
 <meta name="color-scheme" content="dark">
-<meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-QeuYX43ai2dVlGcMaFCIo8pb21j7JRhLevenJIgiq48='; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'none'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="canonical" href="https://xenithcap.io/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xenithcap.io/">
 <meta property="og:title" content="Xenith Capital">
-<meta property="og:description" content="Built on AI. Decided by a fiduciary. A fee-only investment adviser in Austin, Texas.">
-<meta property="og:image" content="https://xenithcap.io/assets/og.png">
+<meta property="og:description" content="Every dollar here survives an argument. A fee-only investment firm built on AI, decided by a fiduciary.">
+<meta property="og:image" content="https://xenithcap.io/assets/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Xenith Capital. A black glass monolith lit in neon, standing in the rain.">
+<meta property="og:image:alt" content="Logan Jackson of Xenith Capital, in a black kimono and hat lit cyan and pink.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image:alt" content="Xenith Capital. A black glass monolith lit in neon, standing in the rain.">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"FinancialService","name":"Xenith Capital","legalName":"Ray Capital Advisors LLC","alternateName":"Xenith Capital","url":"https://xenithcap.io/","logo":"https://xenithcap.io/assets/og.png","image":"https://xenithcap.io/assets/og.png","description":"Fee-only investment adviser in Austin, Texas, registered in Texas and Virginia. Portfolios researched with an AI system; one accountable adviser makes every decision.","foundingDate":"2021","founder":{"@type":"Person","name":"Logan Jackson"},"address":{"@type":"PostalAddress","addressLocality":"Austin","addressRegion":"TX","addressCountry":"US"},"identifier":{"@type":"PropertyValue","propertyID":"CRD","value":"316844"},"sameAs":["https://adviserinfo.sec.gov/firm/summary/316844"]}
-</script>
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-<link rel="manifest" href="site.webmanifest">
-<link rel="preload" href="fonts/inter-tight-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-<style>
-/* ============================================================
-   XENITH CAPITAL · the BlackGlass monolith
-   The page is one object. Turn it to read it: six faces, each
-   one part of the firm, each lighting its floors once read.
-   One file. WebGL, no libraries. No third-party requests.
-   ============================================================ */
-@font-face{font-family:"Inter Tight";src:url(fonts/inter-tight-var.woff2) format("woff2");font-weight:200 600;font-style:normal;font-display:swap}
-@font-face{font-family:"JetBrains Mono";src:url(fonts/jetbrains-mono-var.woff2) format("woff2");font-weight:300 500;font-style:normal;font-display:swap}
-:root{
-  --void:#030306;
-  --white:#eef1f4;
-  --dim:#8f98a3;
-  --faint:#3a4047;
-  --hair:rgba(238,241,244,.11);
-  --cy:#2de2ff;       /* structure: the ground, the grid, the clock */
-  --pk:#ff2e97;       /* conviction: what survived the evidence */
-  --sig:#ff2a3d;      /* live: a real state, risk, the perimeter */
-  --acc:45 226 255;   /* the edge light: the world's sessions, cyan while closed, pink then red as they open */
-  --sans:"Inter Tight",system-ui,-apple-system,sans-serif;
-  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
-  --top:calc(28px + env(safe-area-inset-top));
-  --gut:max(clamp(1.1rem,4.2vw,3.4rem),env(safe-area-inset-left));
-  --gutr:max(clamp(1.1rem,4.2vw,3.4rem),env(safe-area-inset-right));
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{background:var(--void);-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
-body{color:var(--white);font-family:var(--sans);font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased;background:var(--void)}
-/* the monolith is the page: with the script running there is no document scroll to fight */
-.js body{position:fixed;inset:0;overflow:hidden;overscroll-behavior:none;touch-action:pan-y pinch-zoom}
-html.doc body{position:static;overflow:auto;touch-action:auto}
-::selection{background:rgb(var(--acc));color:#000}
-a{color:inherit}
-button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-appearance:none;appearance:none;border-radius:0}
-:focus-visible{outline:1px solid rgb(var(--acc));outline-offset:3px}
-.skip{position:fixed;top:-4rem;left:1rem;z-index:300;background:rgb(var(--acc));color:#000;padding:.6rem 1rem;font:500 .75rem var(--mono);text-decoration:none}
-.skip:focus{top:1rem}
-main:focus{outline:none}
-.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
-
-/* ---------- the scene ---------- */
-#gl,#bloom{position:fixed;top:0;left:0;width:100%;height:100vh;height:100lvh;display:block}
-#gl{z-index:0;cursor:grab}
-#gl.drag{cursor:grabbing}
-/* bloom: the frame, downsampled and screened back over itself, blurred, so light behaves like light */
-#bloom{z-index:1;pointer-events:none;mix-blend-mode:screen;filter:blur(18px) saturate(1.35);opacity:.8}
-.veil{position:fixed;inset:0;z-index:2;pointer-events:none;
-  background:linear-gradient(90deg,#030306f2 0,#030306d9 26%,#0303068c 40%,#03030600 56%)}
-html:not(.js) #gl,html:not(.js) #bloom,html:not(.js) .veil,.doc #gl,.doc #bloom,.doc .veil{display:none}
-.fallback{display:none}
-.nogl .fallback{display:grid;position:fixed;z-index:1;right:12vw;top:50%;transform:translateY(-50%);pointer-events:none}
-.nogl .fallback svg{width:min(26vw,300px);height:auto;filter:drop-shadow(0 0 12px rgb(var(--acc) / .6))}
-.nogl #gl,.nogl #bloom{display:none}
-
-/* ---------- telemetry strip ---------- */
-.strip{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;align-items:center;gap:clamp(.9rem,2.2vw,2rem);
-  height:var(--top);padding:env(safe-area-inset-top) var(--gutr) 0 var(--gut);background:#030306;border-bottom:1px solid var(--hair);
-  font:400 .66rem var(--mono);color:var(--dim);white-space:nowrap;overflow:hidden}
-.strip b{color:var(--white);font-weight:400}
-.strip .live{color:var(--sig);display:flex;align-items:center;gap:.5rem}
-.strip .live i{width:6px;height:6px;background:var(--sig);box-shadow:0 0 8px var(--sig);animation:blink 2s steps(2) infinite}
-@keyframes blink{50%{opacity:.25}}
-.heat{display:inline-flex;align-items:center;gap:.55rem}
-.heat i{width:24px;height:5px;background:linear-gradient(90deg,var(--cy),var(--pk),var(--sig));position:relative}
-.heat i::after{content:"";position:absolute;top:-3px;bottom:-3px;width:2px;left:calc(var(--h,0) * 100% - 1px);background:#fff;box-shadow:0 0 6px #fff}
-.strip .end{margin-left:auto;display:flex;gap:1.4rem;align-items:center}
-.strip .l2,.strip .legal-btn{display:none}
-.strip .legal-btn{font:400 .66rem var(--mono);color:var(--dim);text-decoration:underline;text-decoration-color:var(--faint);text-underline-offset:3px}
-@media (max-width:1180px){.strip .wide{display:none}}
-@media (max-width:560px){.strip .mid{display:none}.strip .l1{display:none}.strip .l2{display:inline}}
-@media (max-width:380px){.strip .u{display:none}.strip{gap:.8rem}}
-
-/* ---------- header ---------- */
-header{position:fixed;top:var(--top);left:0;right:0;z-index:50;display:flex;align-items:center;gap:1.4rem;
-  padding:.85rem var(--gutr) .85rem var(--gut)}
-.mark{display:flex;align-items:center;gap:.75rem;text-decoration:none;padding:.6rem 0;margin:-.6rem 0;flex:none}
-.mark svg{width:20px;height:20px}
-.mark svg .core{fill:rgb(var(--acc));filter:drop-shadow(0 0 4px rgb(var(--acc)))}
-.mark span{font:500 .8rem var(--mono);letter-spacing:.48em}
-.dial{display:flex;gap:.1rem;margin:0 auto}
-.dial [role=tab]{position:relative;display:flex;align-items:baseline;gap:.45rem;padding:.6rem .72rem .7rem;font:400 .8rem var(--sans);color:var(--dim);transition:color .25s}
-.dial .k{font:500 .6rem var(--mono);color:#7a828c;transition:color .25s}
-.dial [role=tab] i{position:absolute;left:.72rem;right:.72rem;bottom:.3rem;height:1px;background:#262b31;transition:background .3s,box-shadow .3s}
-.dial [role=tab].read i{background:var(--pk);box-shadow:0 0 6px rgb(255 46 151 / .7)}
-.dial [role=tab][aria-selected=true]{color:var(--white)}
-.dial [role=tab][aria-selected=true] .k{color:rgb(var(--acc))}
-.dial [role=tab][aria-selected=true] i{background:rgb(var(--acc));box-shadow:0 0 9px rgb(var(--acc))}
-@media (hover:hover){.dial [role=tab]:hover{color:var(--white)}}
-.dial .sm{display:none}
-.tools{display:flex;align-items:center;gap:1rem;flex:none}
-.prog{font:400 .66rem var(--mono);color:var(--dim);display:flex;align-items:center;gap:.55rem}
-.prog b{color:var(--white);font-weight:400}
-.prog svg{width:15px;height:15px}
-.prog svg path{fill:none;stroke:#3a4047;stroke-width:2.4}
-.prog svg path.on{stroke:var(--pk);filter:drop-shadow(0 0 2px var(--pk))}
-.mo{border:1px solid #3a4047;color:var(--dim);width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;flex:none}
-.mo:focus-visible{color:var(--white);border-color:var(--dim)}
-@media (hover:hover){.mo:hover{color:var(--white);border-color:var(--dim)}}
-.mo i{display:block;width:3px;height:11px;background:currentColor;box-shadow:5px 0 0 currentColor;transform:translateX(-2.5px)}
-.mo[aria-pressed="true"] i{width:0;height:0;background:none;box-shadow:none;border-left:9px solid currentColor;border-top:6px solid transparent;border-bottom:6px solid transparent;transform:translateX(1px)}
-.cta{font:400 .82rem var(--sans);color:var(--white);text-decoration:none;padding:.45rem .95rem;border:1px solid rgb(var(--acc));
-  box-shadow:0 0 14px rgb(var(--acc) / .22),inset 0 0 10px rgb(var(--acc) / .1);transition:background .25s,color .25s;white-space:nowrap}
-@media (hover:hover){.cta:hover{background:rgb(var(--acc));color:#000}}
-.cta:focus-visible{background:rgb(var(--acc));color:#000}
-.cta .s{display:none}
-@media (max-width:1180px){.prog .t{display:none}.dial .k{display:none}}
-
-/* ---------- the reading panel: one face at a time ---------- */
-.panel{position:fixed;z-index:20;left:var(--gut);top:calc(var(--top) + 4.4rem);bottom:3.6rem;width:min(40rem,46vw);
-  display:grid;grid-template:1fr/1fr;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;-webkit-mask:linear-gradient(#0000,#000 1.2rem,#000 calc(100% - 1.6rem),#0000);mask:linear-gradient(#0000,#000 1.2rem,#000 calc(100% - 1.6rem),#0000)}
-.panel::-webkit-scrollbar{display:none}
-.face{grid-area:1/1;margin-block:auto;padding:1.4rem 0 1.8rem;opacity:0;visibility:hidden;transform:translateX(calc(var(--dir,1) * -30px));
-  max-height:0;overflow:hidden;
-  transition:opacity .3s ease,transform .55s cubic-bezier(.2,.7,.2,1),visibility 0s linear .3s,max-height 0s linear .3s}
-.face.on{opacity:1;visibility:visible;transform:none;max-height:400rem;overflow:visible;
-  transition:opacity .45s ease .06s,transform .75s cubic-bezier(.16,.8,.2,1) .04s,visibility 0s,max-height 0s}
-.face h1:focus,.face h2:focus{outline:none}
-.face.on>*{animation:rise .75s cubic-bezier(.16,.8,.2,1) both;animation-delay:calc(.08s + var(--i,0) * 60ms)}
-@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-.tag{font:400 .72rem var(--mono);color:var(--dim);display:flex;gap:.8rem;align-items:center;margin-bottom:1.6rem}
-.tag b{color:rgb(var(--acc));font-weight:500;text-shadow:0 0 10px rgb(var(--acc) / .6)}
-.tag::after{content:"";flex:0 0 3rem;height:1px;background:var(--faint)}
-@media (max-width:560px){.tag::after{display:none}}
-@media (min-width:761px) and (max-height:860px){h1{font-size:clamp(2.5rem,4.8vw,4.6rem)}h2{font-size:clamp(2.2rem,4vw,3.9rem)}.lede{margin-top:1.2rem}.jobs,.gates,.books{margin-top:1.2rem}}
-h1,h2{font-family:var(--sans);font-weight:200;letter-spacing:-.035em;line-height:1.02}
-h1{font-size:clamp(2.7rem,min(5.6vw,8.6vh),5.6rem)}
-h2{font-size:clamp(2.4rem,min(4.7vw,7.4vh),4.7rem)}
-.dense h2{font-size:clamp(2.2rem,min(3.9vw,6.3vh),3.9rem)}
-.dense .tag{margin-bottom:1.1rem}.dense .lede{margin-top:1.1rem}
-.dense .jobs,.dense .gates,.dense .books{margin-top:1.2rem}.dense .jobs li,.dense .gates li{padding:.55rem 0}
-.dense .jobs span,.dense .gates span{font-size:.88rem;line-height:1.5}.dense .book{padding:.6rem 0 .6rem 1.05rem}.dense .book p{font-size:.86rem}
-.dense .next{margin-top:1.4rem}.dense .line{margin-top:1.1rem}
-h1 span,h2 span{display:block}
-.hot{color:rgb(var(--acc));text-shadow:0 0 .35em rgb(var(--acc) / .42),0 0 1.2em rgb(var(--acc) / .18)}
-.acc{color:rgb(var(--acc))}
-/* headline decode: the scramble lives in an overlay, so the heading's own text never moves */
-.dc{position:relative}
-.dc.decoding>span{color:transparent;text-shadow:none}
-.dc>.dc-layer{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
-.dc-layer i{position:absolute;font-style:normal;white-space:pre;color:var(--white);text-shadow:-1px 0 0 rgb(255 46 151 / .55),1px 0 0 rgb(45 226 255 / .55)}
-.dc-layer i.hot{color:rgb(var(--acc))}
-.lede{margin-top:1.6rem;font-size:clamp(1.02rem,1.2vw,1.14rem);color:var(--dim);max-width:33rem}
-.lede strong{color:var(--white);font-weight:400}
-.lede.sm{font-size:.95rem;margin-top:1.1rem}
-.aside .t-swipe{display:none}.touch .aside .t-drag{display:none}.touch .aside .t-swipe{display:inline}
-.aside{margin-top:2rem;font:400 .72rem/1.9 var(--mono);color:var(--dim);max-width:30rem;padding-left:1rem;border-left:1px solid rgb(var(--acc))}
-/* job lists: a verb, then what it means */
-.jobs,.gates{list-style:none;margin-top:1.7rem;border-top:1px solid var(--hair)}
-.jobs li,.gates li{display:grid;grid-template-columns:6.4rem 1fr;gap:0 1rem;padding:.72rem 0;border-bottom:1px solid var(--hair);position:relative}
-.jobs b,.gates b{font:500 .72rem/1.9 var(--mono);color:var(--cy);letter-spacing:.02em}
-.jobs span,.gates span{font-size:.92rem;color:#b3bac3;line-height:1.55}
-.gates b{color:var(--white)}
-.gates b::before{content:counter(g) " ";counter-increment:g;color:var(--cy)}
-.gates{counter-reset:g}
-.jobs li::before,.gates li::before{content:"";position:absolute;left:0;top:-1px;height:1px;width:0;background:rgb(var(--acc));box-shadow:0 0 8px rgb(var(--acc));transition:width .5s cubic-bezier(.2,.7,.2,1)}
-@media (hover:hover){.jobs li:hover::before,.gates li:hover::before{width:100%}}
-.line{margin-top:1.5rem;font:400 .74rem/1.85 var(--mono);color:#c4cad1;padding-left:1rem;border-left:1px solid var(--sig);max-width:33rem;
-  box-shadow:-8px 0 14px -10px var(--sig)}
-.line b{color:var(--sig);font-weight:500}
-/* the three books, coloured as their light inside the glass */
-.books{margin-top:1.6rem;display:grid;gap:.1rem}
-.book{padding:.85rem 0 .85rem 1.05rem;border-left:2px solid var(--c);position:relative}
-.book::before{content:"";position:absolute;left:-2px;top:0;bottom:0;width:2px;box-shadow:0 0 12px var(--c)}
-.book.pk{--c:var(--pk)}.book.cy{--c:var(--cy)}.book.rd{--c:var(--sig)}
-.book h3{font:400 1.12rem/1.3 var(--sans);letter-spacing:-.01em;display:flex;flex-wrap:wrap;align-items:baseline;gap:.3rem .8rem}
-.book h3 em{font:400 .68rem var(--mono);font-style:normal;color:var(--c)}
-.book p{font-size:.88rem;color:#b3bac3;margin-top:.25rem;line-height:1.55}
-.book .risk{font-size:.84rem;line-height:1.55;color:var(--dim);margin-top:.3rem}
-.book .obj{font:500 .6rem var(--mono);color:var(--c);letter-spacing:.1em;text-transform:uppercase;margin-right:.4rem}
-.note{margin-top:1.1rem;font-size:.84rem;line-height:1.6;color:var(--dim);max-width:36rem}
-.nos{list-style:none;margin-top:1.5rem;display:grid;gap:.1rem}
-.nos li{display:flex;gap:.9rem;align-items:baseline;padding:.5rem 0;font-size:1rem;color:var(--white);border-bottom:1px solid var(--hair)}
-.nos li::before{content:"";flex:none;width:.7rem;height:1px;background:var(--sig);box-shadow:0 0 6px var(--sig);transform:translateY(-.3em)}
-.nos small{font-size:.86rem;color:var(--dim)}
-/* the open loop: every face ends on the question the next one answers */
-.next{margin-top:2.1rem;display:inline-grid;grid-template-columns:auto auto;align-items:center;gap:.15rem 1rem;text-align:left;padding:.6rem 0}
-.next .k{grid-column:1/-1;font:400 .64rem var(--mono);color:var(--dim);letter-spacing:.06em}
-.next .q{font:400 1.05rem var(--sans);color:var(--white);border-bottom:1px solid var(--faint);padding-bottom:.2rem;transition:border-color .25s}
-.next .arr,.door .arr{width:.55rem;height:.55rem;border-top:1px solid currentColor;border-right:1px solid currentColor;transform:rotate(45deg);transition:transform .3s}
-.next .arr{color:rgb(var(--acc))}
-@media (hover:hover){.next:hover .q{border-color:rgb(var(--acc))}.next:hover .arr{transform:translateX(4px) rotate(45deg)}}
-.next:focus-visible .q{border-color:rgb(var(--acc))}
-/* the channel: a neon edge that travels the frame */
-.door{display:inline-flex;gap:1rem;align-items:center;margin-top:2.2rem;padding:1.05rem 1.9rem;color:var(--white);text-decoration:none;
-  background:#030306;font:500 .8rem var(--mono);position:relative;isolation:isolate;transition:background .25s,color .25s}
-.door::before,.door::after{content:"";position:absolute;z-index:-1;background:conic-gradient(from var(--spin,0deg),var(--cy),var(--pk),var(--sig),var(--pk),var(--cy));
-  animation:spin 6s linear infinite}
-.door::before{inset:-1px;padding:1px;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
-.door::after{inset:-7px;z-index:-2;opacity:.32;filter:blur(12px)}
-@property --spin{syntax:"<angle>";inherits:false;initial-value:0deg}
-@keyframes spin{to{--spin:360deg}}
-@media (hover:hover){.door:hover{background:#fff;color:#000}}
-.door:focus-visible{background:#fff;color:#000}
-.addr{margin-top:1rem;font:400 .8rem var(--mono);color:#c4cad1}
-.done{margin-top:1.4rem;font:400 .72rem var(--mono);color:var(--dim)}
-
-/* ---------- instruments ---------- */
-.hud{position:fixed;right:var(--gutr);top:50%;transform:translateY(-50%);z-index:40;text-align:right;font:400 .62rem/2 var(--mono);color:var(--dim);letter-spacing:.04em;
-  pointer-events:none;text-shadow:0 0 6px #000,0 0 14px #000}
-.hud b{color:var(--white);font-weight:400}
-.hud .hr{display:block;width:1.6rem;height:1px;background:#3a4047;margin:.55rem 0 .55rem auto}
-.hud i{color:rgb(var(--acc));font-style:normal}
-.hud .p{color:var(--pk)}.hud .c{color:var(--cy)}.hud .r{color:var(--sig)}
-.turn{position:fixed;z-index:30;bottom:2.9rem;left:var(--tx,70%);transform:translateX(-50%);display:flex;align-items:center;gap:1.1rem}
-.turn button{width:40px;height:40px;border:1px solid #2a2f35;display:grid;place-items:center;color:var(--dim);background:#030306aa;transition:border-color .25s,color .25s}
-.turn button i{width:.55rem;height:.55rem;border-top:1px solid currentColor;border-right:1px solid currentColor}
-.turn .pv i{transform:translateX(2px) rotate(-135deg)}.turn .nx i{transform:translateX(-2px) rotate(45deg)}
-@media (hover:hover){.turn button:hover{border-color:rgb(var(--acc));color:var(--white)}}
-.turn .hint{font:400 .66rem var(--mono);color:var(--dim);min-width:8.5rem;text-align:center;transition:opacity .6s}
-.turn .hint.gone{opacity:0}
-.hint .t2{display:none}
-.touch .hint .t1{display:none}.touch .hint .t2{display:inline}
-.foot{position:fixed;left:var(--gut);bottom:1.1rem;z-index:40;font:400 .62rem var(--mono);color:#6f7781;display:flex;gap:.2rem .9rem;flex-wrap:wrap}
-.foot a,.foot button{color:#8f98a3;text-decoration:underline;text-decoration-color:#3a4047;text-underline-offset:3px;font:inherit}
-@media (hover:hover){.foot a:hover,.foot button:hover{color:var(--white)}}
-.toast{position:fixed;z-index:70;left:50%;top:calc(var(--top) + 4.6rem);transform:translate(-50%,-8px);opacity:0;pointer-events:none;
-  font:400 .72rem var(--mono);color:var(--white);background:#030306e6;border:1px solid var(--pk);box-shadow:0 0 22px rgb(255 46 151 / .35);
-  padding:.7rem 1.1rem;transition:opacity .5s,transform .5s;white-space:normal;text-align:center;max-width:calc(100vw - 2rem)}
-.toast.on{opacity:1;transform:translate(-50%,0)}
-
-/* ---------- disclosures ---------- */
-dialog{margin:auto;max-width:min(40rem,calc(100vw - 2rem));max-height:calc(100svh - 3rem);background:#07070c;color:var(--white);border:1px solid #2a2f35;
-  padding:2rem clamp(1.2rem,4vw,2.2rem);box-shadow:0 0 60px #000,0 0 30px rgb(var(--acc) / .12);overflow:auto}
-dialog::backdrop{background:#000c;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
-dialog h2{font-size:1.5rem;font-weight:300;letter-spacing:-.01em;margin-bottom:1.2rem}
-dialog p{font-size:.88rem;line-height:1.7;color:#b3bac3}
-dialog p+p{margin-top:.8rem}
-dialog .links{font:400 .75rem var(--mono);margin-top:1.4rem}
-dialog .row{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.6rem}
-dialog .row button{border:1px solid #3a4047;padding:.6rem 1rem;font:400 .75rem var(--mono)}
-@media (hover:hover){dialog .row button:hover{border-color:rgb(var(--acc))}}
-
-/* ---------- phones and portrait tablets: the monolith above, the face below, the dial under the thumb ---------- */
-@media (orientation:portrait) and (max-width:1100px),(max-width:760px){
-  header{padding-top:.55rem;padding-bottom:.55rem;gap:.8rem}
-  .dial{position:fixed;left:0;right:0;bottom:0;margin:0;z-index:55;justify-content:space-between;gap:0;
-    padding:.3rem max(.35rem,env(safe-area-inset-left)) calc(.3rem + env(safe-area-inset-bottom)) max(.35rem,env(safe-area-inset-right));
-    background:linear-gradient(#03030600,#030306 34%)}
-  .dial [role=tab]{flex:1;flex-direction:column;align-items:center;gap:.05rem;padding:.75rem .1rem .9rem;min-height:52px;font-size:.74rem}
-  .dial [role=tab] i{left:28%;right:28%;bottom:.45rem}
-  .dial .lg,.dial .k{display:none}.dial .sm{display:block}
-  .tools{margin-left:auto}
-  .prog .t{display:none}
-  .cta{padding:.5rem .85rem;font-size:.8rem}.cta .l{display:none}.cta .s{display:inline}
-  .strip .legal-btn{display:inline}
-  .panel{left:var(--gut);right:var(--gutr);width:auto;top:47svh;bottom:calc(58px + env(safe-area-inset-bottom));
-    -webkit-mask:linear-gradient(#0000,#000 1.4rem,#000 calc(100% - 1.4rem),#0000);mask:linear-gradient(#0000,#000 1.4rem,#000 calc(100% - 1.4rem),#0000)}
-  .face{margin-block:0 auto;padding:1.1rem 0 1.6rem}
-  .veil{background:linear-gradient(#03030600 0,#03030600 40svh,#030306d9 49svh,#030306 56svh)}
-  .hud,.foot{display:none}
-  .turn{top:calc(47svh - 1.2rem);bottom:auto;left:50%}
-  .turn button{display:none}
-  h1{font-size:clamp(2.35rem,10.4vw,3.6rem)}h2{font-size:clamp(2.1rem,9.2vw,3.3rem)}
-  .tag{margin-bottom:1.1rem}
-  .lede{margin-top:1.1rem}
-  .jobs li,.gates li{grid-template-columns:5.2rem 1fr}
-  .nogl .fallback{right:50%;top:calc(var(--top) + 3.2rem);transform:translateX(50%)}
-  .nogl .fallback svg{width:30vw}
-}
-/* landscape phones: side by side, compact */
-@media (orientation:landscape) and (max-height:520px){
-  header{padding-top:.4rem;padding-bottom:.4rem}
-  .dial{display:none}
-  .panel{top:calc(var(--top) + 3rem);bottom:.6rem;width:min(30rem,50vw)}
-  h1{font-size:clamp(2rem,6vw,3rem)}h2{font-size:clamp(1.9rem,5.4vw,2.8rem)}
-  .hud,.foot{display:none}.turn{bottom:.8rem}
-  .strip .legal-btn{display:inline}
-  .veil{background:linear-gradient(90deg,#030306f2 0,#030306d9 40%,#03030600 60%)}
-}
-/* touch screens and narrow widths: a 12px floor for reading text, 44px tap targets */
-@media (hover:none),(max-width:820px){
-  .strip{font-size:.75rem}.tag{font-size:.78rem}.aside{font-size:.8rem}.jobs b,.gates b{font-size:.78rem}
-  .line{font-size:.78rem}.book h3 em{font-size:.76rem}.book .obj{font-size:.72rem}.next .k{font-size:.75rem}
-  .addr{font-size:.8rem}.hud,.foot{font-size:.75rem}.turn .hint{font-size:.75rem}.toast{font-size:.78rem}
-}
-@media (max-width:359px){h1{font-size:min(2.35rem,11vw)}h2{font-size:min(2.1rem,10vw)}}
-
-/* ---------- document mode (no script, print, or chosen): the faces as one plain page ---------- */
-html:not(.js) .panel,.doc .panel{position:static;width:auto;max-width:46rem;margin:0 auto;display:block;overflow:visible;-webkit-mask:none;mask:none;
-  padding:calc(var(--top) + 6rem) var(--gutr) 3rem var(--gut)}
-html:not(.js) .face,.doc .face{opacity:1;visibility:visible;transform:none;max-height:none;overflow:visible;padding:3.5rem 0;border-top:1px solid var(--hair)}
-html:not(.js) .aside,.doc .aside{display:none}
-html:not(.js) dialog,.doc dialog{display:block;position:static;margin:0 auto;max-width:46rem;max-height:none;overflow:visible;background:transparent;
-  border:0;border-top:1px solid var(--hair);box-shadow:none;padding:3rem var(--gutr) 1rem var(--gut)}
-html:not(.js) dialog .row,.doc dialog .row{display:none}
-html:not(.js) .face:first-child,.doc .face:first-child{border-top:0;padding-top:0}
-html:not(.js) .face>*,.doc .face>*{animation:none}
-html:not(.js) .dial,html:not(.js) .hud,html:not(.js) .turn,html:not(.js) .next,html:not(.js) .strip,html:not(.js) .prog,html:not(.js) .mo,
-.doc .dial,.doc .hud,.doc .turn,.doc .next,.doc .prog,.doc .mo,.doc .toast{display:none}
-html:not(.js) header{top:0;background:#030306}
-.doc header{background:#030306}
-html:not(.js) .foot,.doc .foot{position:static;padding:2rem var(--gut) 3rem;border-top:1px solid var(--hair);display:flex}
-@media print{html,body{background:#fff!important;color:#000!important;position:static!important;overflow:visible!important;height:auto!important}
-  .strip,header,.dial,.hud,.turn,.next,.aside,#gl,#bloom,.veil,.toast,.fallback{display:none!important}
-  .foot{position:static!important;color:#000!important}
-  dialog{display:block!important;position:static!important;max-height:none!important;border:0!important;box-shadow:none!important;background:#fff!important;padding:1.5rem 0!important}
-  dialog .row{display:none!important}dialog p{color:#000!important}
-  .panel{position:static!important;display:block!important;width:auto!important;overflow:visible!important;-webkit-mask:none!important;padding:0!important}
-  .face{opacity:1!important;visibility:visible!important;transform:none!important;max-height:none!important;overflow:visible!important;
-    transition:none!important;page-break-inside:avoid;padding:1.5rem 0!important}
-  .face *{color:#000!important;text-shadow:none!important;animation:none!important}}
-
-/* stillness: reduced motion, or the pause control */
-@media (prefers-reduced-motion:reduce){
-  .face,.face.on{transition:opacity .2s linear,visibility 0s;transform:none}
-  .face.on>*{animation:none}
-  .strip .live i,.door::before,.door::after{animation:none}
-}
-.paused .strip .live i,.paused .door::before,.paused .door::after{animation:none}
-.og .strip,.og header,.og .dial,.og .hud,.og .turn,.og .foot,.og .next,.og .aside,.og .lede{display:none}
-.og .panel{top:0;bottom:0}
-</style>
+<link rel="preload" href="/fonts/fraunces-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/inter-tight-var.woff2" as="font" type="font/woff2" crossorigin>
+<script src="/assets/js-flag.js"></script>
+<link rel="stylesheet" href="/assets/duet.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FinancialService","name":"Xenith Capital","legalName":"Ray Capital Advisors LLC","url":"https://xenithcap.io/","logo":"https://xenithcap.io/assets/icon-512.png","image":"https://xenithcap.io/assets/og.jpg","description":"Fee-only investment firm in Austin. Portfolios researched with an AI system; a fiduciary adviser makes every decision.","foundingDate":"2021","founder":{"@type":"Person","name":"Logan Jackson"},"address":{"@type":"PostalAddress","addressLocality":"Austin","addressCountry":"US"},"identifier":{"@type":"PropertyValue","propertyID":"CRD","value":"316844"},"sameAs":["https://adviserinfo.sec.gov/firm/summary/316844"]}</script>
+<script src="/assets/duet.js" defer></script>
+<!-- build: duet-2 -->
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<canvas id="gl" aria-hidden="true"></canvas>
-<canvas id="bloom" aria-hidden="true"></canvas>
-<div class="veil" aria-hidden="true"></div>
-<div class="fallback" aria-hidden="true"><svg viewBox="0 0 120 300"><path d="M20 30 60 14l40 16v240l-40 16-40-16z" fill="#05050a" stroke="rgb(45 226 255)" stroke-width="1.2"/><path d="M60 14v272" stroke="rgb(255 46 151)" stroke-width="1"/></svg></div>
 
-<div class="strip" id="strip">
-  <span class="live" aria-hidden="true"><i></i>Live</span>
-  <span aria-hidden="true"><span class="u">UTC </span><b id="s-utc">··:··:··</b></span>
-  <span class="mid" aria-hidden="true">Austin <b id="s-aus">··:··</b></span>
-  <span class="wide heat" aria-hidden="true" title="The monolith's edge light follows the world's exchange sessions">Edge light <i id="s-heat"></i> <b id="s-heat-t">·</b></span>
-  <span class="end"><span aria-hidden="true"><span class="l1">In regular hours</span><span class="l2">In hours</span> <b id="s-open">·</b></span><a class="legal-btn" href="#legal" data-legal>Legal</a></span>
-</div>
-
-<header>
-  <a class="mark" href="#xenith" data-face="0" aria-label="Xenith Capital, first face">
-    <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 5 55 18.5v27L32 59 9 45.5v-27z" fill="none" stroke="#eef1f4" stroke-width="4" stroke-linejoin="round"/><circle class="core" cx="32" cy="18" r="6"/></svg>
-    <span>XENITH</span>
-  </a>
-  <nav class="dial" role="tablist" aria-label="Faces of the monolith">
-    <button type="button" role="tab" id="t-xenith" aria-controls="xenith" aria-selected="true"><span class="k">00</span><span class="lg">Xenith</span><span class="sm">Xenith</span><i></i></button>
-    <button type="button" role="tab" id="t-machine" aria-controls="machine" aria-selected="false" tabindex="-1"><span class="k">01</span><span class="lg">The machine</span><span class="sm">Machine</span><i></i></button>
-    <button type="button" role="tab" id="t-portfolios" aria-controls="portfolios" aria-selected="false" tabindex="-1"><span class="k">02</span><span class="lg">Portfolios</span><span class="sm">Books</span><i></i></button>
-    <button type="button" role="tab" id="t-doctrine" aria-controls="doctrine" aria-selected="false" tabindex="-1"><span class="k">03</span><span class="lg">Doctrine</span><span class="sm">Doctrine</span><i></i></button>
-    <button type="button" role="tab" id="t-fees" aria-controls="fees" aria-selected="false" tabindex="-1"><span class="k">04</span><span class="lg">Fee-only</span><span class="sm">Fees</span><i></i></button>
-    <button type="button" role="tab" id="t-adviser" aria-controls="adviser" aria-selected="false" tabindex="-1"><span class="k">05</span><span class="lg">The adviser</span><span class="sm">Adviser</span><i></i></button>
-  </nav>
-  <div class="tools">
-    <span class="prog" id="prog" aria-hidden="true"><svg viewBox="0 0 24 24" id="prog-hex"></svg><span class="t">Read <b id="prog-n">0</b> of 6</span></span>
-    <button class="mo" id="mo" type="button" aria-pressed="false" aria-label="Pause motion" title="Pause motion"><i aria-hidden="true"></i></button>
-    <a class="cta" href="mailto:inquiry@xenithcap.io?subject=Xenith%20Capital%20inquiry"><span class="l">Open a channel</span><span class="s">Contact</span></a>
-  </div>
+<header class="bar">
+  <a class="mark" href="/" aria-label="Xenith Capital, home">XENITH<span>CAPITAL</span></a>
+  <p class="mkt" id="mkt"><i aria-hidden="true"></i><span class="vh">New York Stock Exchange regular hours, by published schedule: </span><span class="st" aria-hidden="false">NYSE</span></p>
+  <a class="bar-apply" href="#apply">Apply<span class="x"> as a client</span></a>
 </header>
 
-<main id="main" tabindex="-1">
-  <div class="panel" id="panel">
-    <section class="face on" id="xenith">
-      <p class="tag"><b>00</b> Xenith Capital · Fee-only · Austin, Texas</p>
-      <h1 class="dc"><span>Built on AI.</span> <span class="hot">Decided by</span> <span class="hot">a fiduciary.</span></h1>
-      <p class="lede">Xenith researches its three portfolios with an AI system that tracks every position and argues the case against
-        every material proposal. <strong>One adviser makes every decision.</strong> The machine has no access to your account, by design.</p>
-      <p class="aside"><span class="t-drag">Turn the monolith to read it: drag it, or use the arrows.</span><span class="t-swipe">Swipe the monolith to turn it.</span>
-        Each face holds one part of the firm, and <span class="acc">a face you have read keeps its floors lit.</span></p>
-      <button class="next" type="button" data-step="1"><span class="k">NEXT · 01</span><span class="q">What is the machine, exactly?</span><span class="arr" aria-hidden="true"></span></button>
-    </section>
+<main id="main">
 
-    <section class="face dense" id="machine">
-      <p class="tag"><b>01</b> BlackGlass · the research system</p>
-      <h2 class="dc"><span>Not decorated</span> <span>with AI.</span> <span class="hot">Built on it.</span></h2>
-      <p class="lede">BlackGlass is the research system Xenith built to pull every position, earnings report and macro signal into one place.
-        <strong>AI agents and automated tools work inside it, each with one job.</strong></p>
-      <ol class="jobs">
-        <li><b>Tracks</b><span>Earnings dates and consensus for all 50 positions. No estimate moves a decision until the company's own release or filing confirms it.</span></li>
-        <li><b>Argues</b><span>Every material proposal meets the strongest case against it before it can reach a portfolio.</span></li>
-        <li><b>Gauges</b><span>Market and macro dials set one firm-wide regime: green, amber or red. A dead or stale feed is flagged, never read as calm.</span></li>
-        <li><b>Watches</b><span>Each weekday after the US close, it checks the latest data and reports any change in the regime. It never trades.</span></li>
-        <li><b>Drafts</b><span>Research and client letters, drafted by machine, approved and sent by the adviser.</span></li>
-      </ol>
-      <p class="line"><b>No access to client accounts.</b> The machine cannot trade them or move money; the adviser does, and answers for it.</p>
-      <button class="next" type="button" data-step="1"><span class="k">NEXT · 02</span><span class="q">What does it run?</span><span class="arr" aria-hidden="true"></span></button>
-    </section>
+  <section class="duet" aria-labelledby="duet-h">
+    <div class="hero">
+      <h1 id="duet-h">Every dollar here survives <em>an argument.</em></h1>
+      <p class="who-we"><b>Xenith Capital</b> is a fee-only investment firm. Our research system, built on AI, argues the case against. The adviser makes the call. Here is one of those arguments.</p>
+    </div>
+    <div class="log">
+    <p class="stamp"><span class="g"><span>02:14</span> · case against</span> <b>· the AI buildout</b></p>
+    <ol class="thread">
+      <li class="m"><span class="who">BLACKGLASS</span><p><span class="tx">Capex is outrunning revenue. The market is pricing a decade of perfection into eighteen months of evidence.</span></p></li>
+      <li class="l"><span class="who">LOGAN</span><p>Agreed on the froth. Not on the conclusion. Where does it bottleneck?</p></li>
+      <li class="m"><span class="who">BLACKGLASS</span><p><span class="tx">Power. Interconnect queues measured in years. Transformers on back-order. Cooling.</span></p></li>
+      <li class="l"><span class="who">LOGAN</span><p>Then the shovels aren&rsquo;t only chips. They&rsquo;re electrons.</p></li>
+      <li class="m"><span class="who">BLACKGLASS</span><p><span class="tx">Counter: regulated returns cap the upside, and the whole theme is one correlated bet if the cycle turns.</span></p></li>
+      <li class="l"><span class="who">LOGAN</span><p>Then we size it for the cycle turning.</p></li>
+      <li class="m pending"><span class="who">BLACKGLASS</span><p>Verdict: it survives. Sized for the bust, not the boom.<span class="caret" aria-hidden="true"></span></p></li>
+    </ol>
+    <p class="cue" aria-hidden="true">who wins <span>&darr;</span></p>
+    </div>
+  </section>
 
-    <section class="face dense" id="portfolios">
-      <p class="tag"><b>02</b> Model portfolios</p>
-      <h2 class="dc"><span>Three mandates.</span> <span class="hot">Fifty positions.</span></h2>
-      <p class="lede">Each portfolio has one written job. Every position is held against it.</p>
-      <div class="books">
-        <article class="book pk"><h3>VURUL <em>20 positions</em></h3><p><span class="obj">Objective</span> Own the bottleneck nodes of the intelligence buildout: compute, foundry, lithography, memory, networking, power/cooling, AI platforms, operational AI.</p>
-          <p class="risk">Concentrated in AI, semiconductor and infrastructure exposure, with elevated single-theme, valuation and geopolitical risk.</p></article>
-        <article class="book cy"><h3>Sovereign Decagon <em>10 positions · equal weight</em></h3><p><span class="obj">Objective</span> Ten atomic control points, equal weight. If one disappears, a critical industrial, financial, healthcare, logistics, or infrastructure function feels the break.</p>
-          <p class="risk">Ten positions; concentration risk is inherent to its design.</p></article>
-        <article class="book rd"><h3>Kinetic Shield <em>20 positions</em></h3><p><span class="obj">Objective</span> Preserve capital and compound through shocks: essential demand, durable cash flow, dividend safety, defense, energy resilience, balance-sheet strength.</p>
-          <p class="risk">Seeks resilience, not immunity.</p></article>
+  <section class="reveal" aria-labelledby="rev-h">
+    <p class="rev-a">Nobody won. The idea did.<br>It survived the argument. Nothing here gets a dollar any other way.</p>
+    <h2 id="rev-h" class="big">This is how every dollar here gets&nbsp;decided.</h2>
+    <p class="rev-b">Xenith Capital is a fee-only investment firm. A research system built on AI makes the case against. <em>A fiduciary makes the call.</em></p>
+  </section>
+
+  <section class="edge" id="edge" aria-labelledby="edge-h">
+    <p class="k">01 · The edge</p>
+    <h2 id="edge-h">We built on AI. <span>We say so.</span></h2>
+    <p class="lede">Most firms bolt a chatbot onto a brochure. Xenith is built around <b>BlackGlass</b>, the research system we built ourselves: every position, filing, earnings report and macro signal in one place, with AI agents inside it, each doing one job relentlessly.</p>
+    <ul class="jobs">
+      <li><b>Tracks</b><span>Every position, earnings date and filing. No estimate moves a decision until the company&rsquo;s own release confirms it.</span></li>
+      <li><b>Argues</b><span>The strongest case against every material proposal, before it can reach a portfolio.</span></li>
+      <li><b>Gauges</b><span>One firm-wide market regime from the macro dials. A stale feed is flagged, never read as calm.</span></li>
+      <li><b>Watches</b><span>Every weekday after the close, it rechecks the evidence and reports what changed.</span></li>
+      <li><b>Drafts</b><span>Research and client letters, for the adviser to approve, edit and send.</span></li>
+    </ul>
+    <p class="coda">The machine argues. <em>The fiduciary decides.</em></p>
+  </section>
+
+  <section class="books" id="portfolios" aria-labelledby="books-h">
+    <p class="k">02 · Model portfolios</p>
+    <h2 id="books-h">Three mandates. <span>Fifty positions.</span></h2>
+    <p class="lede">Each portfolio has one written job. Every position is held against it, and every one has faced its own case against.</p>
+    <div class="cards">
+      <article class="card c1">
+        <h3>VURUL</h3><p class="n">20 positions</p>
+        <p class="obj">Own the bottleneck nodes of the intelligence buildout: compute, foundry, lithography, memory, networking, power and cooling, AI platforms, operational AI.</p>
+        <p class="risk">Concentrated in AI, semiconductor and infrastructure exposure, with elevated single-theme, valuation and geopolitical risk.</p>
+      </article>
+      <article class="card c2">
+        <h3>Sovereign Decagon</h3><p class="n">10 positions · equal weight</p>
+        <p class="obj">Ten atomic control points. If one disappears, a critical industrial, financial, healthcare, logistics or infrastructure function feels the break.</p>
+        <p class="risk">Ten positions; concentration risk is inherent to its design.</p>
+      </article>
+      <article class="card c3">
+        <h3>Kinetic Shield</h3><p class="n">20 positions</p>
+        <p class="obj">Preserve capital and compound through shocks: essential demand, durable cash flow, dividend safety, defense, energy resilience, balance-sheet strength.</p>
+        <p class="risk">Seeks resilience, not immunity.</p>
+      </article>
+    </div>
+    <p class="fine">Model portfolios. All three are equity strategies and can lose money, including the defensive one. Ordinarily fully invested; up to 20% may be held in cash when the risk process signals elevated market risk. Client accounts may differ. Weights change only with the adviser&rsquo;s dated approval.</p>
+  </section>
+
+  <section class="man" id="logan" aria-labelledby="man-h">
+    <figure class="portrait">
+      <picture>
+        <source type="image/webp" srcset="/assets/img/logan-540.webp 540w, /assets/img/logan-900.webp 900w" sizes="(min-width: 900px) min(42vw, 30rem), min(100vw, 30rem)">
+        <img src="/assets/img/logan-900.jpg" width="900" height="1200" loading="lazy" decoding="async" alt="Logan Jackson in a black kimono and black hat, the brim edged in pink light, lit cyan from one side and pink from the other.">
+      </picture>
+    </figure>
+    <div class="say">
+      <p class="k">03 · The adviser</p>
+      <h2 id="man-h">I&rsquo;m Logan Jackson.</h2>
+      <p>I founded Xenith in 2021 because I wanted a firm that thinks the way I do: in evidence, in probabilities, in decades.</p>
+      <p>I&rsquo;m obsessed with artificial intelligence, with analysis, and with what actually makes capital compound. So I built a research system that never sleeps and never lets me fall in love with a story, and I made it argue with me.</p>
+      <p>I build every portfolio. I make every call. And when you call, I&rsquo;m the one who answers. No committee. No service layer. No sixty-page pitch book.</p>
+      <p class="sig">Logan</p>
+    </div>
+  </section>
+
+  <section class="door" id="fit" aria-labelledby="door-h">
+    <figure class="threshold">
+      <picture>
+        <source type="image/webp" srcset="/assets/img/threshold-540.webp 540w, /assets/img/threshold-900.webp 900w" sizes="(min-width: 900px) min(34vw, 30rem), min(100vw, 30rem)">
+        <img src="/assets/img/threshold-900.jpg" width="900" height="1200" loading="lazy" decoding="async" alt="Logan Jackson standing full length in a stone doorway, in a black kimono with neon cyan and pink trim, fog at his feet.">
+      </picture>
+    </figure>
+    <div class="fit">
+      <p class="k">04 · Fit</p>
+      <h2 id="door-h">We&rsquo;re selective. <span>On purpose.</span></h2>
+      <div class="cols">
+        <div class="yes">
+          <h3>This is for you if</h3>
+          <ul>
+            <li>You think in decades, not quarters.</li>
+            <li>You want the evidence <em>and</em> the strongest case against it.</li>
+            <li>You&rsquo;d rather own the future than slow it down.</li>
+            <li>You change your mind when the data does.</li>
+          </ul>
+        </div>
+        <div class="no">
+          <h3>This isn&rsquo;t for you if</h3>
+          <ul>
+            <li>You want a story instead of evidence.</li>
+            <li>You want certainty instead of probabilities.</li>
+            <li>You want agreement instead of an argument.</li>
+          </ul>
+        </div>
       </div>
-      <p class="note">Model portfolios. All three are equity strategies and can lose money, including the defensive one. Ordinarily fully invested;
-        up to 20% may be held in cash when the risk process signals elevated market risk. Client accounts may differ. Weights change only with
-        the adviser's dated approval.</p>
-      <button class="next" type="button" data-step="1"><span class="k">NEXT · 03</span><span class="q">How does anything get in?</span><span class="arr" aria-hidden="true"></span></button>
-    </section>
+    </div>
+  </section>
 
-    <section class="face dense" id="doctrine">
-      <p class="tag"><b>03</b> Doctrine</p>
-      <h2 class="dc"><span>Evidence</span> <span class="hot">before capital.</span></h2>
-      <p class="lede">A story is not a reason to own something. The process requires independent evidence to converge, and <strong>the strongest case
-        against a material proposal to be answered</strong>, before capital moves.</p>
-      <ol class="gates">
-        <li><b>Mandate</b><span>What must the capital accomplish? Objective, horizon, liquidity, tax and loss capacity come first.</span></li>
-        <li><b>Evidence</b><span>Primary sources, cross-checked. The countercase is tested before a proposal advances.</span></li>
-        <li><b>Construction</b><span>Size, concentration and correlation are weighed for the whole portfolio, not one position at a time.</span></li>
-        <li><b>Review</b><span>Each position is re-examined when the evidence behind it changes.</span></li>
-      </ol>
-      <p class="line"><b>The perimeter is drawn first.</b> Loss capacity, liquidity and concentration set the limits a position is sized within.</p>
-      <button class="next" type="button" data-step="1"><span class="k">NEXT · 04</span><span class="q">Who pays for all of this?</span><span class="arr" aria-hidden="true"></span></button>
-    </section>
+  <section class="fees" id="fees" aria-labelledby="fees-h">
+    <p class="k">05 · Fee-only</p>
+    <h2 id="fees-h">Paid by clients. <span>Only by clients.</span></h2>
+    <p class="lede">Xenith&rsquo;s only compensation is one asset-based advisory fee, set in your agreement and billed quarterly in arrears through your custodian.</p>
+    <ul class="nos">
+      <li>No commissions. Xenith is not a broker-dealer.</li>
+      <li>No products of our own to sell.</li>
+      <li>No soft-dollar benefits. No paid referrals.</li>
+      <li>No performance fees.</li>
+    </ul>
+    <div class="custody">
+      <p>Your assets stay with an independent qualified custodian, <b>Altruist</b> or <b>Interactive Brokers</b>, and your statements come straight from it. The research system has no access to client accounts: it cannot trade them or move money. The adviser does, and answers for it.</p>
+      <p class="fid">Xenith is a fiduciary to every client.</p>
+    </div>
+    <p class="fine">Custodian, trading and fund costs are separate; Form ADV Part 2A, Item 5 sets them out.</p>
+  </section>
 
-    <section class="face" id="fees">
-      <p class="tag"><b>04</b> Fee-only</p>
-      <h2 class="dc"><span>Paid by clients.</span> <span class="hot">Only by clients.</span></h2>
-      <p class="lede">Xenith's only compensation is one asset-based advisory fee, set in your agreement and billed quarterly in arrears through your custodian.</p>
-      <ul class="nos">
-        <li><span>No commissions to Xenith. <small>Xenith is not a broker-dealer.</small></span></li>
-        <li><span>No products of its own to sell.</span></li>
-        <li><span>No soft-dollar benefits. No paid referrals.</span></li>
-        <li><span>No performance fees.</span></li>
-      </ul>
-      <p class="note">Custodian, trading and fund costs are separate; Form ADV Part 2A, Item 5 sets them out.</p>
-      <p class="lede sm">Your assets stay with an independent qualified custodian, Altruist or Interactive Brokers, and your statements come straight from it.
-        <strong>Xenith is a fiduciary to every client.</strong></p>
-      <button class="next" type="button" data-step="1"><span class="k">NEXT · 05</span><span class="q">Who answers for it?</span><span class="arr" aria-hidden="true"></span></button>
-    </section>
+  <section class="apply" id="apply" aria-labelledby="apply-h">
+    <p class="k">06 · Apply</p>
+    <h2 id="apply-h">Start with one question.</h2>
+    <blockquote class="q">What&rsquo;s one thing you changed your mind about in the last year, and what changed it?</blockquote>
+    <p class="lede">Answer it in an email. Xenith accepts clients case by case, and Logan reads every application himself.</p>
+    <a class="go" href="mailto:inquiry@xenithcap.io?subject=Application%20%C2%B7%20Xenith%20Capital&amp;body=What%E2%80%99s%20one%20thing%20you%20changed%20your%20mind%20about%20in%20the%20last%20year%2C%20and%20what%20changed%20it%3F%0A%0A">Apply by email <span aria-hidden="true">&rarr;</span></a>
+    <p class="addr">inquiry@xenithcap.io</p>
+  </section>
 
-    <section class="face" id="adviser">
-      <p class="tag"><b>05</b> The adviser</p>
-      <h2 class="dc"><span>One line</span> <span class="hot">of accountability.</span></h2>
-      <p class="lede">Logan Jackson founded Xenith in 2021. <strong>He directs the machine, builds every portfolio, makes every decision
-        and answers your call.</strong> No committee. No service layer.</p>
-      <p class="lede sm">Xenith accepts clients selectively, case by case.</p>
-      <a class="door" href="mailto:inquiry@xenithcap.io?subject=Xenith%20Capital%20inquiry">Open a channel <span class="arr" aria-hidden="true"></span></a>
-      <p class="addr">inquiry@xenithcap.io</p>
-      <p class="done" id="done" hidden>All six faces read. <span class="acc">The monolith is lit.</span></p>
-    </section>
-  </div>
 </main>
 
-<div class="hud" id="hud" aria-hidden="true"></div>
-<div class="turn" id="turn">
-  <button class="pv" type="button" data-step="-1" aria-label="Turn to the previous face"><i aria-hidden="true"></i></button>
-  <span class="hint" id="hint" aria-hidden="true"><span class="t1">Drag to turn</span><span class="t2">Swipe to turn</span></span>
-  <button class="nx" type="button" data-step="1" aria-label="Turn to the next face"><i aria-hidden="true"></i></button>
-</div>
-<div class="toast" id="toast" role="status"></div>
-
-<footer class="foot">
-  <span>Ray Capital Advisors LLC, dba Xenith Capital · Registered in Texas and Virginia</span>
-  <a href="#legal" data-legal>Disclosures</a>
-  <a href="https://reports.adviserinfo.sec.gov/reports/ADV/316844/PDF/316844.pdf" rel="noopener">Form ADV</a>
-  <a href="https://adviserinfo.sec.gov/firm/summary/316844" rel="noopener">IAPD</a>
-  <button type="button" data-doc>Read as a document</button>
+<footer class="foot" id="disclosures">
+  <p>Xenith Capital is the business name of Ray Capital Advisors LLC, a registered investment adviser. Registration does not imply a certain level of skill or training. Xenith transacts business only where it is registered or exempt from registration.</p>
+  <p>This site is informational only, not an offer, a solicitation or personalized investment advice. Investing involves risk, including loss of principal. VURUL, Sovereign Decagon and Kinetic Shield are model portfolios; nothing on this site presents performance. The conversation that opens this page illustrates the research process; it is not a recommendation of any security or sector. The exchange&#8209;hours light follows the published regular schedule, not market data; holidays are not reflected. The page loads nothing from third parties, runs no analytics and sets no cookies.</p>
+  <p class="links"><a href="https://reports.adviserinfo.sec.gov/reports/ADV/316844/PDF/316844.pdf" rel="noopener">Form ADV Part 1</a> · <a href="https://adviserinfo.sec.gov/firm/summary/316844" rel="noopener">IAPD record and Part 2 brochure</a> · <a href="/credits.txt">Credits</a></p>
+  <p class="cr">&copy; 2026 Ray Capital Advisors LLC · Austin</p>
 </footer>
-
-<dialog id="legal" aria-labelledby="legal-h">
-  <h2 id="legal-h">Disclosures</h2>
-  <p>Xenith Capital is the business name of Ray Capital Advisors LLC, an investment adviser registered in Texas and Virginia. Registration does not imply a certain level of skill or training. Xenith transacts business only where it is registered or exempt from registration.</p>
-  <p>This site is informational only: not an offer, a solicitation, or personalized investment advice. Investing involves risk, including loss of principal.</p>
-  <p>VURUL, Sovereign Decagon and Kinetic Shield are model portfolios. All are equity strategies that can lose money, and client accounts may differ
-    because of timing, account size, taxes, custodian constraints, client restrictions and cash flows. Nothing on this site presents performance.
-    The lights inside the monolith are illustrations; on the portfolios face there is one light for each model position.</p>
-  <p>Exchange hours on this site are published regular schedules, not market data; holidays are not reflected. After it loads, the page makes no
-    network requests; it keeps only which faces you have read, whether you have visited before, and your motion setting, on your own device.</p>
-  <p class="links"><a href="https://reports.adviserinfo.sec.gov/reports/ADV/316844/PDF/316844.pdf" rel="noopener">Form ADV Part 1</a> ·
-    <a href="https://adviserinfo.sec.gov/firm/summary/316844" rel="noopener">IAPD record and Part 2 brochure</a> · <a href="credits.txt">Credits</a></p>
-  <div class="row"><button type="button" data-doc>Read as a document</button><button type="button" data-close>Close</button></div>
-</dialog>
-<label class="sr" aria-hidden="true" id="hap"><input type="checkbox" switch tabindex="-1"></label>
-
-<script>
-const EXD=[{"id":"NYSE","name":"New York Stock Exchange","city":"New York","lat":40.7069,"lon":-74.0113,"tz":"America/New_York","s":[[570,960]]},{"id":"TSX","name":"Toronto Stock Exchange","city":"Toronto","lat":43.6487,"lon":-79.3817,"tz":"America/Toronto","s":[[570,960]]},{"id":"LSE","name":"London Stock Exchange","city":"London","lat":51.515,"lon":-0.0994,"tz":"Europe/London","s":[[480,990]]},{"id":"Euronext","name":"Euronext Paris","city":"Paris","lat":48.8698,"lon":2.3412,"tz":"Europe/Paris","s":[[540,1050]]},{"id":"Xetra","name":"Deutsche Börse Xetra","city":"Frankfurt","lat":50.1155,"lon":8.6842,"tz":"Europe/Berlin","s":[[540,1050]]},{"id":"SIX","name":"SIX Swiss Exchange","city":"Zurich","lat":47.3769,"lon":8.5417,"tz":"Europe/Zurich","s":[[540,1040]]},{"id":"JSE","name":"Johannesburg Stock Exchange","city":"Johannesburg","lat":-26.1076,"lon":28.0567,"tz":"Africa/Johannesburg","s":[[540,1010]]},{"id":"Tadawul","name":"Saudi Exchange","city":"Riyadh","lat":24.7136,"lon":46.6753,"tz":"Asia/Riyadh","s":[[600,900]],"wk":[0,1,2,3,4]},{"id":"NSE","name":"National Stock Exchange of India","city":"Mumbai","lat":19.06,"lon":72.86,"tz":"Asia/Kolkata","s":[[555,930]]},{"id":"SGX","name":"Singapore Exchange","city":"Singapore","lat":1.2789,"lon":103.85,"tz":"Asia/Singapore","s":[[540,720],[780,1020]]},{"id":"HKEX","name":"Hong Kong Exchanges","city":"Hong Kong","lat":22.283,"lon":114.1588,"tz":"Asia/Hong_Kong","s":[[570,720],[780,960]]},{"id":"SSE","name":"Shanghai Stock Exchange","city":"Shanghai","lat":31.2304,"lon":121.4737,"tz":"Asia/Shanghai","s":[[570,690],[780,897]]},{"id":"TSE","name":"Tokyo Stock Exchange","city":"Tokyo","lat":35.6828,"lon":139.7773,"tz":"Asia/Tokyo","s":[[540,690],[750,925]]},{"id":"ASX","name":"Australian Securities Exchange","city":"Sydney","lat":-33.8651,"lon":151.2099,"tz":"Australia/Sydney","s":[[600,960]]}];
-(() => {
-"use strict";
-const DOC = document.documentElement;
-DOC.classList.add("js");
-const $ = id => document.getElementById(id);
-const QS = new URLSearchParams(location.search);
-const RM_Q = matchMedia("(prefers-reduced-motion: reduce)");
-let reduce = RM_Q.matches;
-if (RM_Q.addEventListener) RM_Q.addEventListener("change", e => { reduce = e.matches; dirty = true; });
-const TOUCH = matchMedia("(hover: none)").matches || (navigator.maxTouchPoints || 0) > 0;
-if (TOUCH) DOC.classList.add("touch");
-const OG = QS.has("og");
-if (OG) DOC.classList.add("og");
-const SEG = Math.PI / 3, N = 6;
-let dirty = true, lost = false;
-const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
-const mod = (a, n) => ((a % n) + n) % n;
-const store = {
-  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
-  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
-};
-
-// ============ exchanges: the live strip and the edge light ============
-const WD = {Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6}, MON_FRI = [1, 2, 3, 4, 5];
-const EX = EXD.map(e => Object.assign({}, e, {
-  days: e.wk || MON_FRI, state: "closed", offset: 0, next: null,
-  fmt: new Intl.DateTimeFormat("en-US", {timeZone: e.tz, weekday: "short", year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"}),
-}));
-function parts(e, ms) {
-  const p = {}; for (const x of e.fmt.formatToParts(ms)) p[x.type] = x.value;
-  return {wd: WD[p.weekday], h: +p.hour, m: +p.minute, s: +p.second, y: +p.year, mo: +p.month, d: +p.day};
-}
-function evaluate(e, ms) {
-  const p = parts(e, ms), now = p.h * 60 + p.m + p.s / 60;
-  e.offset = Math.round((Date.UTC(p.y, p.mo - 1, p.d, p.h, p.m, p.s) - Math.floor(ms / 1000) * 1000) / 60000);
-  const trading = e.days.includes(p.wd);
-  e.state = !trading ? "closed" : e.s.some(([a, b]) => now >= a && now < b) ? "open"
-    : now >= e.s[0][0] && now < e.s[e.s.length - 1][1] ? "break" : "closed";
-  let best = null;
-  for (let k = 0; k < 8 && !best; k++) {
-    if (!e.days.includes((p.wd + k) % 7)) continue;
-    e.s.forEach(([a, b], si) => {
-      for (const [m, kind] of [[a, si ? "resumes" : "opens"], [b, si < e.s.length - 1 ? "pauses" : "closes"]]) {
-        const t = k * 1440 + m - now;
-        if (t > 0.0001 && (!best || t < best.t)) best = {t, kind, m};
-      }
-    });
-  }
-  if (best) { // correct for a daylight-saving change between now and the boundary
-    const q = parts(e, ms + best.t * 60000), got = q.h * 60 + q.m + q.s / 60;
-    let diff = best.m - got; diff = ((diff + 720) % 1440 + 1440) % 1440 - 720;
-    if (Math.abs(diff) >= 1) best.t += diff;
-  }
-  e.next = best;
-}
-const fmtDur = t => {
-  const sec = Math.max(0, Math.round(t * 60)), h = Math.floor(sec / 3600), m = Math.floor(sec / 60) % 60;
-  return h ? `${h}h ${String(m).padStart(2, "0")}m` : `${m}m`;
-};
-// the visitor's own exchange: by time zone, else the nearest UTC offset
-const TZ = (Intl.DateTimeFormat().resolvedOptions().timeZone || "");
-const TZX = {"America/Toronto": "TSX", "America/Vancouver": "TSX", "America/Edmonton": "TSX", "America/Halifax": "TSX",
-  "Europe/London": "LSE", "Europe/Dublin": "LSE", "Europe/Paris": "Euronext", "Europe/Amsterdam": "Euronext", "Europe/Brussels": "Euronext",
-  "Europe/Lisbon": "Euronext", "Europe/Oslo": "Euronext", "Europe/Milan": "Euronext", "Europe/Berlin": "Xetra", "Europe/Vienna": "Xetra",
-  "Europe/Zurich": "SIX", "Africa/Johannesburg": "JSE", "Asia/Riyadh": "Tadawul", "Asia/Dubai": "Tadawul", "Asia/Kolkata": "NSE",
-  "Asia/Calcutta": "NSE", "Asia/Singapore": "SGX", "Asia/Hong_Kong": "HKEX", "Asia/Shanghai": "SSE", "Asia/Tokyo": "TSE",
-  "Australia/Sydney": "ASX", "Australia/Melbourne": "ASX", "Australia/Brisbane": "ASX"};
-let mine = null;
-const heatQ = QS.has("heat") ? clamp(+QS.get("heat") || 0, 0, 1) : null;
-let heatT = heatQ === null ? 0 : heatQ, heat = heatT;
-const CYs = [45, 226, 255], PKs = [255, 46, 151], RDs = [255, 42, 61];
-const mix3 = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
-const accRGB = h => h < .5 ? mix3(CYs, PKs, h * 2) : mix3(PKs, RDs, h * 2 - 1);
-const chi = new Intl.DateTimeFormat("en-US", {timeZone: "America/Chicago", hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZoneName: "short"});
-const own = new Intl.DateTimeFormat("en-US", {hour: "2-digit", minute: "2-digit", hourCycle: "h23"});
-let openN = 0;
-function tick() {
-  const ms = Date.now(), d = new Date(ms);
-  EX.forEach(e => evaluate(e, ms));
-  openN = EX.filter(e => e.state === "open").length;
-  const w = EX.reduce((s, e) => s + (e.state === "open" ? 1 : e.state === "break" ? .5 : 0), 0);
-  if (heatQ === null) heatT = clamp(w / 5, 0, 1);
-  if (!mine) {
-    const id = TZX[TZ] || (TZ.startsWith("America/") ? "NYSE" : null);
-    const off = -d.getTimezoneOffset();
-    mine = EX.find(e => e.id === id) || EX.slice().sort((a, b) => Math.abs(a.offset - off) - Math.abs(b.offset - off))[0];
-  }
-  const cp = {}; for (const x of chi.formatToParts(d)) cp[x.type] = x.value;
-  $("s-utc").textContent = d.toISOString().slice(11, 19);
-  $("s-aus").textContent = `${cp.hour}:${cp.minute} ${cp.timeZoneName}`;
-  $("s-open").textContent = innerWidth < 380 ? `${openN}/${EX.length}` : `${openN} of ${EX.length}`;
-  const hc = accRGB(heatT);
-  DOC.style.setProperty("--acc", hc.join(" "));
-  $("s-heat").style.setProperty("--h", heatT.toFixed(3));
-  $("s-heat-t").textContent = heatT < .2 ? "cold" : heatT < .6 ? "warming" : "hot";
-  hudLines(d);
-}
-
-// ============ faces ============
-const FACES = [...document.querySelectorAll(".face")];
-const TABS = [...document.querySelectorAll('[role="tab"]')];
-const panel = $("panel"), legal = $("legal");
-FACES.forEach(f => [...f.children].forEach((c, i) => c.style.setProperty("--i", i)));
-// the faces become tab panels only when the script runs; without it they are plain sections of one page
-FACES.forEach((f, i) => {
-  f.setAttribute("role", "tabpanel"); f.setAttribute("aria-labelledby", TABS[i].id);
-  const h = f.querySelector("h1,h2"); if (h) h.tabIndex = -1;
-});
-const read = new Set((store.get("xg-read") || "").split(",").filter(x => /^[0-5]$/.test(x)).map(Number));
-const VIS = new Float32Array(N);
-read.forEach(i => { VIS[i] = 1; });
-const fromHash = () => FACES.findIndex(f => "#" + f.id === location.hash);
-let k = Math.max(0, fromHash()), active = -1, rot = -k * SEG, target = rot, rv = 0, dwell = 0, touched = false, lastDir = 1;
-let paused = store.get("xg-motion") === "off";
-
-const progHex = $("prog-hex");
-progHex.innerHTML = Array.from({length: N}, (_, i) => {
-  const a0 = (i * 60 - 90) * Math.PI / 180, a1 = ((i + 1) * 60 - 90) * Math.PI / 180, r = 9.5;
-  return `<path d="M${(12 + r * Math.cos(a0)).toFixed(2)} ${(12 + r * Math.sin(a0)).toFixed(2)}L${(12 + r * Math.cos(a1)).toFixed(2)} ${(12 + r * Math.sin(a1)).toFixed(2)}"/>`;
-}).join("");
-const progSegs = [...progHex.querySelectorAll("path")];
-function paintRead() {
-  TABS.forEach((t, i) => t.classList.toggle("read", read.has(i)));
-  progSegs.forEach((p, i) => p.classList.toggle("on", read.has(i)));
-  $("prog-n").textContent = read.size;
-  $("done").hidden = read.size < N;
-}
-function markRead(i) {
-  if (read.has(i)) return;
-  read.add(i); VIS[i] = 1; store.set("xg-read", [...read].join(","));
-  paintRead(); dirty = true;
-  if (read.size === N) toast("All six faces read. The monolith is lit.");
-}
-let toastT = 0;
-function toast(msg) {
-  const t = $("toast"); t.textContent = msg; t.classList.add("on");
-  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 5200);
-}
-function show(i, dir) {
-  if (i === active || DOC.classList.contains("doc")) return;
-  const first = active < 0, prev = active;
-  const settled = i === mod(k, N);   // a turn across several faces passes the ones in between without claiming them
-  const heldFocus = prev >= 0 && FACES[prev].contains(document.activeElement);
-  active = i;
-  FACES.forEach((f, j) => {
-    const on = j === i;
-    if (on && !first && !reduce) { // enter from the side the monolith turns toward
-      f.style.transition = "none"; f.style.transform = `translateX(${dir * 34}px)`; void f.offsetWidth;
-      f.style.transition = ""; f.style.transform = "";
-    }
-    f.style.setProperty("--dir", dir);
-    f.classList.toggle("on", on);
-    if (on) f.removeAttribute("inert"); else f.setAttribute("inert", "");
-  });
-  // focus never falls into a face that just went inert: it follows the reader to the new face's heading
-  if (heldFocus) { const h = FACES[i].querySelector("h1,h2"); if (h) h.focus({preventScroll: true}); }
-  const focusTab = TABS.includes(document.activeElement);
-  TABS.forEach((t, j) => { t.setAttribute("aria-selected", String(j === i)); t.tabIndex = j === i ? 0 : -1; });
-  if (focusTab && settled) TABS[i].focus({preventScroll: true});
-  panel.scrollTop = 0;
-  fit();
-  const h = FACES[i].querySelector(".dc"); if (h && !first && settled) decode(h);
-  if (!OG && history.replaceState) history.replaceState(null, "", location.pathname + location.search + "#" + FACES[i].id);
-  clearTimeout(dwell); if (settled) dwell = setTimeout(() => markRead(i), 1700);
-  hudLines(new Date());
-}
-function go(nk, user) {
-  if (nk === k && Math.abs(target - rot) < 1e-3) return;
-  lastDir = Math.sign(nk - k) || lastDir;
-  k = nk; target = -k * SEG;
-  if (reduce) { rot = target; rv = 0; }
-  if (user) { touched = true; $("hint").classList.add("gone"); }
-  dirty = true;
-}
-const step = (d, user = true) => go(k + d, user);
-function goFace(i, user = true) { let d = mod(i - mod(k, N), N); if (d > N / 2) d -= N; go(k + d, user); }
-const isDoc = () => DOC.classList.contains("doc");
-// on desktop a face should fit its panel: if it does not, it is scaled down, never below 88%; below that the panel scrolls
-function fit() {
-  const f = FACES[active]; if (!f) return;
-  f.style.zoom = "";
-  if (isDoc() || STACK_Q.matches) return;
-  const need = f.offsetHeight, have = panel.clientHeight;
-  if (need > have) f.style.zoom = Math.max(.88, have / need).toFixed(3);
-}
-addEventListener("resize", () => fit());
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fit());
-
-// ============ input: drag, swipe, wheel, keys, buttons ============
-const cv = $("gl");
-let drag = null;
-addEventListener("pointerdown", e => {
-  if (isDoc() || e.button > 0 || !e.isPrimary) return;
-  if (e.target.closest("a,button,dialog,input,label,.strip,header")) return;
-  if (e.pointerType === "mouse" && e.target.closest(".panel")) return;   // text stays selectable with a mouse
-  drag = {x: e.clientX, y: e.clientY, r0: rot, t: performance.now(), lx: e.clientX, lt: performance.now(), v: 0, moved: false, id: e.pointerId};
-}, {passive: true});
-addEventListener("pointermove", e => {
-  if (e.pointerType === "mouse") { mouse[0] = e.clientX / innerWidth * 2 - 1; mouse[1] = e.clientY / innerHeight * 2 - 1; }
-  if (!drag || e.pointerId !== drag.id) return;
-  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-  if (!drag.moved) {
-    if (Math.abs(dx) > 7 && Math.abs(dx) > Math.abs(dy) * 1.2) { drag.moved = true; cv.classList.add("drag"); }
-    else if (Math.abs(dy) > 10) { drag = null; return; }
-    else return;
-  }
-  const span = Math.max(260, (STACK ? innerWidth * .78 : innerWidth * .42));
-  rot = drag.r0 + dx / span * SEG;
-  const now = performance.now(), dt = Math.max(1, now - drag.lt);
-  drag.v = drag.v * .6 + ((e.clientX - drag.lx) / span * SEG / dt * 1000) * .4;
-  drag.lx = e.clientX; drag.lt = now; dirty = true;
-}, {passive: true});
-function endDrag(e) {
-  if (!drag) return;
-  const d = drag; drag = null; cv.classList.remove("drag");
-  if (!d.moved) return;
-  const proj = rot + clamp(d.v, -9, 9) * .13;
-  go(Math.round(-proj / SEG), true); rv = reduce ? 0 : d.v;
-  buzz();
-}
-addEventListener("pointerup", endDrag, {passive: true});
-addEventListener("pointercancel", endDrag, {passive: true});
-// wheel and trackpad: a long face scrolls first; the tail of a scroll that hits the end is not a turn;
-// then one gesture turns one face, and the gesture must pause before the next turn
-let wAcc = 0, wLock = false, wLast = 0, lastNative = 0;
-addEventListener("wheel", e => {
-  if (isDoc() || e.ctrlKey || legal.open) return;
-  const vertical = Math.abs(e.deltaY) >= Math.abs(e.deltaX);
-  const now = performance.now();
-  if (vertical && e.target.closest(".panel") && canScroll(panel, e.deltaY)) { lastNative = now; return; }
-  e.preventDefault();
-  if (now - lastNative < 380) { lastNative = now; return; }
-  if (wLock) { if (now - wLast > 220) wLock = false; else { wLast = now; return; } }
-  if (now - wLast > 300) wAcc = 0;
-  wLast = now; wAcc += (vertical ? e.deltaY : e.deltaX) * (e.deltaMode === 1 ? 30 : 1);
-  if (Math.abs(wAcc) > 42) { step(Math.sign(wAcc)); wAcc = 0; wLock = true; }
-}, {passive: false});
-function canScroll(el, dy) {
-  if (el.scrollHeight <= el.clientHeight + 2) return false;
-  return dy > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 2 : el.scrollTop > 2;
-}
-// keys: a long face scrolls before it turns; the digits work only inside the tab list
-function scrollFace(dir, big) {
-  if (!canScroll(panel, dir)) return false;
-  panel.scrollBy({top: dir * (big ? panel.clientHeight * .85 : 64), behavior: reduce ? "auto" : "smooth"});
-  return true;
-}
-addEventListener("keydown", e => {
-  if (isDoc() || e.altKey || e.ctrlKey || e.metaKey || legal.open) return;
-  const t = e.target;
-  if (t.closest && t.closest("input,textarea,select")) return;
-  const onBtn = t.closest && t.closest("a,button");
-  const K = e.key;
-  if (K === "ArrowRight") { e.preventDefault(); step(1); }
-  else if (K === "ArrowLeft") { e.preventDefault(); step(-1); }
-  else if (K === "PageDown" || (K === " " && !onBtn && !e.shiftKey)) { e.preventDefault(); if (!scrollFace(1, true)) step(1); }
-  else if (K === "PageUp" || (K === " " && !onBtn && e.shiftKey)) { e.preventDefault(); if (!scrollFace(-1, true)) step(-1); }
-  else if (K === "ArrowDown") { e.preventDefault(); if (!scrollFace(1, false)) step(1); }
-  else if (K === "ArrowUp") { e.preventDefault(); if (!scrollFace(-1, false)) step(-1); }
-  else if (K === "Home" && TABS.includes(t)) { e.preventDefault(); goFace(0); }
-  else if (K === "End" && TABS.includes(t)) { e.preventDefault(); goFace(N - 1); }
-  else if (/^[1-6]$/.test(K) && TABS.includes(t)) { e.preventDefault(); goFace(+K - 1); }
-});
-TABS.forEach((t, i) => t.addEventListener("click", () => { goFace(i); buzz(); }));
-document.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => { step(+b.dataset.step); buzz(); }));
-document.querySelector(".mark").addEventListener("click", e => { if (!isDoc()) { e.preventDefault(); goFace(0); } });
-addEventListener("hashchange", () => { if (isDoc()) return; const i = fromHash(); if (i >= 0 && i !== active) goFace(i, false); });
-// the disclosures are page text; with the script they open over the monolith, and every legal control reaches them
-function enterDoc() {
-  if (legal.open) legal.close();
-  DOC.classList.add("doc");
-  FACES.forEach(f => { f.removeAttribute("inert"); f.removeAttribute("role"); f.removeAttribute("aria-labelledby"); });
-  scrollTo(0, 0);
-}
-document.querySelectorAll("[data-legal]").forEach(a => a.addEventListener("click", e => {
-  if (isDoc()) return;   // the link scrolls to the text in document mode
-  e.preventDefault();
-  if (typeof legal.showModal === "function") legal.showModal();
-  else { enterDoc(); legal.scrollIntoView(); }
-}));
-legal.querySelector("[data-close]").addEventListener("click", () => legal.close());
-legal.addEventListener("click", e => {   // a click on the backdrop closes it; a click inside never does
-  if (e.target !== legal) return;
-  const r = legal.getBoundingClientRect();
-  if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) legal.close();
-});
-document.querySelectorAll("[data-doc]").forEach(b => b.addEventListener("click", enterDoc));
-// haptics: a vibration where the browser offers one; on iPhone, the system switch tick
-const hap = $("hap");
-function buzz() {
-  if (!TOUCH || reduce) return;
-  if (navigator.vibrate) { try { navigator.vibrate(7); } catch (e) {} return; }
-  const f = document.activeElement; try { hap.click(); } catch (e) {} if (f && f.focus) f.focus({preventScroll: true});
-}
-const moBtn = $("mo");
-function setPaused(v) {   // one label, one pressed state: "Pause motion, pressed" means paused
-  paused = v; DOC.classList.toggle("paused", v); dirty = true;
-  moBtn.setAttribute("aria-pressed", String(v));
-  store.set("xg-motion", v ? "off" : "on");
-}
-moBtn.addEventListener("click", () => setPaused(!paused));
-setPaused(paused);
-
-// ============ headline decode ============
-// The scramble is drawn in an overlay, one glyph at each letter's measured position over the real text.
-const GLYPH = "#%&*+=-/\\|<>_[]{}0123456789";
-function decode(el) {
-  if (reduce || paused || el.dataset.done) return;
-  if (document.fonts && document.fonts.status !== "loaded") { document.fonts.ready.then(() => decode(el)); return; }
-  el.dataset.done = 1;
-  const box = el.getBoundingClientRect(), layer = document.createElement("span"), cells = [];
-  layer.className = "dc-layer"; layer.setAttribute("aria-hidden", "true");
-  [...el.children].forEach((line, li) => {
-    const tn = line.firstChild; if (!tn || tn.nodeType !== 3) return;
-    const text = tn.textContent, rg = document.createRange(), hot = line.classList.contains("hot");
-    for (let i = 0; i < text.length; i++) {
-      if (text[i] === " ") continue;
-      rg.setStart(tn, i); rg.setEnd(tn, i + 1);
-      const r = rg.getBoundingClientRect(); if (!r.width) continue;
-      const c = document.createElement("i");
-      c.style.left = r.left - box.left + "px"; c.style.top = r.top - box.top + "px"; c.style.lineHeight = r.height + "px";
-      if (hot) c.className = "hot";
-      layer.appendChild(c); cells.push([c, i / 1.5 + 6 + li * 3, text[i]]);
-    }
-  });
-  if (!cells.length) return;
-  el.appendChild(layer); el.classList.add("decoding");
-  const total = Math.max(...cells.map(c => c[1])) + 1;
-  let f = 0;
-  const run = () => {
-    for (const [c, at, ch] of cells) c.textContent = f > at ? ch : GLYPH[(Math.random() * GLYPH.length) | 0];
-    if (++f < total) requestAnimationFrame(run); else { layer.remove(); el.classList.remove("decoding"); }
-  };
-  run();
-}
-
-// ============ the instruments ============
-const hud = $("hud");
-function hudLines(d) {
-  if (!hud || active < 0) return;
-  const deg = mod(-target * 180 / Math.PI, 360).toFixed(0).padStart(3, "0");
-  const st = e => e.state === "open" ? "IN HOURS" : e.state === "break" ? "BREAK" : "CLOSED";
-  const L = [
-    [`YOUR TIME <b>${own.format(d)}</b>`, mine ? `${mine.id} <b>${st(mine)}</b>` : "", mine && mine.next ? `${mine.next.kind.toUpperCase()} IN <b>${fmtDur(mine.next.t).toUpperCase()}</b>` : "", `EDGE LIGHT <i>${openN}/${EX.length}</i>`],
-    [`POSITIONS TRACKED <b>50</b>`, `WATCHER <b>WEEKDAYS AFTER CLOSE</b>`, `ACCOUNT ACCESS <span class="r">NONE</span>`],
-    [`<span class="p">VURUL 20</span>`, `<span class="c">DECAGON 10</span>`, `<span class="r">SHIELD 20</span>`, `ONE LIGHT PER POSITION`],
-    [`GATES <b>4</b>`, `AN ILLUSTRATION`, `WHAT PASSES <span class="p">PINK</span>`],
-    [`ADVISORY FEES <b>1</b>`, `COMMISSIONS TO XENITH <b>0</b>`, `CUSTODIANS <b>ALTRUIST · IBKR</b>`],
-    [`FOUNDED <b>2021</b>`, `AUSTIN, <b>TEXAS</b>`, `LINE <b>FLOOR TO CROWN</b>`],
-  ][active] || [];
-  hud.innerHTML = L.filter(Boolean).join("<br>") + `<span class="hr"></span>FACE <b>0${active}</b>/06<br>BEARING <b>${deg}°</b>`;
-}
-
-// ============ WebGL: the monolith ============
-const VS = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
-const FS = `
-precision highp float;
-uniform vec2 R; uniform float T; uniform vec2 RS; uniform float FP; uniform float HEAT;
-uniform float VIS[6]; uniform float ALL; uniform float INTRO;
-uniform vec3 CAM; uniform vec3 TGT; uniform vec3 VIEW;
-#define PI 3.14159265
-#define AP 1.0
-#define HH 2.9
-#define HW 0.57735
-const vec3 CY = vec3(.026, .76, 1.);
-const vec3 PK = vec3(1., .027, .31);
-const vec3 RD = vec3(1., .023, .047);
-const vec3 WH = vec3(1., .92, .84);
-float h11(float n){ return fract(sin(n * 127.1) * 43758.5453); }
-float h21(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-float n11(float x){ float i = floor(x), f = fract(x); f = f * f * (3. - 2. * f); return mix(h11(i), h11(i + 1.), f); }
-vec3 acc(){ return HEAT < .5 ? mix(CY, PK, HEAT * 2.) : mix(PK, RD, HEAT * 2. - 1.); }
-vec3 toM(vec3 v){ return vec3(v.x * RS.x - v.z * RS.y, v.y, v.x * RS.y + v.z * RS.x); }
-vec3 toW(vec3 v){ return vec3(v.x * RS.x + v.z * RS.y, v.y, -v.x * RS.y + v.z * RS.x); }
-
-// the city at night, all around: neon haze, distant towers with red aviation lights, defocused city lights
-vec3 env(vec3 d){
-  float y = d.y, az = atan(d.x, d.z);
-  vec3 c = mix(vec3(.011, .008, .021), vec3(.0012, .0012, .003), smoothstep(-.05, .6, y));
-  float hz = exp(-abs(y - .015) * 11.);
-  vec3 neon = CY * (.5 + .5 * sin(az * 1.3 + .7)) + PK * (.5 + .5 * sin(az * 2.1 - 1.1)) * .8 + RD * pow(.5 + .5 * sin(az * .9 + 2.4), 3.) * .7;
-  c += neon * hz * .075;
-  // distant towers: silhouettes against the haze, each with a slow red light on its roof
-  float sc = az * 9., bid = floor(sc), bx = fract(sc), bh = h11(bid * 3.3 + 1.);
-  if (bh > .45) {
-    float x0 = .15 + .35 * h11(bid * 5.1), w0 = .12 + .22 * h11(bid * 7.7), top = .025 + .16 * pow(h11(bid * 9.1), 1.6);
-    if (bx > x0 && bx < x0 + w0 && y < top && y > -.2) c = mix(c, vec3(.0035, .003, .007), .9);
-    vec2 lp = vec2((bx - x0 - w0 * .5) / 9., y - top - .004);
-    float blink = .35 + .65 * step(.55, fract(T * .45 + bh * 7.));
-    c += RD * exp(-length(lp) * 900.) * 1.6 * blink;
-  }
-  // defocused city lights: soft discs with brighter rims, the way a lens renders lights at night
-  if (y > -.2 && y < .14) {
-    for (int l = 0; l < 2; l++) {
-      float s2 = l == 0 ? 110. : 46.;
-      vec2 g = vec2(az * s2, (y + .2) * s2), id = floor(g), f = fract(g) - .5;
-      float h = h21(id + float(l) * 31.);
-      if (h > .7) {
-        vec2 o = (vec2(h21(id + 3.), h21(id + 7.)) - .5) * .45;
-        float r = .16 + .2 * h21(id + 11.), dd = length(f - o);
-        float disc = smoothstep(r, r - .05, dd) * (.5 + .5 * smoothstep(r - .12, r, dd));
-        float hh = h21(id + 17.);
-        vec3 col = hh > .93 ? PK : hh > .85 ? CY : hh > .8 ? RD * .8 : vec3(1., .7, .42);
-        c += col * disc * (l == 0 ? .075 : .05) * smoothstep(.14, 0., abs(y));
-      }
-    }
-  }
-  if (y > .12) { vec2 g = vec2(az * 70., y * 70.), id = floor(g); float hs = h21(id);
-    if (hs > .996) c += vec3(.8, .85, 1.) * exp(-length(fract(g) - .5) * 18.) * smoothstep(.12, .4, y) * .5; }
-  return c;
-}
-
-// exact ray / hexagonal prism intersection: three slabs for the faces, one for the floor and crown
-bool hex(vec3 ro, vec3 rd, out float tn, out float tf, out vec3 nn, out vec3 nf){
-  tn = -1e9; tf = 1e9; nn = vec3(0.); nf = vec3(0.);
-  for (int i = 0; i < 4; i++) {
-    vec3 n = i == 3 ? vec3(0., 1., 0.) : vec3(sin(float(i) * PI / 3.), 0., cos(float(i) * PI / 3.));
-    float e = i == 3 ? HH : AP;
-    float d = dot(rd, n), o = dot(ro, n);
-    if (abs(d) < 1e-6) { if (abs(o) > e) return false; continue; }
-    float t0 = (-e - o) / d, t1 = (e - o) / d, s = sign(d);
-    if (t0 > t1) { float tt = t0; t0 = t1; t1 = tt; }
-    if (t0 > tn) { tn = t0; nn = -s * n; }
-    if (t1 < tf) { tf = t1; nf = s * n; }
-  }
-  return tn < tf && tf > 0.;
-}
-
-// light inside the glass, integrated exactly along the refracted ray: points, vertical lines, planes
-float P(vec3 o, vec3 d, float L, vec3 p, float b){
-  vec3 w = p - o; float t0 = dot(w, d); float m2 = max(dot(w, w) - t0 * t0, 0.); float s = sqrt(m2 + b);
-  return b / s * (atan((L - t0) / s) + atan(t0 / s));
-}
-// a star: the squared kernel b²/(d²+b)², integrated exactly, so each light keeps a hard core; plus a faint halo
-float S(vec3 o, vec3 d, float L, vec3 p, float b){
-  vec3 w = p - o; float t0 = dot(w, d); float m2 = max(dot(w, w) - t0 * t0, 0.); float s2 = m2 + b, s = sqrt(s2);
-  float x1 = L - t0, x0 = -t0;
-  float F1 = x1 / (2. * s2 * (x1 * x1 + s2)) + atan(x1 / s) / (2. * s2 * s);
-  float F0 = x0 / (2. * s2 * (x0 * x0 + s2)) + atan(x0 / s) / (2. * s2 * s);
-  return b * b * (F1 - F0) * 18. + P(o, d, L, p, b) * .25;
-}
-float VL(vec3 o, vec3 d, float L, vec2 cp, float b, out float yc){
-  vec2 w = cp - o.xz, dh = d.xz; float hs2 = dot(dh, dh);
-  yc = o.y;
-  if (hs2 < 1e-7) return 0.;
-  float tc = dot(w, dh) / hs2; vec2 cl = o.xz + dh * tc - cp; float m2 = dot(cl, cl);
-  float s = sqrt(m2 + b), hs = sqrt(hs2);
-  yc = o.y + d.y * clamp(tc, 0., L);
-  return b / (hs * s) * (atan(hs * (L - tc) / s) + atan(hs * tc / s));
-}
-float PL(vec3 o, vec3 d, float L, float gy, float rho){
-  if (abs(d.y) < 1e-4) return 0.;
-  float t = (gy - o.y) / d.y; if (t < 0. || t > L) return 0.;
-  float r = length(o.xz + d.xz * t);
-  return smoothstep(rho, rho - .2, r) * min(.035 / abs(d.y), 1.6);
-}
-// 00 Xenith: the zenith, a meridian of light beneath it, a ring of motes
-vec3 sZen(vec3 o, vec3 d, float L){
-  vec3 c = mix(PK, WH, .6) * P(o, d, L, vec3(0., 1.72, 0.), .0007) * 16.;
-  float yc; float v = VL(o, d, L, vec2(0.), .00035, yc);
-  c += CY * v * 6. * smoothstep(-HH, 1.4, yc) * step(yc, 1.72);
-  for (int k = 0; k < 24; k++) {
-    float a = float(k) * PI / 12. + T * .15;
-    c += PK * S(o, d, L, vec3(.36 * cos(a), 1.72 + .04 * sin(a * 3. + T), .36 * sin(a)), .00008) * 6.;
-  }
-  return c;
-}
-// 01 the machine: streams of data rising through the glass, a red scan reading them
-vec3 sMach(vec3 o, vec3 d, float L){
-  vec3 c = vec3(0.);
-  for (int k = 0; k < 28; k++) {
-    float fk = float(k), h = h11(fk * 3.17 + 1.), a = fk * 2.39996, r = .82 * sqrt((fk + .5) / 28.);
-    float yc; float v = VL(o, d, L, vec2(cos(a), sin(a)) * r, .00012, yc);
-    float seg = fract(yc * .8 - T * (.25 + h * .55) + h * 7.);
-    float pk = smoothstep(0., .03, seg) * smoothstep(.18, .03, seg);
-    c += (h > .85 ? PK : CY) * v * (.6 + 9. * pk);
-  }
-  float sy = mod(T * .5, 2. * HH + .6) - HH - .3;
-  c += RD * PL(o, d, L, sy, .98) * .5;
-  return c;
-}
-// 02 the books: one light per position. VURUL a helix, the Decagon a ring, the Shield a shell
-vec3 sBook(vec3 o, vec3 d, float L){
-  vec3 c = vec3(0.);
-  for (int k = 0; k < 20; k++) { float fk = float(k), a = fk * .95 + T * .22;
-    c += PK * S(o, d, L, vec3(.5 * cos(a), .55 + (fk + .5) * (1.5 / 20.), .5 * sin(a)), .00012) * 9.; }
-  for (int k = 0; k < 10; k++) { float a = float(k) * 2. * PI / 10. - T * .12;
-    c += CY * S(o, d, L, vec3(.56 * cos(a), -.15, .56 * sin(a)), .00012) * 9.; }
-  for (int k = 0; k < 20; k++) { float fk = float(k), j = floor(fk / 5.), m = mod(fk, 5.);
-    float lat = (j - 1.5) * .62, a = m * PI * .4 + j * .63 + T * .1;
-    c += RD * S(o, d, L, vec3(.5 * cos(lat) * cos(a), -1.5 + .5 * sin(lat), .5 * cos(lat) * sin(a)), .00012) * 9.; }
-  return c;
-}
-// 03 doctrine: four gates; most signals stop at the first, few reach the top, where they converge
-vec3 sGate(vec3 o, vec3 d, float L){
-  vec3 c = vec3(0.);
-  for (int g = 0; g < 4; g++) c += CY * PL(o, d, L, -1.6 + float(g), .95) * .16;
-  for (int k = 0; k < 40; k++) {
-    float fk = float(k), h = h11(fk * 7.13 + 2.), h2 = h11(fk * 3.7 + 5.);
-    float lvl = h < .42 ? 0. : h < .7 ? 1. : h < .86 ? 2. : h < .95 ? 3. : 4.;
-    float y = -HH + fract(T * .09 + h2) * 2. * HH;
-    float stopY = lvl < 3.5 ? -1.6 + lvl : HH - .35;
-    float a = fk * 2.39996, r = .8 * sqrt((fk + .5) / 40.);
-    vec2 xz = vec2(cos(a), sin(a)) * r;
-    if (y < stopY) {
-      float conv = lvl > 3.5 ? smoothstep(1.2, 2.05, y) : 0.;
-      float st = y < -1.6 ? 0. : y < -.6 ? 1. : y < .4 ? 2. : y < 1.4 ? 3. : 4.;
-      vec3 col = st < .5 ? CY * .45 : st < 2.5 ? CY : st < 3.5 ? WH : PK;
-      c += col * S(o, d, L, vec3(xz.x * (1. - conv), y, xz.y * (1. - conv)), .0001) * 8.;
-    } else if (lvl < 3.5) {
-      c += RD * P(o, d, L, vec3(xz.x, stopY, xz.y), .00018) * 10. * exp(-(y - stopY) * 9.);
-    }
-  }
-  c += PK * P(o, d, L, vec3(0., 2.08, 0.), .0005) * 8.;
-  return c;
-}
-// 04 fee-only: one ring, one fee, one direction of payment
-vec3 sFee(vec3 o, vec3 d, float L){
-  vec3 c = vec3(0.);
-  for (int k = 0; k < 36; k++) { float a = float(k) * PI / 18., hl = pow(.5 + .5 * cos(a - T * .7), 18.);
-    c += mix(CY * .7, PK * 1.3, hl) * S(o, d, L, vec3(.62 * cos(a), 0., .62 * sin(a)), .00008) * (4. + 10. * hl); }
-  return c;
-}
-// 05 the adviser: one line of light, floor to crown, with a pulse
-vec3 sOne(vec3 o, vec3 d, float L){
-  float yc; float v = VL(o, d, L, vec2(0.), .0003, yc);
-  float by = -HH + mod(T * 1.6, 2. * HH + 1.);
-  float pulse = exp(-abs(yc - by) * 5.) + .6 * exp(-abs(yc - by + .35) * 6.);
-  vec3 c = mix(WH, PK, .35) * v * (2.2 + 7. * pulse);
-  c += WH * P(o, d, L, vec3(0., HH - .15, 0.), .0005) * 4. * (.3 + .7 * ALL);
-  return c;
-}
-vec3 scene(float i, vec3 o, vec3 d, float L){
-  if (i < .5) return sZen(o, d, L);
-  if (i < 1.5) return sMach(o, d, L);
-  if (i < 2.5) return sBook(o, d, L);
-  if (i < 3.5) return sGate(o, d, L);
-  if (i < 4.5) return sFee(o, d, L);
-  return sOne(o, d, L);
-}
-vec3 interior(vec3 o, vec3 d, float L){
-  float i0 = floor(FP), w = FP - i0, i1 = mod(i0 + 1., 6.);
-  vec3 c = scene(i0, o, d, L) * (1. - w);
-  if (w > .02) c += scene(i1, o, d, L) * w;
-  return c;
-}
-float faceAct(float fid){ return 1. - clamp(abs(mod(fid - FP + 3., 6.) - 3.), 0., 1.); }
-float ignite(float y){ float yt = -HH + INTRO * (2. * HH + .8); return 1. - smoothstep(yt - .5, yt, y); }
-
-// black glass: a curtain wall of slightly uneven panels; neon edges that breathe; a face already read etches its floors in pink
-vec3 glass(vec3 ro, vec3 rd, float t, vec3 n){
-  vec3 p = ro + rd * t;
-  if (abs(n.y) > .5) return vec3(.006) + acc() * ALL * .5;
-  float fid = mod(floor(atan(n.x, n.z) / (PI / 3.) + .5), 6.);
-  vec3 tg = vec3(n.z, 0., -n.x);
-  float u = dot(p, tg), y = p.y;
-  vec2 g = vec2((u / HW * .5 + .5) * 5., (y + HH) / .145);
-  vec2 cell = floor(g), fc = fract(g);
-  float ph = h21(cell + fid * 17.3), ph2 = h21(cell * 1.7 + fid * 3.1 + 9.);
-  vec3 np = normalize(n + tg * (ph - .5) * .028 + vec3(0., (ph2 - .5) * .022, 0.));
-  float ci = clamp(-dot(rd, np), 0., 1.);
-  float F = .04 + .96 * pow(1. - ci, 5.);
-  vec3 refl = env(toW(reflect(rd, np)));
-  vec3 rr = refract(rd, np, .69);
-  float t2n, t2f; vec3 a1, a2;
-  vec3 inner = hex(p + rr * .003, rr, t2n, t2f, a1, a2) ? interior(p, rr, t2f) : vec3(0.);
-  float act = faceAct(fid);
-  float vis = 0.;
-  for (int i = 0; i < 6; i++) if (abs(float(i) - fid) < .5) vis = VIS[i];
-  float mx = min(fc.x, 1. - fc.x), my = min(fc.y, 1. - fc.y);
-  float mull = 1. - smoothstep(0., .035, mx) * smoothstep(0., .06, my);
-  float floorLine = exp(-my * 60.) * step(mx, .5);
-  float breathe = .86 + .14 * sin(T * 1.25);
-  float ev = HW - abs(u), eh = HH - abs(y);
-  float ig = ignite(y);
-  float edge = (exp(-ev * 70.) + exp(-ev * 11.) * .12 + (exp(-eh * 70.) + exp(-eh * 11.) * .1) * .8) * ig * breathe;
-  vec3 ec = mix(CY * .5 + PK * .3 * vis, acc(), act);
-  vec3 c = vec3(.004, .004, .008);
-  c += refl * F * 1.35;
-  c += inner * (1. - F) * (.3 + .7 * act) * (1. - mull * .75);
-  c *= 1. - mull * .55;
-  c += refl * mull * .1;
-  c += PK * floorLine * vis * .05 * ig * (1. - .5 * act);
-  c += ec * edge * (.45 + 1.15 * act);
-  return c * (.2 + .8 * INTRO);
-}
-// the same glass as the wet street sees it: edges and reflections only
-vec3 glassLite(vec3 p, vec3 rd, vec3 n){
-  if (abs(n.y) > .5) return vec3(.005);
-  float fid = mod(floor(atan(n.x, n.z) / (PI / 3.) + .5), 6.);
-  vec3 tg = vec3(n.z, 0., -n.x);
-  float u = dot(p, tg), y = p.y, act = faceAct(fid);
-  float edge = (exp(-(HW - abs(u)) * 60.) + exp(-(HH - abs(y)) * 60.) * .7) * ignite(y) * (.86 + .14 * sin(T * 1.25));
-  float F = .04 + .96 * pow(1. - clamp(-dot(rd, n), 0., 1.), 5.);
-  return vec3(.005) + env(toW(reflect(rd, n))) * F + mix(CY * .45, acc(), act) * edge * (.5 + 1.2 * act);
-}
-// the street: wet, rippled by rain, reflecting the monolith and the city
-vec3 ground(vec3 p, vec3 rd, float t){
-  vec2 g = p.xz;
-  vec3 n = normalize(vec3((n11(g.x * 3.1 + T * .8) - .5) * .06, 1., (n11(g.y * 2.7 - T * .7 + 3.) - .5) * .06));
-  vec3 r = reflect(rd, n);
-  float F = .03 + .97 * pow(1. - clamp(-dot(rd, n), 0., 1.), 5.);
-  vec3 rc = env(r);
-  vec3 pM = toM(p), rM = toM(r);
-  float tn, tf; vec3 nn, nf;
-  if (hex(pM + rM * .01, rM, tn, tf, nn, nf) && tn > 0.) rc = glassLite(pM + rM * tn, rM, nn);
-  float wet = .45 + .55 * smoothstep(.35, .75, n11(g.x * .5 + 1.) * .6 + n11(g.y * .45 + 7.) * .6);
-  vec3 c = vec3(.004, .004, .007) + rc * (F * wet * 1.4 + .1 * wet);
-  c += acc() * exp(-max(length(pM.xz) - AP, 0.) * 2.5) * .05 * INTRO;
-  return mix(c, env(rd) * .5 + vec3(.004, .003, .008), smoothstep(10., 45., t));
-}
-void main(){
-  vec2 uv = (gl_FragCoord.xy - .5 * R) / R.y;
-  vec2 sv = uv - VIEW.xy;
-  vec3 fw = normalize(TGT - CAM), rt = normalize(cross(fw, vec3(0., 1., 0.))), up = cross(rt, fw);
-  vec3 rd = normalize(fw * VIEW.z + rt * sv.x + up * sv.y), ro = CAM;
-  vec3 roM = toM(ro), rdM = toM(rd);
-  float tn, tf; vec3 nn, nf;
-  bool hit = hex(roM, rdM, tn, tf, nn, nf) && tn > 0.;
-  float tg = rd.y < -1e-4 ? (-HH - ro.y) / rd.y : 1e9;
-  vec3 c;
-  if (hit && tn < tg) c = glass(roM, rdM, tn, nn);
-  else if (tg < 1e8) c = ground(ro + rd * tg, rd, tg);
-  else c = env(rd);
-  if (ALL > .01) { float yc; float v = VL(ro, rd, 80., vec2(0.), .0025, yc); c += acc() * v * ALL * 2. * smoothstep(HH, HH + .3, yc) * exp(-(yc - HH) * .12); }
-  vec2 q = gl_FragCoord.xy / R.y;
-  float cx = floor((q.x + q.y * .07) * 240.), hr = h11(cx * 1.37);
-  float yy = fract(q.y * 2. + T * (1. + hr * 1.2) + hr * 9.);
-  c += vec3(.55, .7, .9) * step(.955, hr) * smoothstep(0., .015, yy) * smoothstep(.09, .015, yy) * .03;
-  c *= 1.55;
-  c = (c * (2.51 * c + .03)) / (c * (2.43 * c + .59) + .14);
-  c = pow(clamp(c, 0., 1.), vec3(.4545));
-  c *= 1. - .28 * dot(uv * .9, uv * .9);
-  c += (h21(gl_FragCoord.xy + fract(T) * 91.) - .5) * .026;
-  gl_FragColor = vec4(c, 1.);
-}`;
-
-const bl = $("bloom"), bx = bl.getContext("2d");
-let gl = null, prog = null, U = {};
-function compile(type, src) {
-  const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
-  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.warn(gl.getShaderInfoLog(s)); return null; }
-  return s;
-}
-function initGL() {
-  const vs = compile(gl.VERTEX_SHADER, VS), fs = compile(gl.FRAGMENT_SHADER, FS);
-  if (!vs || !fs) return false;
-  prog = gl.createProgram(); gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
-  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { console.warn(gl.getProgramInfoLog(prog)); return false; }
-  gl.useProgram(prog);
-  const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  const loc = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  for (const n of ["R", "T", "RS", "FP", "HEAT", "VIS", "ALL", "INTRO", "CAM", "TGT", "VIEW"]) U[n] = gl.getUniformLocation(prog, n);
-  return true;
-}
-try { gl = cv.getContext("webgl", {alpha: false, antialias: false, depth: false, stencil: false, premultipliedAlpha: false, preserveDrawingBuffer: OG, powerPreference: "high-performance"}); } catch (e) {}
-if (!gl || !initGL()) { gl = null; DOC.classList.add("nogl"); }
-let lostT = 0;
-cv.addEventListener("webglcontextlost", e => { e.preventDefault(); lost = true; clearTimeout(lostT); lostT = setTimeout(() => { if (lost) DOC.classList.add("nogl"); }, 3000); });
-cv.addEventListener("webglcontextrestored", () => { lost = false; clearTimeout(lostT); DOC.classList.remove("nogl"); if (!initGL()) { gl = null; DOC.classList.add("nogl"); } dirty = true; });
-
-const STACK_Q = matchMedia("(orientation: portrait) and (max-width: 1100px), (max-width: 760px)");
-const LOW_Q = matchMedia("(orientation: landscape) and (max-height: 520px)");
-let STACK = STACK_Q.matches, LOW = LOW_Q.matches, W = 0, H = 0, scale = 1, hdrBottom = 90, panelRight = 0, panelTop = 0;
-const hdr = document.querySelector("header"), turnEl = $("turn");
-function measure() {
-  STACK = STACK_Q.matches; LOW = LOW_Q.matches;
-  hdrBottom = hdr.getBoundingClientRect().bottom;
-  const pr = panel.getBoundingClientRect(); panelRight = pr.right; panelTop = pr.top;
-}
-function size() {
-  measure();
-  const w = cv.clientWidth || innerWidth, h = cv.clientHeight || innerHeight;
-  const dpr = Math.min(devicePixelRatio || 1, STACK ? 2 : 1.6);
-  const bw = Math.max(1, Math.round(w * dpr * scale)), bh = Math.max(1, Math.round(h * dpr * scale));
-  if (bw !== cv.width || bh !== cv.height) { cv.width = bw; cv.height = bh; dirty = true; }
-  W = w; H = h;
-  const sw = Math.max(1, Math.round(w / 8)), sh = Math.max(1, Math.round(h / 8));
-  if (bl.width !== sw || bl.height !== sh) { bl.width = sw; bl.height = sh; }
-}
-if (window.ResizeObserver) new ResizeObserver(size).observe(cv);
-addEventListener("resize", size); addEventListener("orientationchange", () => setTimeout(size, 250));
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(size);
-
-// where the monolith stands, and how large, for each layout
-const view = [0, 0, 1.6];
-let towerX = 0;
-function layout() {
-  // the monolith is framed into the space the layout leaves it. Seen from the camera, crown to floor spans
-  // tan(16.3°) + tan(17.6°) = 0.608 of the frame per unit of zoom, centred 0.018 below the optical axis.
-  const K = 1 / .608;
-  let top, bot, cx;
-  if (STACK) { top = hdrBottom + 10; bot = Math.max(top + 140, panelTop - 4); cx = W / 2; }
-  else if (LOW) { top = hdrBottom + 6; bot = H - 10; const left = panelRight + 12; cx = left + (W - left) / 2; }
-  else { top = hdrBottom + 34; bot = H - 92; const left = Math.max(panelRight + 24, W * .5); cx = left + (W - left) * .5; }
-  const band = bot - top, zoom = band / H * .94 * K;
-  towerX = cx;
-  view[0] = (cx - W / 2) / H;
-  view[1] = .5 - (top + band * .5) / H + .018;
-  view[2] = zoom;
-  turnEl.style.setProperty("--tx", towerX + "px");
-}
-
-// ============ the loop ============
-let tiltOn = false;
-const mouse = [0, 0], tilt = [0, 0], cam = [0, -.55, 10.5], tgt = [0, .12, 0];
-// phones that report orientation without asking (Android): tilting the phone moves the camera, and the reflections slide
-// across the glass. Where the browser would put up a permission prompt (iPhone), the page never asks.
-if (TOUCH && !reduce && window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission !== "function") {
-  addEventListener("deviceorientation", e => {
-    if (e.gamma == null || e.beta == null) return;
-    tiltOn = true; tilt[0] = clamp(e.gamma / 28, -1, 1); tilt[1] = clamp((e.beta - 50) / 28, -1, 1);
-  }, {passive: true});
-}
-const seenBefore = store.get("xg-seen") === "1" || !!location.hash;
-let intro = reduce || OG || seenBefore ? 1 : 0, all = read.size === N ? 1 : 0, clock = OG ? 7.3 : (Date.now() / 1000) % 600;
-let last = 0, ema = 16, slow = 0, fast = 0, capped = 0, nudged = false, bornAt = performance.now();
-store.set("xg-seen", "1");
-function frame(now) {
-  const dt = last ? Math.min(.05, (now - last) / 1000) : 1 / 60; last = now;
-  const still = reduce || paused;
-  if (!still) clock += dt;
-  // a damped spring turns the monolith to its target face; a drag sets the angle directly
-  if (!drag) {
-    const w = 10, z = .78, a = w * w * (target - rot) - 2 * z * w * rv;
-    rv += a * dt; rot += rv * dt;
-    if (Math.abs(target - rot) < 1e-4 && Math.abs(rv) < 1e-3) { rot = target; rv = 0; }
-  }
-  const cur = mod(Math.round(-rot / SEG), N);
-  if (cur !== active) show(cur, active < 0 ? 1 : lastDir);
-  if (intro < 1) { intro = Math.min(1, intro + dt / 2.4); dirty = true; }
-  const allT = read.size === N ? 1 : 0;
-  if (Math.abs(allT - all) > 1e-3) { all += (allT - all) * (1 - Math.exp(-dt * 1.1)); dirty = true; }
-  if (Math.abs(heatT - heat) > 1e-3) { heat += (heatT - heat) * (1 - Math.exp(-dt * 1.5)); dirty = true; }
-  // one unprompted nudge, so a first-time reader sees that the object turns
-  if (!nudged && !touched && !still && intro >= 1 && now - bornAt > 5200) { nudged = true; rv = -1.9; }
-  const moving = drag || Math.abs(target - rot) > 1e-4 || Math.abs(rv) > 1e-3;
-  if (gl && !lost && !isDoc() && (!still || moving || dirty)) {
-    layout();
-    const sway = still ? 0 : Math.sin(clock * .11) * .3;
-    const px = tiltOn ? tilt[0] : mouse[0], py = tiltOn ? tilt[1] : mouse[1];
-    cam[0] += (px * (tiltOn ? .9 : .7) + sway - cam[0]) * .05;
-    cam[1] += (-py * .35 - .55 - cam[1]) * .05;
-    gl.viewport(0, 0, cv.width, cv.height);
-    gl.uniform2f(U.R, cv.width, cv.height);
-    gl.uniform1f(U.T, clock);
-    gl.uniform2f(U.RS, Math.cos(rot), Math.sin(rot));
-    gl.uniform1f(U.FP, mod(-rot / SEG, N));
-    gl.uniform1f(U.HEAT, heat);
-    gl.uniform1fv(U.VIS, VIS);
-    gl.uniform1f(U.ALL, all);
-    gl.uniform1f(U.INTRO, intro);
-    gl.uniform3f(U.CAM, cam[0], cam[1], cam[2]);
-    gl.uniform3f(U.TGT, tgt[0], tgt[1], tgt[2]);
-    gl.uniform3f(U.VIEW, view[0], view[1], view[2]);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-    bx.drawImage(cv, 0, 0, bl.width, bl.height);
-    dirty = false;
-    // hold the frame rate: shed resolution when slow, win it back when there is headroom
-    ema = ema * .92 + dt * 1000 * .08;
-    const ms = dt * 1000; capped = capped * .95 + (ms > 31 && ms < 35.5 ? .05 : 0);   // a steady 30 fps is a power cap, not a slow GPU
-    if (!still) {
-      if (ema > 26 && capped < .7) { if (++slow > 40 && scale > .5) { scale = Math.max(.5, scale * .85); slow = 0; size(); } } else slow = 0;
-      if (ema < 15) { if (++fast > 240 && scale < 1) { scale = Math.min(1, scale * 1.1); fast = 0; size(); } } else fast = 0;
-    }
-  }
-  window.__xg = {face: active, rot: +rot.toFixed(4), scale, ema: +ema.toFixed(1), read: [...read], heat: +heat.toFixed(3), view: view.map(v => +v.toFixed(3)), gl: !!gl};
-  requestAnimationFrame(frame);
-}
-
-paintRead();
-tick(); setInterval(tick, 1000);
-size();
-show(mod(k, N), 1);
-requestAnimationFrame(frame);
-})();
-</script>
 </body>
 </html>
