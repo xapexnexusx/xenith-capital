@@ -203,5 +203,5 @@ p,li{text-wrap:pretty}
   .big{-webkit-background-clip:border-box;background-clip:border-box}
 }
 
-.stamp .g{white-space:nowrap}
+.stamp .g{white-space:nowrap;margin-right:.35em}
 .bar-apply .x{white-space:pre}
