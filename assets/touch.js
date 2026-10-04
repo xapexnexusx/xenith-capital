@@ -28,12 +28,12 @@
     W = window.innerWidth; H = window.innerHeight;
     cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    N = Math.ceil(W / 3) + 1; bufM = new Float32Array(N); bufH = new Float32Array(N);
+    N = Math.ceil(W / 4) + 1; bufM = new Float32Array(N); bufH = new Float32Array(N);
   }
 
   function draw(now) {
     var t = (now - t0) / 1000;
-    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, W, H);
     var mid = H * (finished ? 0.47 : 0.64);
     var amp = Math.min(H * 0.1, 84);
     var breath = 0.5 + 0.5 * Math.sin(t * 1.25);          // slow pulse, ~5s
@@ -42,7 +42,7 @@
     var lean = present * (1 - join);
 
     for (var i = 0; i < N; i++) {
-      var x = i * 3;
+      var x = i * 4;
       var hy = Math.sin(x * 0.0072 + t * 0.5 + (finished ? endPhase : 0)) * 0.75 + Math.sin(x * 0.0021 + t * 0.19) * 0.25;
       var my = Math.sin(x * 0.014 + t * 1.6) * 0.45 + (vnoise(x * 0.08 + t * 7) - 0.5) * 1.3 + (vnoise(x * 0.23 + t * 12) - 0.5) * 0.45;
       var d = Math.abs(x - cx);
@@ -57,29 +57,33 @@
     }
 
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    function path(a) { ctx.beginPath(); ctx.moveTo(0, a[0]); for (var i = 1; i < N; i++) ctx.lineTo(i * 3, a[i]); }
+    function path(a) { ctx.beginPath(); ctx.moveTo(0, a[0]); for (var i = 1; i < N; i++) ctx.lineTo(i * 4, a[i]); }
+    // glow without blur: one wide faint stroke under one crisp stroke (no shadowBlur; cheap on mobile)
+    function glow(a, rgb, w, alpha) {
+      path(a);
+      ctx.strokeStyle = 'rgba(' + rgb + ',' + (alpha * 0.16).toFixed(3) + ')'; ctx.lineWidth = w * 6; ctx.stroke();
+      ctx.strokeStyle = 'rgba(' + rgb + ',' + alpha.toFixed(3) + ')'; ctx.lineWidth = w; ctx.stroke();
+    }
     var fade = finished ? 0 : 1 - Math.min(1, join * 0.8);
-    if (fade > 0.01) { path(bufH); ctx.strokeStyle = 'rgba(255,183,128,' + (0.25 + 0.55 * fade) + ')'; ctx.lineWidth = 2; ctx.shadowColor = '#ffb780'; ctx.shadowBlur = 12; ctx.stroke();
-    path(bufM); ctx.strokeStyle = 'rgba(51,230,255,' + (0.22 + 0.58 * fade) + ')'; ctx.lineWidth = 1.3; ctx.shadowColor = '#33e6ff'; ctx.shadowBlur = 10; ctx.stroke(); }
-
+    if (fade > 0.01) {
+      glow(bufH, '255,183,128', 2, 0.25 + 0.55 * fade);
+      glow(bufM, '51,230,255', 1.3, 0.22 + 0.58 * fade);
+    }
     var pk = Math.max(join, finished ? 1 : 0);
     if (pk > 0.02) {
-      // pink where they meet, blooming outward from the touch
-      var g = ctx.createLinearGradient(cx - reach * 1.6, 0, cx + reach * 1.6, 0);
+      for (var j = 0; j < N; j++) bufM[j] = (bufM[j] + bufH[j]) / 2;   // reuse buffer: the meeting line
       var a = Math.min(1, pk * 1.1) * (0.75 + 0.25 * breath);
-      g.addColorStop(0, 'rgba(255,61,154,0)'); g.addColorStop(0.5, 'rgba(255,61,154,' + a + ')'); g.addColorStop(1, 'rgba(255,61,154,0)');
-      ctx.beginPath(); ctx.moveTo(0, (bufM[0] + bufH[0]) / 2);
-      for (var j = 1; j < N; j++) ctx.lineTo(j * 3, (bufM[j] + bufH[j]) / 2);
-      ctx.strokeStyle = finished ? 'rgba(255,61,154,' + (0.6 + 0.3 * breath) + ')' : g;
-      ctx.lineWidth = 1.4 + pk * 2.2 + breath * 0.6; ctx.shadowColor = '#ff3d9a'; ctx.shadowBlur = 14 + pk * 26 * (0.7 + 0.3 * breath);
-      ctx.stroke();
-      if (!finished && pyS >= 0) {
-        var rg = ctx.createRadialGradient(cx, mid, 0, cx, mid, 70 + 140 * pk);
-        rg.addColorStop(0, 'rgba(255,61,154,' + (0.16 * pk * (0.6 + 0.4 * breath)) + ')'); rg.addColorStop(1, 'rgba(255,61,154,0)');
-        ctx.shadowBlur = 0; ctx.fillStyle = rg; ctx.fillRect(cx - 220, mid - 220, 440, 440);
+      var w = 1.4 + pk * 2.2 + breath * 0.6;
+      if (finished) { glow(bufM, '255,61,154', w, 0.6 + 0.3 * breath); }
+      else {
+        var g = ctx.createLinearGradient(cx - reach * 1.6, 0, cx + reach * 1.6, 0);
+        g.addColorStop(0, 'rgba(255,61,154,0)'); g.addColorStop(0.5, 'rgba(255,61,154,' + (a * 0.18).toFixed(3) + ')'); g.addColorStop(1, 'rgba(255,61,154,0)');
+        path(bufM); ctx.strokeStyle = g; ctx.lineWidth = w * 6; ctx.stroke();
+        var g2 = ctx.createLinearGradient(cx - reach * 1.6, 0, cx + reach * 1.6, 0);
+        g2.addColorStop(0, 'rgba(255,61,154,0)'); g2.addColorStop(0.5, 'rgba(255,61,154,' + a.toFixed(3) + ')'); g2.addColorStop(1, 'rgba(255,61,154,0)');
+        ctx.strokeStyle = g2; ctx.lineWidth = w; ctx.stroke();
       }
     }
-    ctx.shadowBlur = 0;
   }
 
   function show(i) {
@@ -110,7 +114,7 @@
     if (!root.classList.contains('live')) return;
     // smooth pointer follow
     present *= 0.985;
-    if (px >= 0) { pxS = pxS < 0 ? px : pxS + (px - pxS) * 0.08; pyS = pyS < 0 ? py : pyS + (py - pyS) * 0.08; }
+    if (px >= 0) { pxS = pxS < 0 ? px : pxS + (px - pxS) * 0.35; pyS = pyS < 0 ? py : pyS + (py - pyS) * 0.35; }
     if (holding && !finished) {
       joinT = Math.min(1, (now - holdStart) / HOLD_MS);
       join += (ease(joinT) - join) * 0.18;
@@ -151,7 +155,7 @@
   function toStatic() { root.classList.remove('live', 'done'); cancelAnimationFrame(raf); }
 
   function boot() {
-    cv = document.getElementById('field'); ctx = cv && cv.getContext('2d');
+    cv = document.getElementById('field'); ctx = cv && (cv.getContext('2d', { alpha: false, desynchronized: true }) || cv.getContext('2d'));
     if (!ctx) { root.classList.remove('live'); return; }
     say = document.getElementById('say'); face = document.getElementById('face');
     stage = document.getElementById('stage'); hint = document.getElementById('hint');
