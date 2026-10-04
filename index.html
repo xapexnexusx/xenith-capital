@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Xenith Capital · In phase</title>
+<title>Xenith Capital</title>
 <meta name="description" content="Xenith Capital is a fee-only investment firm. A machine hears all of it. A person decides what matters. One adviser makes every call.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#050507">
 <meta name="color-scheme" content="dark">
@@ -23,51 +23,35 @@
 <meta property="og:image:alt" content="Logan Jackson of Xenith Capital, lit cyan and pink.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/fonts/fraunces-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fraunces-italic-var.woff2" as="font" type="font/woff2" crossorigin>
 <script src="/assets/phase-flag.js"></script>
-<link rel="stylesheet" href="/assets/phase.css">
+<link rel="stylesheet" href="/assets/touch.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FinancialService","name":"Xenith Capital","legalName":"Ray Capital Advisors LLC","url":"https://xenithcap.io/","logo":"https://xenithcap.io/assets/icon-512.png","image":"https://xenithcap.io/assets/og.jpg","description":"Fee-only investment firm. A fiduciary adviser makes every decision.","foundingDate":"2021","founder":{"@type":"Person","name":"Logan Jackson"},"address":{"@type":"PostalAddress","addressLocality":"Austin","addressCountry":"US"},"identifier":{"@type":"PropertyValue","propertyID":"CRD","value":"316844"},"sameAs":["https://adviserinfo.sec.gov/firm/summary/316844"]}</script>
-<script src="/assets/phase.js" defer></script>
-<!-- build: phase-2 -->
+<script src="/assets/touch.js" defer></script>
+<!-- build: touch-3 -->
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 
 <header class="bar">
-  <a class="mark" href="/" aria-label="Xenith Capital, home">XENITH<span>CAPITAL</span></a>
-  <nav class="nav" aria-label="Site">
-    <a href="/disclosures.html">Disclosures</a>
-    <a class="apply-top" href="#apply">Apply</a>
-  </nav>
+  <a class="mark" href="/" aria-label="Xenith Capital, home">XENITH</a>
 </header>
 
 <canvas id="field" aria-hidden="true"></canvas>
 
+<div class="stage" id="stage" aria-hidden="true">
+  <p class="say" id="say"></p>
+  <figure class="face" id="face">
+    <picture>
+      <source type="image/webp" srcset="/assets/img/logan-540.webp 540w, /assets/img/logan-900.webp 900w" sizes="(min-width: 550px) 12rem, 36vw">
+      <img src="/assets/img/logan-900.jpg" width="900" height="1200" loading="lazy" decoding="async" alt="">
+    </picture>
+  </figure>
+  <p class="hint" id="hint">touch</p>
+</div>
+
 <main id="main" tabindex="-1">
   <h1 class="vh">Xenith Capital, a fee-only investment firm</h1>
-
-  <div class="stage" id="stage" aria-hidden="true">
-    <p class="say" id="say"></p>
-    <figure class="face" id="face">
-      <picture>
-        <source type="image/webp" srcset="/assets/img/logan-540.webp 540w, /assets/img/logan-900.webp 900w" sizes="(min-width: 550px) 11rem, 32vw">
-        <img src="/assets/img/logan-900.jpg" width="900" height="1200" loading="lazy" decoding="async" alt="">
-      </picture>
-      <figcaption>Logan Jackson</figcaption>
-    </figure>
-  </div>
-
-  <div class="ctl" id="ctl">
-    <button class="hold" id="hold" type="button" aria-describedby="hold-help">
-      <svg viewBox="0 0 48 48" aria-hidden="true"><circle class="trk" cx="24" cy="24" r="21"/><circle class="arc" id="arc" cx="24" cy="24" r="21"/></svg>
-      <span class="lbl" id="lbl">Hold</span>
-    </button>
-    <p class="help" id="hold-help">Hold to bring the two lines into phase.</p>
-    <ol class="dots" id="dots" aria-hidden="true"><li></li><li></li><li></li><li></li><li></li><li></li></ol>
-    <button class="all" id="all" type="button">Read it all</button>
-    <p class="mini"><a href="/disclosures.html">Disclosures</a> · <a href="https://reports.adviserinfo.sec.gov/reports/ADV/316844/PDF/316844.pdf" rel="noopener">Form ADV</a> · <a href="https://adviserinfo.sec.gov/firm/summary/316844" rel="noopener">IAPD</a></p>
-  </div>
-
   <ol class="lines" id="lines">
     <li>Markets are loud. Most of it means nothing.</li>
     <li>A machine can hear all of it. A person can decide what matters.</li>
@@ -76,16 +60,14 @@
     <li>One adviser makes every call, and answers for it. <span class="who">Logan Jackson, founder</span></li>
     <li>We take few clients, and we choose them slowly.</li>
   </ol>
-
-  <section class="apply" id="apply" aria-labelledby="apply-q">
-    <h2 id="apply-q">What have you changed your mind about this year?</h2>
-    <a class="go" href="mailto:inquiry@xenithcap.io?subject=Application%20%C2%B7%20Xenith%20Capital&amp;body=What%20I%20changed%20my%20mind%20about%20this%20year%2C%20and%20what%20changed%20it%3A%0A%0A">Apply <span aria-hidden="true">&rarr;</span></a>
-    <p class="addr">inquiry@xenithcap.io</p>
+  <section class="end" id="end" aria-labelledby="end-q">
+    <h2 id="end-q">What have you changed your mind about this year?</h2>
+    <p class="mail"><a href="mailto:inquiry@xenithcap.io">inquiry@xenithcap.io</a></p>
   </section>
 </main>
 
 <footer class="foot">
-  <p>Xenith Capital is the business name of Ray Capital Advisors LLC, a registered investment adviser. Registration does not imply a certain level of skill or training. Not an offer or personalized advice. Investing involves risk, including loss of principal.</p>
+  <p class="legal">Xenith Capital is the business name of Ray Capital Advisors LLC, a registered investment adviser. Registration does not imply a certain level of skill or training. Not an offer or personalized advice. Investing involves risk, including loss of principal.</p>
   <p class="links"><a href="/disclosures.html">Disclosures</a> · <a href="https://reports.adviserinfo.sec.gov/reports/ADV/316844/PDF/316844.pdf" rel="noopener">Form ADV</a> · <a href="https://adviserinfo.sec.gov/firm/summary/316844" rel="noopener">IAPD</a></p>
 </footer>
 </body>

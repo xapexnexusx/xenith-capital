@@ -9,7 +9,9 @@
     var r = document.documentElement;
     if (!still && room && hasCanvas && !location.hash) {
       r.classList.add('live');
-      window.addEventListener('load', function () { if (!r.classList.contains('booted')) r.classList.remove('live'); });
+      var fallback = function () { if (!r.classList.contains('booted')) r.classList.remove('live'); };
+      setTimeout(fallback, 2500);
+      window.addEventListener('load', fallback);
     }
   } catch (e) {}
 })();
