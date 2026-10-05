@@ -64,11 +64,7 @@ html.live.done .stage{top:6%}
 .face img{width:100%;height:auto;display:block;-webkit-mask:radial-gradient(closest-side,#000 58%,#0000);mask:radial-gradient(closest-side,#000 58%,#0000)}
 .stage.portrait .face{display:block}
 .face.on{opacity:1}
-.hint{position:fixed;left:0;right:0;bottom:calc(max(2rem,env(safe-area-inset-bottom)) + 3.6rem);text-align:center;
-  font:300 italic .95rem var(--serif);letter-spacing:.14em;color:#f0dbe4;opacity:0;transition:opacity 2s ease}
-.hint.on{opacity:.85;animation:breathe 4.8s ease-in-out 3}
-html.live.done .hint{display:none}
-
+html.live.done 
 html.live .foot{position:fixed;left:0;right:0;bottom:max(.6rem,env(safe-area-inset-bottom));z-index:7;max-width:none;border:0;
   padding:0 max(var(--gut),env(safe-area-inset-right)) .4rem max(var(--gut),env(safe-area-inset-left));
   text-align:center;color:#c4bfb7;font-size:.72rem}
@@ -77,7 +73,6 @@ html.live.done .foot .legal{display:block;max-width:40rem;margin:0 auto .5rem;fo
 html.live .foot .links{margin:0;letter-spacing:.06em}
 html.live .foot a{padding:.6rem .2rem}
 
-@keyframes breathe{0%,100%{opacity:.7}50%{opacity:1}}
 @keyframes slow{from{opacity:0;filter:blur(10px)}to{opacity:1;filter:blur(0)}}
 
 /* legal page shares this stylesheet */
