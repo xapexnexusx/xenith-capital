@@ -34,6 +34,8 @@ main{padding:7rem max(var(--gut),env(safe-area-inset-right)) 2rem max(var(--gut)
 .mail{margin-top:1.8rem;font:400 .95rem var(--mono);letter-spacing:.06em}
 .mail a{display:inline-block;padding:.5rem 0;color:#e6e0d6;text-decoration:none;border-bottom:1px solid var(--pk);padding-bottom:.15rem}
 .mail a:hover{color:var(--paper);border-color:var(--pk)}
+.mail a:hover,.mail a:focus-visible,.mail a:active{animation:lub 1.15s ease-out 1}
+@keyframes lub{0%,18%,40%,100%{box-shadow:0 1px 0 0 #ff3d9a00}8%{box-shadow:0 2px 7px 0 #ff3d9acc}28%{box-shadow:0 2px 5px 0 #ff3d9a88}}
 .foot{max-width:52rem;margin:0 auto;padding:2rem max(var(--gut),env(safe-area-inset-right)) max(2.5rem,env(safe-area-inset-bottom)) max(var(--gut),env(safe-area-inset-left));
   border-top:1px solid var(--hair);font:400 .8rem/1.6 var(--sans);color:var(--dim)}
 .foot .links{margin-top:.8rem;font-family:var(--mono)}
@@ -64,7 +66,11 @@ html.live.done .stage{top:6%}
 .face img{width:100%;height:auto;display:block;-webkit-mask:radial-gradient(closest-side,#000 58%,#0000);mask:radial-gradient(closest-side,#000 58%,#0000)}
 .stage.portrait .face{display:block}
 .face.on{opacity:1}
-html.live.done 
+.face{position:relative}
+.face::after{content:"";position:absolute;left:11%;width:78%;top:calc(100% + .5rem);height:1px;opacity:0;transform:translate3d(0,7px,0) scaleX(0);
+  background:linear-gradient(90deg,#ff3d9a00,var(--pk),#ff3d9a00);will-change:transform,opacity;
+  transition:opacity 1.6s ease .9s,transform 2.4s cubic-bezier(.2,.6,.2,1) .9s}
+.face.on::after{opacity:.75;transform:translate3d(0,0,0) scaleX(1)}
 html.live .foot{position:fixed;left:0;right:0;bottom:max(.6rem,env(safe-area-inset-bottom));z-index:7;max-width:none;border:0;
   padding:0 max(var(--gut),env(safe-area-inset-right)) .4rem max(var(--gut),env(safe-area-inset-left));
   text-align:center;color:#c4bfb7;font-size:.72rem}
