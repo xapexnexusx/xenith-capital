@@ -102,7 +102,7 @@ html.live .block:focus-within{opacity:1}
 .holdring .ring{position:absolute;inset:0;border-radius:50%;border:1px solid #ffffff26}
 .holdring .ring.p{position:absolute;inset:0;border-radius:50%;border:1px solid var(--pk);
   box-shadow:0 0 18px #ff3d9a55;transform:scale(.4);opacity:0}
-.holdring .in{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.holdring .in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .holdring .in b{font:400 .56rem var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
 .holdring .in u{font:400 .5rem var(--mono);letter-spacing:.14em;color:var(--pk);text-decoration:none;margin-top:.2rem}
 .holdring .in u.alt{display:none}
