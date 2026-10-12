@@ -33,7 +33,12 @@
     var f; try { f = new Intl.DateTimeFormat('en-GB', { timeZone: b.getAttribute('data-tz'), hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }); } catch (e) { f = null; }
     return { el: b, f: f };
   });
-  function tick() { var d = new Date(); clocks.forEach(function (c) { if (c.f) c.el.textContent = c.f.format(d); }); }
+  var obsEl = document.getElementById('obs'), t0 = Date.now();
+  var p2 = function (n) { return n < 10 ? '0' + n : '' + n; };
+  function tick() {
+    var d = new Date(); clocks.forEach(function (c) { if (c.f) c.el.textContent = c.f.format(d); });
+    if (obsEl) { var s = Math.floor((Date.now() - t0) / 1000), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60; obsEl.textContent = (h ? h + ':' + p2(m) : p2(m)) + ':' + p2(s % 60); }
+  }
   tick(); setInterval(tick, 1000);
 
   /* ---------- redacted name flicker (random glyphs only; the real name is never on the page) ---------- */
