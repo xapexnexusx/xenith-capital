@@ -135,10 +135,10 @@ html.live .hub.tear{animation:tear .2s steps(3) 1}
 .al .vl i{background:var(--vi);box-shadow:0 0 10px var(--vi)}
 .al .in i{background:var(--au);box-shadow:0 0 10px var(--au)}
 .al .df i{background:var(--pk);box-shadow:0 0 10px var(--pk)}
-.al .cs i{background:var(--ac);box-shadow:0 0 10px var(--ac)}
+.al .en i{background:var(--ac);box-shadow:0 0 10px var(--ac)}
 .stack{display:flex;height:4px;gap:2px;flex:none}
 .stack i{display:block;flex:0 0 20%;transition:flex-basis 1.1s cubic-bezier(.2,.8,.2,1)}
-.stack .tk{background:var(--cy)}.stack .vl{background:var(--vi)}.stack .in{background:var(--au)}.stack .df{background:var(--pk)}.stack .cs{background:var(--ac)}
+.stack .tk{background:var(--cy)}.stack .vl{background:var(--vi)}.stack .in{background:var(--au)}.stack .df{background:var(--pk)}.stack .en{background:var(--ac)}
 .tilt{display:flex;justify-content:space-between;flex:none;color:var(--dim)}
 .tilt b{font-weight:600;color:var(--ac)}
 
@@ -157,7 +157,7 @@ html.live .hub.tear{animation:tear .2s steps(3) 1}
 .feed .viz{position:relative}
 .lines{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;
   -webkit-mask-image:linear-gradient(180deg,#0000,#000 45%);mask-image:linear-gradient(180deg,#0000,#000 45%)}
-.lines li{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.6;font-size:clamp(.58rem,.7vw,.72rem);color:var(--tx);letter-spacing:.06em}
+.lines li{flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.6;font-size:clamp(.58rem,.7vw,.72rem);color:var(--tx);letter-spacing:.06em}
 .lines .ts{color:var(--mute)}
 .lines .t{font-weight:700;margin:0 .6em}
 .lines .t.c{color:var(--cy)}.lines .t.p{color:var(--pk)}.lines .t.a{color:var(--ac)}.lines .t.v{color:var(--vi)}.lines .t.w{color:#fff}.lines .t.g{color:var(--au)}
