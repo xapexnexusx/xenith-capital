@@ -121,7 +121,7 @@
   var stack = $$('#stack i'), tiltEl = $('#tilt');
   function stepAlloc() {
     var v = regT;
-    var tg = [48 + 20 * v, 30 - 12 * v, 11 - 3 * v, 11 - 5 * v].map(function (x) { return Math.max(2, x + rnd(-2.2, 2.2)); });
+    var tg = [34 + 12 * v, 22 - 3 * v, 18 + 3 * v, 16 - 7 * v, 10 - 5 * v].map(function (x) { return Math.max(2, x + rnd(-2, 2)); });
     var s = tg.reduce(function (a, b) { return a + b; }, 0), moved = false;
     tg = tg.map(function (x) { return Math.round(x / s * 100); });
     tg[0] += 100 - tg.reduce(function (a, b) { return a + b; }, 0);
