@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Xenith Capital</title>
-<meta name="description" content="Xenith Capital is a fee-only investment firm. A machine hears all of it. A person decides what matters. One adviser makes every call.">
+<meta name="description" content="Xenith Capital. A fee-only investment firm. Markets are loud. We separate signal from noise — machine speed, human judgment, one adviser answering for every call.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#050507">
@@ -16,19 +16,19 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xenithcap.io/">
 <meta property="og:title" content="Xenith Capital">
-<meta property="og:description" content="A machine hears all of it. A person decides what matters. Fee-only. Fiduciary.">
+<meta property="og:description" content="Markets are loud. We separate signal from noise — machine speed, human judgment, one adviser answering for every call.">
 <meta property="og:image" content="https://xenithcap.io/assets/og-card.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Xenith Capital. A machine hears all of it. A person decides what matters.">
+<meta property="og:image:alt" content="Xenith Capital. Markets are loud. We separate signal from noise.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/fonts/fraunces-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/fraunces-italic-var.woff2" as="font" type="font/woff2" crossorigin>
 <script src="/assets/phase-flag.js"></script>
-<link rel="stylesheet" href="/assets/touch.css">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FinancialService","name":"Xenith Capital","legalName":"Ray Capital Advisors LLC","url":"https://xenithcap.io/","logo":"https://xenithcap.io/assets/icon-512.png","image":"https://xenithcap.io/assets/og-card.jpg","description":"Fee-only investment firm. A fiduciary adviser makes every decision.","foundingDate":"2021","founder":{"@type":"Person","name":"Logan Jackson"},"address":{"@type":"PostalAddress","addressLocality":"Austin","addressCountry":"US"},"identifier":{"@type":"PropertyValue","propertyID":"CRD","value":"316844"},"sameAs":["https://adviserinfo.sec.gov/firm/summary/316844"]}</script>
-<script src="/assets/touch.js" defer></script>
-<!-- build: touch-8 -->
+<link rel="stylesheet" href="/assets/briefing.css">
+<script type="application/ld+json">{"@context":"https://***@type":"FinancialService","name":"Xenith Capital","legalName":"Ray Capital Advisors LLC","url":"https://xenithcap.io/","logo":"https://xenithcap.io/assets/icon-512.png","image":"https://xenithcap.io/assets/og-card.jpg","description":"Fee-only investment firm. A fiduciary adviser makes every decision.","foundingDate":"2021","founder":{"@type":"Person","name":"Logan Jackson"},"address":{"@type":"PostalAddress","addressLocality":"Austin","addressCountry":"US"},"sameAs":["https://adviserinfo.sec.gov/firm/summary/316844"]}</script>
+<script src="/assets/briefing.js" defer></script>
+<!-- build: briefing-1 -->
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -39,23 +39,51 @@
 
 <canvas id="field" aria-hidden="true"></canvas>
 
-<div class="stage" id="stage" aria-hidden="true">
-  <p class="say" id="say"></p>
+<div class="stage" aria-hidden="true">
+  <div class="hud-corners"><i></i><i></i><i></i><i></i></div>
+  <p class="st"><i></i>CHANNEL <span id="stn">00/06</span></p>
+  <p class="clk" id="clk">--:--:--</p>
+  <a class="endb" id="endbtn" href="#">END</a>
+  <div class="holdring" id="holdring">
+    <span class="ring"></span>
+    <span class="ring p"></span>
+    <span class="in"><b>standby</b><u>press to proceed</u></span>
+  </div>
 </div>
 
 <main id="main" tabindex="-1">
   <h1 class="vh">Xenith Capital, a fee-only investment firm</h1>
-  <ol class="lines" id="lines">
-    <li>Markets are loud. Most of it means nothing.</li>
-    <li>A machine can hear all of it. A person can decide what matters.</li>
-    <li>Neither one is enough alone.</li>
-    <li>Fee-only. Fiduciary. Paid by our clients and no one else.</li>
-    <li>One adviser makes every call, and answers for it. <span class="who">Logan Jackson, founder</span></li>
-    <li>We take few clients, and we choose them slowly.</li>
-  </ol>
-  <section class="end" id="end" aria-labelledby="end-q">
-    <h2 id="end-q">What have you changed your mind about this year?</h2>
-    <p class="mail"><a href="mailto:inquiry@xenithcap.io">inquiry@xenithcap.io</a></p>
+  <p class="intro">Xenith Capital · a fee-only investment firm · the briefing opens itself</p>
+  <div class="blocks" id="blocks">
+    <div class="block">
+      <span class="lab"><i>01</i>THE SITUATION</span>
+      <p data-text="Markets are loud. Nearly all of it is noise.">Markets are loud. Nearly all of it is noise.</p>
+    </div>
+    <div class="block">
+      <span class="lab"><i>02</i>THE METHOD</span>
+      <p data-text="We separate signal from noise with our own research system — machine speed, human judgment.">We separate signal from noise with our own research system — machine speed, human judgment.</p>
+    </div>
+    <div class="block">
+      <span class="lab"><i>03</i>THE WORK</span>
+      <p data-text="Tactical asset allocation across several model portfolios. Positions move when the evidence moves — and every move is documented.">Tactical asset allocation across several model portfolios. Positions move when the evidence moves — and every move is documented.</p>
+    </div>
+    <div class="block">
+      <span class="lab"><i>04</i>THE COMPENSATION</span>
+      <p data-text="Fee-only. Fiduciary. Paid by our clients and no one else.">Fee-only. Fiduciary. Paid by our clients and no one else.</p>
+    </div>
+    <div class="block">
+      <span class="lab"><i>05</i>THE ACCOUNTABILITY</span>
+      <p data-text="One adviser makes every call and answers for it. <span class="who">Logan Jackson, founder — investment analysis, Virginia National Guard</span>">One adviser makes every call and answers for it. <span class="who">Logan Jackson, founder — investment analysis, Virginia National Guard</span></p>
+    </div>
+    <div class="block">
+      <span class="lab"><i>06</i>THE STANDARD</span>
+      <p data-text="We take few clients. We choose them slowly.">We take few clients. We choose them slowly.</p>
+    </div>
+  </div>
+  <section class="cta" aria-labelledby="cta-q">
+    <h2 id="cta-q">What have you changed your mind about this year?</h2>
+    <a class="apply" href="mailto:inquiry@xenithcap.io">Request a briefing</a>
+    <p class="note">A short conversation. No call, no pitch, no obligation.</p>
   </section>
 </main>
 
