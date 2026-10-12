@@ -23,7 +23,7 @@ a{color:inherit}
 .mark{font:500 .85rem/1 var(--mono);letter-spacing:.42em;text-decoration:none;color:var(--paper)}
 
 /* ---------- static page (reduced motion, small screens, no script) ---------- */
-#field,.stage{display:none}
+html:not(.live) #field, html:not(.live) .stage{display:none}
 main{padding:7rem max(var(--gut),env(safe-area-inset-right)) 2rem max(var(--gut),env(safe-area-inset-left));max-width:56rem;margin:0 auto;outline:none}
 .intro{font:400 .78rem var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);max-width:56rem;margin:0 auto 1.2rem;padding:0 var(--gut)}
 .blocks{display:block;max-width:56rem;margin:0 auto;padding:0 var(--gut)}
@@ -81,6 +81,8 @@ html.live main{position:fixed;inset:0;z-index:6;pointer-events:none;display:flex
   padding:5.5rem var(--gut) 5.5rem;overflow:hidden}
 html.live main:focus-within{outline:none}
 html.live .intro{display:none}
+html.live .endb{display:none}
+html.live .holdring{display:block}
 html.live .blocks{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:100%;max-width:46rem}
 html.live .block{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:100%;opacity:0;border-top:0;
   max-width:44rem;text-align:center}
@@ -102,9 +104,11 @@ html.live .block:focus-within{opacity:1}
   box-shadow:0 0 18px #ff3d9a55;transform:scale(.4);opacity:0}
 .holdring .in{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .holdring .in b{font:400 .56rem var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
-.holdring .in u{display:none;font:400 .5rem var(--mono);letter-spacing:.14em;color:var(--pk);text-decoration:none;margin-top:.2rem}
+.holdring .in u{font:400 .5rem var(--mono);letter-spacing:.14em;color:var(--pk);text-decoration:none;margin-top:.2rem}
+.holdring .in u.alt{display:none}
 .holdring.holding .in b{color:var(--paper)}
-.holdring.holding .in u{display:block}
+.holdring.holding .in u{display:none}
+.holdring.holding .in u.alt{display:block}
 .holdring.gone{opacity:0;transition:opacity 1s ease}
 
 /* the close */
