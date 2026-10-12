@@ -1,17 +1,16 @@
-/* Xenith Capital: choose the live one-screen mode before first paint.
-   Only on a plain visit, with motion allowed, canvas available and enough room; falls back if the engine never boots. */
+/* Xenith Capital: choose the live command-hub mode before first paint.
+   Live needs a canvas and enough room; otherwise the page stays a plain readable document.
+   Falls back to the document if the engine never boots. */
 (function () {
   try {
     var mm = window.matchMedia;
-    var still = mm && mm('(prefers-reduced-motion: reduce)').matches;
-    var room = !mm || mm('(min-height: 36em) and (min-width: 20em)').matches;
+    var room = !mm || mm('(min-height: 34em) and (min-width: 20em)').matches;
     var hasCanvas = !!document.createElement('canvas').getContext;
     var r = document.documentElement;
-    if (!still && room && hasCanvas && !location.hash) {
+    if (room && hasCanvas) {
       r.classList.add('live');
       var fallback = function () { if (!r.classList.contains('booted')) r.classList.remove('live'); };
-      setTimeout(fallback, 2500);
-      window.addEventListener('load', fallback);
+      setTimeout(fallback, 3000);
     }
   } catch (e) {}
 })();

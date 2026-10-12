@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Xenith Capital</title>
-<meta name="description" content="Xenith Capital. A fee-only investment firm. Markets are loud. We separate signal from noise — machine speed, human judgment, one adviser answering for every call.">
+<title>Xenith Capital · Tactical Asset Allocation</title>
+<meta name="description" content="Xenith Capital. Tactical asset allocation. Machine intelligence reads the market; one fiduciary makes every call. Fee-only. Few clients.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta name="theme-color" content="#050507">
+<meta name="theme-color" content="#03040a">
 <meta name="color-scheme" content="dark">
 <link rel="canonical" href="https://xenithcap.io/">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
@@ -15,81 +15,173 @@
 <link rel="manifest" href="/site.webmanifest">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xenithcap.io/">
-<meta property="og:title" content="Xenith Capital">
-<meta property="og:description" content="Markets are loud. We separate signal from noise — machine speed, human judgment, one adviser answering for every call.">
-<meta property="og:image" content="https://xenithcap.io/assets/og-card.jpg">
+<meta property="og:title" content="Xenith Capital // Tactical Asset Allocation">
+<meta property="og:description" content="Machine intelligence reads the market. One fiduciary makes every call. Few clients, chosen slowly.">
+<meta property="og:image" content="https://xenithcap.io/assets/og-hub.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Xenith Capital. Markets are loud. We separate signal from noise.">
+<meta property="og:image:alt" content="Xenith Capital command hub: a dot-matrix globe with data arcs between financial centers.">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preload" href="/fonts/fraunces-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/fraunces-italic-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/inter-tight-var.woff2" as="font" type="font/woff2" crossorigin>
 <script src="/assets/phase-flag.js"></script>
-<link rel="stylesheet" href="/assets/briefing.css">
-<script type="application/ld+json">{"@context":"https://***@type":"FinancialService","name":"Xenith Capital","legalName":"Ray Capital Advisors LLC","url":"https://xenithcap.io/","logo":"https://xenithcap.io/assets/icon-512.png","image":"https://xenithcap.io/assets/og-card.jpg","description":"Fee-only investment firm. A fiduciary adviser makes every decision.","foundingDate":"2021","founder":{"@type":"Person","name":"Logan Jackson"},"address":{"@type":"PostalAddress","addressLocality":"Austin","addressCountry":"US"},"sameAs":["https://adviserinfo.sec.gov/firm/summary/316844"]}</script>
-<script src="/assets/briefing.js" defer></script>
-<!-- build: briefing-1 -->
+<link rel="stylesheet" href="/assets/hub.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FinancialService","name":"Xenith Capital","legalName":"Ray Capital Advisors LLC","url":"https://xenithcap.io/","logo":"https://xenithcap.io/assets/icon-512.png","image":"https://xenithcap.io/assets/og-hub.jpg","description":"Fee-only investment firm. Tactical asset allocation. A fiduciary adviser makes every decision.","foundingDate":"2021","founder":{"@type":"Person","name":"Logan Jackson"},"address":{"@type":"PostalAddress","addressLocality":"Austin","addressCountry":"US"},"sameAs":["https://adviserinfo.sec.gov/firm/summary/316844"]}</script>
+<script src="/assets/earth.js" defer></script>
+<script src="/assets/hub.js" defer></script>
+<!-- build: hub-1 -->
 </head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="#core">Skip to content</a>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="tears" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<div class="hub" id="hub">
 
 <header class="bar">
-  <a class="mark" href="/" aria-label="Xenith Capital, home">XENITH</a>
+  <p class="cls"><i class="dot"></i><b>XENITH CAPITAL</b><span class="sl">//</span><span class="tta">TACTICAL ASSET ALLOCATION</span><span class="sl">//</span><span class="rd" id="sysname" aria-label="redacted system name">██████</span><span class="on">ONLINE</span></p>
+  <p class="clocks" aria-label="World clocks">
+    <span class="ck"><em>AUS</em><b data-tz="America/Chicago">--:--:--</b></span>
+    <span class="ck"><em>NYC</em><b data-tz="America/New_York">--:--:--</b></span>
+    <span class="ck"><em>LON</em><b data-tz="Europe/London">--:--:--</b></span>
+    <span class="ck"><em>TYO</em><b data-tz="Asia/Tokyo">--:--:--</b></span>
+  </p>
 </header>
 
-<canvas id="field" aria-hidden="true"></canvas>
-
-<div class="stage" aria-hidden="true">
-  <div class="hud-corners"><i></i><i></i><i></i><i></i></div>
-  <p class="st"><i></i>CHANNEL <span id="stn">00/06</span></p>
-  <p class="clk" id="clk">--:--:--</p>
-  <a class="endb" id="endbtn" href="#">END</a>
-  <div class="holdring" id="holdring">
-    <span class="ring"></span>
-    <span class="ring p"></span>
-    <span class="in"><b>standby</b><u>press to proceed</u><u class="alt">release to continue</u></span>
+<section class="core" id="core" tabindex="-1">
+  <p class="kick">TACTICAL ASSET ALLOCATION <span>·</span> MACHINE INTELLIGENCE <span>·</span> HUMAN JUDGMENT</p>
+  <div class="low">
+    <div class="head">
+      <h1 class="glitch" data-text="SIGNAL OVER NOISE">SIGNAL OVER NOISE</h1>
+      <p class="sub">Machines read the whole market. One fiduciary makes every call.</p>
+    </div>
+    <button class="chip" type="button" data-ro="ro-intel"><span class="rd">██████</span> PROPRIETARY RESEARCH SYSTEM <i>· ONLINE</i></button>
   </div>
+</section>
+
+<nav class="tabs" aria-label="Panels">
+  <button type="button" class="tab act" data-p="p-reg">REGIME</button>
+  <button type="button" class="tab" data-p="p-alc">ALLOCATION</button>
+  <button type="button" class="tab" data-p="p-feed">INTEL</button>
+  <button type="button" class="tab" data-p="p-op">OPERATOR</button>
+</nav>
+
+<section class="pn reg act" id="p-reg" data-ro="ro-regime" aria-labelledby="h-reg">
+  <header class="ph"><h2 id="h-reg"><i>01</i>REGIME</h2><span class="ex">EXPAND ⤢</span></header>
+  <div class="viz">
+    <div class="gw"><canvas id="gauge" aria-hidden="true"></canvas></div>
+    <div class="post"><span class="lo">RISK-OFF</span><b id="posture">NEUTRAL</b><span class="hi">RISK-ON</span></div>
+    <ul class="sig" id="sig" aria-hidden="true">
+      <li><span>GROWTH</span><s><i></i></s><b>+0.00</b></li>
+      <li><span>INFLATION</span><s><i></i></s><b>+0.00</b></li>
+      <li><span>CREDIT</span><s><i></i></s><b>+0.00</b></li>
+      <li><span>VOLATILITY</span><s><i></i></s><b>+0.00</b></li>
+      <li><span>TREND</span><s><i></i></s><b>+0.00</b></li>
+      <li><span>BREADTH</span><s><i></i></s><b>+0.00</b></li>
+    </ul>
+    <p class="ill">SIMULATED DISPLAY · NOT A LIVE SIGNAL</p>
+  </div>
+</section>
+
+<section class="pn alc" id="p-alc" data-ro="ro-alloc" aria-labelledby="h-alc">
+  <header class="ph"><h2 id="h-alc"><i>02</i>ALLOCATION</h2><span class="ex">EXPAND ⤢</span></header>
+  <div class="viz">
+    <ul class="al" id="al" aria-hidden="true">
+      <li class="eq"><span>EQUITIES</span><b>--%</b><em>·</em><s><i></i></s></li>
+      <li class="bd"><span>BONDS</span><b>--%</b><em>·</em><s><i></i></s></li>
+      <li class="au"><span>GOLD</span><b>--%</b><em>·</em><s><i></i></s></li>
+      <li class="cs"><span>CASH</span><b>--%</b><em>·</em><s><i></i></s></li>
+    </ul>
+    <div class="stack" id="stack" aria-hidden="true"><i class="eq"></i><i class="bd"></i><i class="au"></i><i class="cs"></i></div>
+    <p class="tilt"><span>TILT ENGINE</span><b id="tilt">ARMED</b></p>
+    <p class="ill">SIMULATED DISPLAY · NOT CLIENT ALLOCATIONS</p>
+  </div>
+</section>
+
+<section class="pn op" id="p-op" data-ro="ro-op" aria-labelledby="h-op">
+  <header class="ph"><h2 id="h-op"><i>03</i>OPERATOR</h2><span class="ex">EXPAND ⤢</span></header>
+  <div class="viz">
+    <p class="nm">LOGAN JACKSON</p>
+    <p class="rl">FOUNDER <span>·</span> FIDUCIARY ADVISER</p>
+    <dl>
+      <dt>PRIOR</dt><dd>Intelligence Analyst, Virginia National Guard, 2012–2020</dd>
+      <dt>PAID BY</dt><dd>Clients only. Fee-only.</dd>
+      <dt>SIGNS</dt><dd>Every call. No model trades on its own.</dd>
+      <dt>INTAKE</dt><dd><b class="blink">OPEN</b> · few clients, chosen slowly</dd>
+    </dl>
+    <p class="hash"><span>LAST SIGNATURE</span><b id="lastsig">#----</b></p>
+  </div>
+</section>
+
+<section class="pn feed" id="p-feed" data-ro="ro-intel" aria-labelledby="h-feed">
+  <header class="ph"><h2 id="h-feed"><i>04</i>INTERCEPT</h2><span class="ex"><em class="sim">SIMULATED FEED</em> EXPAND ⤢</span></header>
+  <div class="viz"><ol class="lines" id="lines" aria-hidden="true"></ol></div>
+</section>
+
+<div class="dock">
+  <a class="cta" href="mailto:inquiry@xenithcap.io?subject=Access%20request"><span class="k">REQUEST ACCESS</span><span class="s">FEW CLIENTS · CHOSEN SLOWLY</span><i class="arr">→</i></a>
 </div>
 
-<main id="main" tabindex="-1">
-  <h1 class="vh">Xenith Capital, a fee-only investment firm</h1>
-  <p class="intro">Xenith Capital · a fee-only investment firm · the briefing opens itself</p>
-  <div class="blocks" id="blocks">
-    <div class="block">
-      <span class="lab"><i>01</i>THE SITUATION</span>
-      <p data-text="Markets are loud. Nearly all of it is noise.">Markets are loud. Nearly all of it is noise.</p>
-    </div>
-    <div class="block">
-      <span class="lab"><i>02</i>THE METHOD</span>
-      <p data-text="We separate signal from noise with our own research system — machine speed, human judgment.">We separate signal from noise with our own research system — machine speed, human judgment.</p>
-    </div>
-    <div class="block">
-      <span class="lab"><i>03</i>THE WORK</span>
-      <p data-text="Tactical asset allocation across several model portfolios. Positions move when the evidence moves — and every move is documented.">Tactical asset allocation across several model portfolios. Positions move when the evidence moves — and every move is documented.</p>
-    </div>
-    <div class="block">
-      <span class="lab"><i>04</i>THE COMPENSATION</span>
-      <p data-text="Fee-only. Fiduciary. Paid by our clients and no one else.">Fee-only. Fiduciary. Paid by our clients and no one else.</p>
-    </div>
-    <div class="block">
-      <span class="lab"><i>05</i>THE ACCOUNTABILITY</span>
-      <p data-text="One adviser makes every call and answers for it. <span class="who">Logan Jackson, founder — investment analysis, Virginia National Guard</span>">One adviser makes every call and answers for it. <span class="who">Logan Jackson, founder — investment analysis, Virginia National Guard</span></p>
-    </div>
-    <div class="block">
-      <span class="lab"><i>06</i>THE STANDARD</span>
-      <p data-text="We take few clients. We choose them slowly.">We take few clients. We choose them slowly.</p>
-    </div>
-  </div>
-  <section class="cta" aria-labelledby="cta-q">
-    <h2 id="cta-q">What have you changed your mind about this year?</h2>
-    <a class="apply" href="mailto:inquiry@xenithcap.io">Request a briefing</a>
-    <p class="note">A short conversation. No call, no pitch, no obligation.</p>
-  </section>
-</main>
-
-<footer class="foot">
-  <p class="legal">Xenith Capital is the business name of Ray Capital Advisors LLC, a registered investment adviser. Registration does not imply a certain level of skill or training. Not an offer or personalized advice. Investing involves risk, including loss of principal.</p>
+<footer class="leg">
+  <p><span class="full">Xenith Capital is the business name of Ray Capital Advisors LLC, a registered investment adviser. Registration does not imply a certain level of skill or training. Not an offer or personalized advice. Investing involves risk, including loss of principal. Panels are illustrative simulations, not live signals, client allocations or performance.</span><span class="short">Ray Capital Advisors LLC, a registered investment adviser. Not an offer or advice. Displays are simulated.</span></p>
   <p class="links"><a href="/disclosures.html">Disclosures</a> · <a href="https://reports.adviserinfo.sec.gov/reports/ADV/316844/PDF/316844.pdf" rel="noopener">Form ADV</a> · <a href="https://adviserinfo.sec.gov/firm/summary/316844" rel="noopener">IAPD</a></p>
 </footer>
+
+</div>
+
+<div class="veil" id="veil" aria-hidden="true"></div>
+
+<section class="ro" id="ro-regime" role="dialog" aria-modal="true" aria-labelledby="ro-regime-h">
+  <header class="rh"><p class="rk">READOUT // 01</p><h2 id="ro-regime-h" data-d>REGIME: THE POSTURE ENGINE</h2><button type="button" class="x" aria-label="Close">CLOSE <kbd>ESC</kbd> ✕</button></header>
+  <div class="rb">
+    <p class="lead" data-d>Before we choose a single holding, we read the market's posture.</p>
+    <p>Growth, inflation, credit, volatility, trend and breadth each feed one dial that runs from risk-off to risk-on. When the dial moves, the portfolios move with it. When it doesn't, we don't trade for the sake of trading.</p>
+    <ul class="pts">
+      <li><b>INPUTS</b>Macro data, rates, credit spreads, volatility, price trend, market breadth</li>
+      <li><b>CADENCE</b>Recomputed after every market close</li>
+      <li><b>OUTPUT</b>One posture, written down with the evidence behind it</li>
+    </ul>
+    <p class="fine">The dial on this page is an illustrative simulation. It is not a live signal, a forecast or a recommendation.</p>
+  </div>
+</section>
+
+<section class="ro" id="ro-alloc" role="dialog" aria-modal="true" aria-labelledby="ro-alloc-h">
+  <header class="rh"><p class="rk">READOUT // 02</p><h2 id="ro-alloc-h" data-d>TACTICAL ASSET ALLOCATION</h2><button type="button" class="x" aria-label="Close">CLOSE <kbd>ESC</kbd> ✕</button></header>
+  <div class="rb">
+    <p class="lead" data-d>Tactical means we're allowed to move. Disciplined means every move has a reason first.</p>
+    <p>Each model portfolio holds a strategic core and tilts across equities, bonds, gold and cash as the evidence changes. We don't hold a static mix and hope; we shift when the regime and the evidence agree, and we document why.</p>
+    <ul class="pts">
+      <li><b>CORE</b>The long-term mix your plan is built on</li>
+      <li><b>TILT</b>Measured shifts when the posture and the evidence line up</li>
+      <li><b>TRAIL</b>Every change dated, reasoned and logged</li>
+    </ul>
+    <p class="fine">Weights shown on this page are an illustrative simulation. They are not actual client allocations, model weights or performance.</p>
+  </div>
+</section>
+
+<section class="ro" id="ro-intel" role="dialog" aria-modal="true" aria-labelledby="ro-intel-h">
+  <header class="rh"><p class="rk">READOUT // 04</p><h2 id="ro-intel-h" data-d>MACHINE INTELLIGENCE, HUMAN JUDGMENT</h2><button type="button" class="x" aria-label="Close">CLOSE <kbd>ESC</kbd> ✕</button></header>
+  <div class="rb">
+    <p class="lead" data-d>Machines read everything. A human decides.</p>
+    <p>Our proprietary research system, <span class="rd">██████</span>, ingests thousands of data series, filings and price histories. Machine models read all of it, argue with each other and score their own confidence.</p>
+    <p>Then a human takes over. Every conclusion is reviewed, anything that doesn't hold up is overridden, and every decision is signed off by one fiduciary. No model places a trade.</p>
+    <ul class="pts">
+      <li><b>SPEED</b>More breadth than any analyst team could read by hand</li>
+      <li><b>JUDGMENT</b>Every call reviewed and owned by a person</li>
+      <li><b>RECORD</b>Every decision logged with the evidence behind it</li>
+    </ul>
+  </div>
+</section>
+
+<section class="ro" id="ro-op" role="dialog" aria-modal="true" aria-labelledby="ro-op-h">
+  <header class="rh"><p class="rk">READOUT // 03</p><h2 id="ro-op-h" data-d>OPERATOR: ONE ADVISER ANSWERS FOR EVERY CALL</h2><button type="button" class="x" aria-label="Close">CLOSE <kbd>ESC</kbd> ✕</button></header>
+  <div class="rb">
+    <p class="lead" data-d>Logan Jackson, founder.</p>
+    <p>Eight years as an Intelligence Analyst in the Virginia National Guard (2012–2020): turning noisy, incomplete information into decisions someone has to stand behind. Formerly a financial advisor and a banker.</p>
+    <p>Xenith is fee-only and fiduciary. We are paid by our clients and no one else. We take few clients, and we choose them slowly.</p>
+    <p><a class="cta in" href="mailto:inquiry@xenithcap.io?subject=Access%20request"><span class="k">REQUEST ACCESS</span><i class="arr">→</i></a></p>
+  </div>
+</section>
+
 </body>
 </html>
