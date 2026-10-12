@@ -1,6 +1,6 @@
 Xenith Capital website: credits and licences
 
-Portraits of Logan Jackson, the adviser. No libraries, no trackers, no third-party requests.
+No libraries, no trackers, no third-party requests.
 
 ========================================================================
 Inter Tight typeface, used under the SIL Open Font License 1.1:

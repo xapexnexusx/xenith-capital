@@ -61,16 +61,6 @@ html.live.done .stage{top:6%}
   opacity:0;transform:translate3d(0,8px,0);transition:opacity 1.3s cubic-bezier(.2,.6,.2,1),transform 1.3s cubic-bezier(.2,.6,.2,1);will-change:opacity,transform}
 .say.on{opacity:1;transform:translate3d(0,0,0)}
 .say.pk{color:#ffd6ea;font-style:italic}
-.say.sm{font-size:clamp(1.3rem,4.6vw,2.4rem)}
-.face{display:none;width:min(12rem,36vw);opacity:0;transition:opacity 1.6s ease;will-change:opacity}
-.face img{width:100%;height:auto;display:block;-webkit-mask:radial-gradient(closest-side,#000 58%,#0000);mask:radial-gradient(closest-side,#000 58%,#0000)}
-.stage.portrait .face{display:block}
-.face.on{opacity:1}
-.face{position:relative}
-.face::after{content:"";position:absolute;left:11%;width:78%;top:calc(100% + .5rem);height:1px;opacity:0;transform:translate3d(0,7px,0) scaleX(0);
-  background:linear-gradient(90deg,#ff3d9a00,var(--pk),#ff3d9a00);will-change:transform,opacity;
-  transition:opacity 1.6s ease .9s,transform 2.4s cubic-bezier(.2,.6,.2,1) .9s}
-.face.on::after{opacity:.75;transform:translate3d(0,0,0) scaleX(1)}
 html.live .foot{position:fixed;left:0;right:0;bottom:max(.6rem,env(safe-area-inset-bottom));z-index:7;max-width:none;border:0;
   padding:0 max(var(--gut),env(safe-area-inset-right)) .4rem max(var(--gut),env(safe-area-inset-left));
   text-align:center;color:#c4bfb7;font-size:.72rem}

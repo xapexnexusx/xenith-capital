@@ -11,7 +11,7 @@
   var cv, ctx, W = 0, H = 0, DPR = 1, raf = 0, last = 0, doneAt = 0;
   var LINES = [];
   var step = 0, finished = false;
-  var say, face, stage;
+  var say;
   var px = -1, cx = -1, hov = 0, near = 0;
   var holding = false, holdId = null, holdStart = 0, join = 0, cling = 0, earned = false, earnedAt = 0;
   var marks = [], secret = 0, phase = 0, fin = 0;
@@ -139,21 +139,17 @@
 
   function show(i) {
     say.classList.remove('on');
-    var portrait = i === 4;
     setTimeout(function () {
       say.textContent = LINES[i];
       say.classList.toggle('pk', i === 2);
-      say.classList.toggle('sm', portrait);
-      stage.classList.toggle('portrait', portrait);
       say.classList.add('on');
-      if (portrait) setTimeout(function () { face.classList.add('on'); }, 300);
     }, 500);
   }
-  function hide() { say.classList.remove('on'); face.classList.remove('on'); }
+  function hide() { say.classList.remove('on'); }
 
   function finish() {
     finished = true;
-    hide(); stage.classList.remove('portrait');
+    hide();
     setTimeout(function () { root.classList.add('done'); doneAt = performance.now(); }, 1800);
   }
 
@@ -253,7 +249,7 @@
   function boot() {
     cv = document.getElementById('field'); ctx = cv && cv.getContext('2d', { alpha: false });
     if (!ctx) { root.classList.remove('live'); return; }
-    say = document.getElementById('say'); face = document.getElementById('face'); stage = document.getElementById('stage');
+    say = document.getElementById('say');
     var src = document.querySelectorAll('#lines li');
     for (var i = 0; i < src.length; i++) { var c = src[i].cloneNode(true); var w = c.querySelector('.who'); if (w) w.parentNode.removeChild(w); LINES.push(c.textContent.trim()); }
     size();
@@ -266,7 +262,6 @@
     window.addEventListener('lostpointercapture', release);
     document.addEventListener('contextmenu', function (e) { if (root.classList.contains('live') && !inUi(e)) e.preventDefault(); });
     document.addEventListener('pointerleave', function () { hov = 0; lmx = -1; spd = 0; });
-    var im = face.querySelector('img'); if (im) { im.loading = 'eager'; if (im.decode) im.decode().catch(function () {}); }
     document.addEventListener('visibilitychange', function () { if (document.hidden) release(); else kick(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Tab' && !finished) toStatic(); });
     if (window.matchMedia) {
