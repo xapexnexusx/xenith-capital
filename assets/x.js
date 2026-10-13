@@ -32,9 +32,18 @@
   var CITIES = [
     { k: 'NYC', la: 40.71, lo: -74.01 }, { k: 'LON', la: 51.51, lo: -0.13 }, { k: 'FRA', la: 50.11, lo: 8.68 },
     { k: 'TYO', la: 35.68, lo: 139.69 }, { k: 'HKG', la: 22.32, lo: 114.17 }, { k: 'CHI', la: 41.88, lo: -87.63 },
-    { k: 'AUS', la: 30.27, lo: -97.74, hq: 1 }
+    { k: 'AUS', la: 30.27, lo: -97.74, hq: 1 },
+    { k: 'SFO', la: 37.77, lo: -122.42 }, { k: 'TOR', la: 43.65, lo: -79.38 }, { k: 'SAO', la: -23.55, lo: -46.63 }, { k: 'ZUR', la: 47.37, lo: 8.54 },
+    { k: 'DXB', la: 25.2, lo: 55.27 }, { k: 'MUM', la: 19.08, lo: 72.88 }, { k: 'SGP', la: 1.35, lo: 103.82 }, { k: 'SYD', la: -33.87, lo: 151.21 },
+    { k: 'JNB', la: -26.2, lo: 28.05 }, { k: 'SEL', la: 37.57, lo: 126.98 }
   ];
-  CITIES.forEach(function (c) { c.v = vec(c.la, c.lo); });
+  var NC = CITIES.length;
+  // every endpoint is snapped onto a real land dot, so light only ever lands on land
+  CITIES.forEach(function (c) {
+    var t = vec(c.la, c.lo), bi = 0, bd = -2;
+    for (var j = 0; j < LAND.length; j += 3) { var d = LAND[j] * t[0] + LAND[j + 1] * t[1] + LAND[j + 2] * t[2]; if (d > bd) { bd = d; bi = j; } }
+    c.v = [LAND[bi], LAND[bi + 1], LAND[bi + 2]];
+  });
 
   /* ================= GL helpers ================= */
   function sh(type, src) {
@@ -54,7 +63,7 @@
   var P_PTS = prog(
     '#version 300 es\nprecision highp float;\n' +
     'layout(location=0) in vec3 a_p; layout(location=1) in vec4 a_c; layout(location=2) in vec2 a_sm;\n' +
-    'uniform mat3 u_M; uniform mat3 u_S; uniform vec2 u_c; uniform vec2 u_res; uniform float u_f; uniform float u_D; uniform float u_ps; uniform float u_t; uniform float u_conv; uniform vec3 u_sun; uniform vec3 u_city[7]; uniform float u_sw;\n' +
+    'uniform mat3 u_M; uniform mat3 u_S; uniform vec2 u_c; uniform vec2 u_res; uniform float u_f; uniform float u_D; uniform float u_ps; uniform float u_t; uniform float u_conv; uniform vec3 u_sun; uniform vec3 u_city[17]; uniform float u_sw;\n' +
     'out vec3 v_c;\n' +
     'float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}\n' +
     'void main(){\n' +
@@ -73,7 +82,7 @@
     '  vec3 cy=vec3(0.16,0.86,1.0), vi=vec3(0.46,0.36,1.0), mg=vec3(0.85,0.30,1.0);\n' +
     '  vec3 ir=mix(mix(mg,vi,smoothstep(0.04,0.42,fr)),cy,smoothstep(0.42,0.92,fr));\n' +
     '  col=ir*(0.10+2.1*day)*(0.75+0.5*hh)*(0.5+0.5*fr);\n' +
-    '  float near=0.; for(int i=0;i<7;i++){near=max(near,smoothstep(0.9965,0.99985,dot(e,u_city[i])));}\n' +
+    '  float near=0.; for(int i=0;i<17;i++){near=max(near,smoothstep(0.9965,0.99985,dot(e,u_city[i])));}\n' +
     '  float town=step(0.93,hh)*(0.5+fract(hh*91.7));\n' +
     '  col+=vec3(1.0,0.62,0.30)*(town*2.6+near*5.0)*(1.-day)*(0.55+0.45*fr);\n' +
     '  float lo=atan(e.x,e.z); float dl=abs(mod(lo-u_sw+3.14159265,6.2831853)-3.14159265);\n' +
@@ -456,8 +465,11 @@
   }
   var CY_ = [0.2, 0.85, 1.0], PK = [1.0, 0.16, 0.82], VI = [0.58, 0.4, 1.0], AC = [0.7, 1.0, 0.22], AM = [1.0, 0.6, 0.18], WH = [0.92, 0.96, 1.0];
   var COLS = [CY_, CY_, PK, PK, VI, AC, AM, WH], GCOL = [CY_, VI, AC, PK];
+  function zOf(v) { return M[2] * v[0] + M[5] * v[1] + M[8] * v[2]; }
   function spawnArc() {
-    var a = Math.random() < 0.4 ? CITIES[6] : pick(CITIES), b = pick(CITIES);
+    var vis = CITIES.filter(function (c) { return zOf(c.v) > 0.32; });
+    if (vis.length < 2) return;
+    var a = zOf(CITIES[6].v) > 0.32 && Math.random() < 0.4 ? CITIES[6] : pick(vis), b = pick(vis);
     if (a === b) return;
     var d = Math.acos(clamp(a.v[0] * b.v[0] + a.v[1] * b.v[1] + a.v[2] * b.v[2], -1, 1));
     arcs.push({ a: a.v, b: b.v, h: 0.06 + 0.34 * d / Math.PI, age: 0, life: rnd(5, 9), col: pick(COLS), sp: rnd(0.24, 0.42), ph: Math.random(), hit: 0, hits: 0 });
@@ -469,6 +481,7 @@
     return [t1, [v[1] * t1[2] - v[2] * t1[1], v[2] * t1[0] - v[0] * t1[2], v[0] * t1[1] - v[1] * t1[0]]];
   }
   function splash(v, c, big, sc) {
+    if (zOf(v) < 0.1) return;
     var b = basis(v), dr = [];
     for (var k = 0; k < (big ? 22 : 14); k++) dr.push([rnd(0, 6.283), rnd(0.4, 1.2), rnd(0.3, 1)]);
     bursts.push({ v: v, t1: b[0], t2: b[1], c: c, age: 0, life: big ? 2.2 : 1.7, s: (big ? 1.5 : 1) * (sc || 1), dr: dr });
@@ -497,6 +510,7 @@
     arcs = arcs.filter(function (A) {
       A.age += dt; if (A.age > A.life) return false;
       var grow = clamp(A.age / 1.4, 0, 1), fade = clamp((A.life - A.age) / 1.2, 0, 1), c = A.col, k, p;
+      var ez = Math.min(zOf(A.a), zOf(A.b)); fade *= clamp((ez - 0.04) / 0.16, 0, 1); if (fade <= 0 && A.age > 1.5) return false;
       var PN = 110, end = Math.floor(PN * grow);
       for (k = 0; k <= end && w < DMAX - 40; k++) { p = slerp(A.a, A.b, k / PN, A.h); put(D, p[0], p[1], p[2], c[0], c[1], c[2], (0.95 + 0.6 * (k === end && grow < 1)) * fade, 1.4, 3); }
       if (grow >= 1) {
@@ -588,7 +602,7 @@
   }
 
   /* ================= render ================= */
-  var cityFlat = new Float32Array(21); CITIES.forEach(function (c, k) { cityFlat[3 * k] = c.v[0]; cityFlat[3 * k + 1] = c.v[1]; cityFlat[3 * k + 2] = c.v[2]; });
+  var cityFlat = new Float32Array(3 * NC); CITIES.forEach(function (c, k) { cityFlat[3 * k] = c.v[0]; cityFlat[3 * k + 1] = c.v[1]; cityFlat[3 * k + 2] = c.v[2]; });
   var SROT = new Float32Array(9), starYaw = 0;
   function tri() { gl.bindVertexArray(VTRI); gl.drawArrays(gl.TRIANGLES, 0, 3); }
   function pass(p, rt) { gl.useProgram(p.p); gl.bindFramebuffer(gl.FRAMEBUFFER, rt ? rt.f : null); gl.viewport(0, 0, rt ? rt.w : cv.width, rt ? rt.h : cv.height); }
