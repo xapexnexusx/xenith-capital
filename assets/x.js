@@ -54,7 +54,7 @@
   var P_PTS = prog(
     '#version 300 es\nprecision highp float;\n' +
     'layout(location=0) in vec3 a_p; layout(location=1) in vec4 a_c; layout(location=2) in vec2 a_sm;\n' +
-    'uniform mat3 u_M; uniform mat3 u_S; uniform vec2 u_c; uniform vec2 u_res; uniform float u_f; uniform float u_D; uniform float u_ps; uniform float u_t; uniform float u_conv; uniform vec3 u_sun; uniform vec3 u_city[7];\n' +
+    'uniform mat3 u_M; uniform mat3 u_S; uniform vec2 u_c; uniform vec2 u_res; uniform float u_f; uniform float u_D; uniform float u_ps; uniform float u_t; uniform float u_conv; uniform vec3 u_sun; uniform vec3 u_city[7]; uniform float u_sw;\n' +
     'out vec3 v_c;\n' +
     'float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}\n' +
     'void main(){\n' +
@@ -76,6 +76,9 @@
     '  float near=0.; for(int i=0;i<7;i++){near=max(near,smoothstep(0.9965,0.99985,dot(e,u_city[i])));}\n' +
     '  float town=step(0.93,hh)*(0.5+fract(hh*91.7));\n' +
     '  col+=vec3(1.0,0.62,0.30)*(town*2.6+near*5.0)*(1.-day)*(0.55+0.45*fr);\n' +
+    '  float lo=atan(e.x,e.z); float dl=abs(mod(lo-u_sw+3.14159265,6.2831853)-3.14159265);\n' +
+    '  float sd=mod(u_sw-lo+3.14159265,6.2831853)-3.14159265; float tr=sd>0.?exp(-sd*5.)*0.35:0.;\n' +
+    '  col+=vec3(0.35,1.0,0.75)*(exp(-dl*dl*120.)*2.0+tr)*(0.5+0.5*fr);\n' +
     '  if(occ>0.5) col=vi*0.035;\n' +
     '  if(m<-0.5) col*=0.13;\n' +
     ' } else if(m<1.5){\n' +
@@ -120,10 +123,14 @@
     ' c+=(texture(u_t,v+u_dir*3.2307692).rgb+texture(u_t,v-u_dir*3.2307692).rgb)*0.0702703; o=vec4(c,1.);}');
 
   var P_COMP = prog(FS_TRI,
-    '#version 300 es\nprecision highp float; in vec2 v; out vec4 o; uniform sampler2D u_s; uniform sampler2D u_b1; uniform sampler2D u_b2; uniform float u_flash;\n' +
+    '#version 300 es\nprecision highp float; in vec2 v; out vec4 o; uniform sampler2D u_s; uniform sampler2D u_b1; uniform sampler2D u_b2; uniform float u_flash; uniform float u_gl; uniform float u_gy; uniform float u_gh; uniform float u_gs; uniform float u_dpr;\n' +
+    'vec3 S(vec2 v){return texture(u_s,v).rgb+texture(u_b1,v).rgb*0.85+texture(u_b2,v).rgb*0.4;}\n' +
     'vec3 aces(vec3 x){return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14),0.,1.);}\n' +
-    'void main(){ vec3 c=texture(u_s,v).rgb+texture(u_b1,v).rgb*0.85+texture(u_b2,v).rgb*0.4+vec3(u_flash)*vec3(1.0,0.75,0.95);\n' +
-    ' c=aces(c*1.12); vec2 q=v-0.5; c*=1.-dot(q,q)*0.45;\n' +
+    'void main(){ vec2 uv=v; float band=step(abs(uv.y-u_gy),u_gh)*u_gl; uv.x+=(u_gs-0.5)*0.07*band; uv.y+=sin(uv.x*90.+u_gs*40.)*0.002*band;\n' +
+    ' vec2 dr=(uv-0.5); float ca=0.0016+0.009*u_gl;\n' +
+    ' vec3 c=vec3(S(uv+dr*ca).r,S(uv).g,S(uv-dr*ca).b)+vec3(u_flash)*vec3(1.0,0.75,0.95);\n' +
+    ' c+=vec3(1.0,0.2,0.85)*band*0.06;\n' +
+    ' c=aces(c*1.12); vec2 q=v-0.5; c*=1.-dot(q,q)*0.45; c*=0.965+0.035*step(0.5,fract(gl_FragCoord.y/(2.*u_dpr)));\n' +
     ' float n=fract(52.9829189*fract(dot(gl_FragCoord.xy,vec2(0.06711056,0.00583715)))); c+=(n-0.5)/255.;\n' +
     ' o=vec4(c,1.);}');
 
@@ -152,7 +159,8 @@
   /* ================= geometry ================= */
   var STRIDE = 9; // pos3, col4, size, mode
   var ringN = 150, starN = 380;
-  var nStatic = LAND.length / 3 * 2 + OCEAN.length / 3 + starN + ringN;
+  var GRAT = []; (function () { var la, lo; for (la = -60; la <= 60; la += 30) for (lo = -180; lo < 180; lo += 2) GRAT.push(vec(la, lo)); for (lo = -180; lo < 180; lo += 30) for (la = -78; la <= 78; la += 2) GRAT.push(vec(la, lo)); })();
+  var nStatic = LAND.length / 3 * 2 + OCEAN.length / 3 + starN + ringN + GRAT.length;
   var S = new Float32Array(nStatic * STRIDE), w = 0;
   function put(arr, x, y, z, r, g, b, a, sz, m) { var o = w * STRIDE; arr[o] = x; arr[o + 1] = y; arr[o + 2] = z; arr[o + 3] = r; arr[o + 4] = g; arr[o + 5] = b; arr[o + 6] = a; arr[o + 7] = sz; arr[o + 8] = m; w++; }
   var i;
@@ -164,6 +172,7 @@
     var u = rnd(-1, 1), th = rnd(0, Math.PI * 2), rr = rnd(7, 13), sq = Math.sqrt(1 - u * u), warm = Math.random() < 0.18;
     put(S, sq * Math.cos(th) * rr, u * rr, sq * Math.sin(th) * rr, warm ? 1 : 0.7, warm ? 0.82 : 0.82, 1, Math.pow(Math.random(), 4) * 0.9 + 0.05, rnd(0.35, 0.7), 2);
   }
+  GRAT.forEach(function (g) { put(S, g[0] * 1.002, g[1] * 1.002, g[2] * 1.002, 0.3, 0.62, 1.0, 0.16, 0.8, 3); });
   var RING_R = 1.62, RING_Y = 0.27;
   function ringPos(a) { return [RING_R * Math.cos(a), -RING_R * RING_Y * Math.sin(a), RING_R * Math.sin(a) * 0.96]; }
   for (i = 0; i < ringN; i++) { var rp = ringPos(i / ringN * Math.PI * 2); put(S, rp[0], rp[1], rp[2], 0.55, 0.85, 1.0, 0.42, 1.25, 4); }
@@ -178,7 +187,7 @@
     return { a: a, b: b };
   }
   var VS = vao(S, false);
-  var DMAX = 4200, D = new Float32Array(DMAX * STRIDE), VD = vao(D, true);
+  var DMAX = 12000, D = new Float32Array(DMAX * STRIDE), VD = vao(D, true);
   var VTRI = gl.createVertexArray();
 
   /* ================= camera / layout ================= */
@@ -207,6 +216,9 @@
     var tb = top.getBoundingClientRect().bottom;
     if (PHONE) {
       R = Math.min(W * 0.285, H * 0.2);
+      var room = $('#cta').getBoundingClientRect().top - 12 - hero.offsetHeight - 26 - tb - 6;
+      // ring front edge sits ~1.86R below the top of the globe band; shrink the planet before the copy collides with the button
+      R = Math.max(40, Math.min(R, room / (1.5 + RING_R * RING_Y * Math.sqrt(CAMD * CAMD - 1) / (CAMD - RING_R * 0.96))));
       CX = W / 2; CY = tb + R * 1.5 + 6;
     } else {
       var shortS = H < 820;
@@ -214,7 +226,8 @@
       CX = W * (shortS ? 0.63 : 0.6); CY = H * (shortS ? 0.39 : 0.41);
     }
     F = R * Math.sqrt(CAMD * CAMD - 1);
-    root.style.setProperty('--gy', Math.round(CY + R * 1.62 * 0.27 * 0.8 + R * 0.42) + 'px');
+    var fz = CAMD - RING_R * 0.96, fy = CY + RING_R * RING_Y * F / fz;
+    root.style.setProperty('--gy', Math.round(PHONE ? fy + 26 : CY + R * 1.62 * 0.27 * 0.8 + R * 0.42) + 'px');
     cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
     buildRT(cv.width, cv.height);
     root.setAttribute('data-g', [Math.round(CX), Math.round(CY), Math.round(R)].join(','));
@@ -251,11 +264,22 @@
   var tag = $('#tag'), tagK = $('b', tag), tagV = $('span', tag);
   var series = 4112;
   function setText(el, s) { if (el && el.textContent !== s) el.textContent = s; }
+  var NOISE = '#%&@$*+=<>/\\ABCDEFHKMNRSTXZ0123456789';
+  function decrypt(el, s) {
+    if (!el || el._to === s) return; el._to = s;
+    if (RM || !el.textContent) { el.textContent = s; return; }
+    var n = 0, steps = 7; clearInterval(el._iv);
+    el._iv = setInterval(function () {
+      n++; var o = '';
+      for (var k = 0; k < s.length; k++) o += s[k] === ' ' || k < (n / steps) * s.length ? s[k] : NOISE[(Math.random() * NOISE.length) | 0];
+      el.textContent = o; if (n >= steps) { clearInterval(el._iv); el.textContent = s; }
+    }, 45);
+  }
   function paint() {
-    setText(gv[0], postureOf(regT));
+    decrypt(gv[0], postureOf(regT));
     var top = 0; for (var k = 1; k < 5; k++) if (sw[k] > sw[top]) top = k;
-    setText(gv[1], SECT[top] + ' ' + sw[top] + '%');
-    setText(gv[2], series.toLocaleString('en-US') + ' SERIES');
+    decrypt(gv[1], SECT[top] + ' ' + sw[top] + '%');
+    decrypt(gv[2], series.toLocaleString('en-US') + ' SERIES');
     // readouts
     var pm = $('#pmark'); if (pm) pm.style.left = ((regT + 1) / 2 * 100).toFixed(1) + '%';
     setText($('#pval'), postureOf(regT) + '  ' + (regT >= 0 ? '+' : '−') + Math.abs(regT).toFixed(2));
@@ -339,7 +363,7 @@
   function openReadout(id) {
     var ro = document.getElementById(id); if (!ro || openRo) return;
     lastFocus = document.activeElement; openRo = ro;
-    ro.classList.add('open'); veil.classList.add('on'); root.classList.add('reading');
+    ro.classList.add('open'); veil.classList.add('on'); root.classList.add('reading'); glitch(0.18, false);
     mainEl.inert = true;
     var x = $('.x', ro); if (x) x.focus();
   }
@@ -418,7 +442,7 @@
     if (RM || convT > 0) return;
     e.preventDefault();
     var href = cta.getAttribute('href');
-    convT = 1; root.classList.add('pending'); setText(clr, 'PENDING');
+    convT = 1; root.classList.add('pending'); setText(clr, 'PENDING'); glitch(0.35);
     setTimeout(function () { flash = 1.2; window.location.href = href; }, 1150);
     setTimeout(function () { convT = 0; root.classList.remove('pending'); setText(clr, 'OBSERVER'); }, 2900);
   });
@@ -430,39 +454,83 @@
     var ka = Math.sin((1 - t) * om) / s, kb = Math.sin(t * om) / s, lift = 1 + h * Math.sin(Math.PI * t);
     return [(a[0] * ka + b[0] * kb) * lift, (a[1] * ka + b[1] * kb) * lift, (a[2] * ka + b[2] * kb) * lift];
   }
-  var COLS = [[0.25, 0.9, 1.0], [0.25, 0.9, 1.0], [0.55, 0.5, 1.0], [0.9, 0.95, 1.0]];
+  var CY_ = [0.2, 0.85, 1.0], PK = [1.0, 0.16, 0.82], VI = [0.58, 0.4, 1.0], AC = [0.7, 1.0, 0.22], AM = [1.0, 0.6, 0.18], WH = [0.92, 0.96, 1.0];
+  var COLS = [CY_, CY_, PK, PK, VI, AC, AM, WH], GCOL = [CY_, VI, AC, PK];
   function spawnArc() {
     var a = Math.random() < 0.4 ? CITIES[6] : pick(CITIES), b = pick(CITIES);
     if (a === b) return;
     var d = Math.acos(clamp(a.v[0] * b.v[0] + a.v[1] * b.v[1] + a.v[2] * b.v[2], -1, 1));
-    arcs.push({ a: a.v, b: b.v, h: 0.05 + 0.3 * d / Math.PI, age: 0, life: rnd(5, 9), col: pick(COLS), sp: rnd(0.22, 0.38), ph: Math.random(), hit: 0 });
+    arcs.push({ a: a.v, b: b.v, h: 0.06 + 0.34 * d / Math.PI, age: 0, life: rnd(5, 9), col: pick(COLS), sp: rnd(0.24, 0.42), ph: Math.random(), hit: 0, hits: 0 });
+  }
+  function basis(v) {
+    var up = Math.abs(v[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0];
+    var t1 = [up[1] * v[2] - up[2] * v[1], up[2] * v[0] - up[0] * v[2], up[0] * v[1] - up[1] * v[0]], l = Math.hypot(t1[0], t1[1], t1[2]);
+    t1 = [t1[0] / l, t1[1] / l, t1[2] / l];
+    return [t1, [v[1] * t1[2] - v[2] * t1[1], v[2] * t1[0] - v[0] * t1[2], v[0] * t1[1] - v[1] * t1[0]]];
+  }
+  function splash(v, c, big, sc) {
+    var b = basis(v), dr = [];
+    for (var k = 0; k < (big ? 22 : 14); k++) dr.push([rnd(0, 6.283), rnd(0.4, 1.2), rnd(0.3, 1)]);
+    bursts.push({ v: v, t1: b[0], t2: b[1], c: c, age: 0, life: big ? 2.2 : 1.7, s: (big ? 1.5 : 1) * (sc || 1), dr: dr });
+  }
+  function onSphere(B, r, th, h) {
+    var x = B.v[0] + r * (Math.cos(th) * B.t1[0] + Math.sin(th) * B.t2[0]), y = B.v[1] + r * (Math.cos(th) * B.t1[1] + Math.sin(th) * B.t2[1]), z = B.v[2] + r * (Math.cos(th) * B.t1[2] + Math.sin(th) * B.t2[2]);
+    var l = Math.hypot(x, y, z) / h; return [x / l, y / l, z / l];
+  }
+  /* strikes: a capability on the ring fires a beam down onto a city */
+  var strikes = [], strikeT = 2.5;
+  function spawnStrike() {
+    var gk = -1, best = -9, k;
+    for (k = 0; k < 4; k++) { var z = glyphPos[k][2] + rnd(0, 1.2); if (glyphPos[k][2] > -0.6 && z > best) { best = z; gk = k; } }
+    if (gk < 0) return;
+    var vis = []; for (k = 0; k < CITIES.length; k++) if (rot(CITIES[k].v)[2] > 0.25) vis.push(k);
+    if (!vis.length) return;
+    strikes.push({ g: gk, ci: pick(vis), age: 0, c: GCOL[gk] });
+    root.dataset.strikes = (+root.dataset.strikes || 0) + 1;
+    glyphs[gk].classList.add('fire'); setTimeout(function () { glyphs[gk].classList.remove('fire'); }, 900);
   }
   function fillDynamic(dt, t) {
     w = 0;
     spawnT -= dt;
-    if (spawnT <= 0 && arcs.length < 15) { spawnArc(); spawnT = rnd(0.25, 0.7); }
+    if (spawnT <= 0 && arcs.length < 18) { spawnArc(); spawnT = rnd(0.2, 0.55); }
+    strikeT -= dt; if (strikeT <= 0 && !RM) { spawnStrike(); strikeT = rnd(1.4, 3.2); }
     arcs = arcs.filter(function (A) {
       A.age += dt; if (A.age > A.life) return false;
       var grow = clamp(A.age / 1.4, 0, 1), fade = clamp((A.life - A.age) / 1.2, 0, 1), c = A.col, k, p;
-      var PN = 72, end = Math.floor(PN * grow);
-      for (k = 0; k <= end && w < DMAX - 40; k++) { p = slerp(A.a, A.b, k / PN, A.h); put(D, p[0], p[1], p[2], c[0], c[1], c[2], 0.62 * fade, 1.25, 3); }
+      var PN = 110, end = Math.floor(PN * grow);
+      for (k = 0; k <= end && w < DMAX - 40; k++) { p = slerp(A.a, A.b, k / PN, A.h); put(D, p[0], p[1], p[2], c[0], c[1], c[2], (0.95 + 0.6 * (k === end && grow < 1)) * fade, 1.4, 3); }
       if (grow >= 1) {
-        if (!A.hit) { A.hit = 1; bursts.push({ v: A.b, age: 0, c: c }); }
-        for (var q = 0; q < 2; q++) {
-          var tp = (A.age * A.sp + A.ph + q * 0.5) % 1;
+        if (!A.hit) { A.hit = 1; splash(A.b, c, false); }
+        for (var q = 0; q < 3; q++) {
+          var tp0 = A.age * A.sp + A.ph + q / 3, tp = tp0 % 1, lap = Math.floor(tp0);
+          if (q === 0 && lap > A.hits) { A.hits = lap; if (fade > 0.5) splash(A.b, c, false, 0.6); }
           for (var tr = 0; tr < 18 && w < DMAX - 4; tr++) {
             var tt = tp - tr * 0.006; if (tt < 0) break;
             p = slerp(A.a, A.b, tt, A.h);
-            var hd = tr === 0, ia = hd ? 6.0 : 2.2 * Math.pow(1 - tr / 18, 2);
-            put(D, p[0], p[1], p[2], hd ? 1 : c[0], hd ? 1 : c[1], hd ? 1 : c[2], ia * fade, hd ? 3.2 : 2.2, 3);
+            var hd = tr === 0, ia = hd ? 7.5 : 2.8 * Math.pow(1 - tr / 18, 2);
+            put(D, p[0], p[1], p[2], hd ? 1 : c[0], hd ? 1 : c[1], hd ? 1 : c[2], ia * fade, hd ? 3.4 : 2.4, 3);
           }
         }
       }
       return true;
     });
+    strikes = strikes.filter(function (St) {
+      St.age += dt; if (St.age > 1.6) return false;
+      var a = glyphPos[St.g], cv3 = rot(CITIES[St.ci].v), b = [cv3[0] * 1.004, cv3[1] * 1.004, cv3[2] * 1.004], c = St.c;
+      var grow = clamp(St.age / 0.38, 0, 1), fade = clamp((1.6 - St.age) / 0.7, 0, 1), n = 90, e = Math.floor(n * grow), k;
+      for (k = 0; k <= e && w < DMAX - 20; k++) { var t = k / n; put(D, a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t, c[0], c[1], c[2], (k === e ? 6 : 1.7) * fade, k === e ? 3.4 : 1.6, 4); }
+      if (grow >= 1 && !St.hit) { St.hit = 1; splash(CITIES[St.ci].v, c, true); }
+      return true;
+    });
     bursts = bursts.filter(function (B) {
-      B.age += dt; if (B.age > 1.4) return false;
-      var k = 1 - B.age / 1.4; put(D, B.v[0] * 1.004, B.v[1] * 1.004, B.v[2] * 1.004, B.c[0], B.c[1], B.c[2], 4 * k * k, 3 + 6 * (1 - k), 3);
+      B.age += dt; if (B.age > B.life || w > DMAX - 120) return false;
+      var u = B.age / B.life, k = 1 - u, eo = 1 - Math.pow(1 - u, 3), c = B.c, j, p;
+      put(D, B.v[0] * 1.006, B.v[1] * 1.006, B.v[2] * 1.006, 1, 1, 1, 3.2 * Math.pow(k, 5) * B.s, (3 + 6 * u) * B.s, 3);
+      put(D, B.v[0] * 1.006, B.v[1] * 1.006, B.v[2] * 1.006, c[0], c[1], c[2], 1.1 * k * k * k, (5 + 12 * u) * B.s, 3);
+      for (j = 0; j < 40; j++) { p = onSphere(B, 0.15 * eo * B.s, j / 40 * 6.283, 1.004); put(D, p[0], p[1], p[2], c[0], c[1], c[2], 2.0 * k * k, 1.3, 3); }
+      if (u > 0.12) { var u2 = (u - 0.12) / 0.88, e2 = 1 - Math.pow(1 - u2, 3); for (j = 0; j < 26; j++) { p = onSphere(B, 0.085 * e2 * B.s, j / 26 * 6.283 + 0.1, 1.004); put(D, p[0], p[1], p[2], 1, 1, 1, 1.2 * (1 - u2) * (1 - u2), 1.1, 3); } }
+      B.dr.forEach(function (d) { p = onSphere(B, d[1] * 0.16 * eo * B.s, d[0], 1.004 + d[2] * 0.07 * Math.sin(Math.PI * Math.min(1, u * 1.25)) * B.s); put(D, p[0], p[1], p[2], c[0], c[1], c[2], 2.0 * k, 1.6, 3); });
+      if (u < 0.45) { var bk = 1 - u / 0.45; for (j = 0; j < 12; j++) { var hh = 1.004 + j * 0.012 * B.s; put(D, B.v[0] * hh, B.v[1] * hh, B.v[2] * hh, c[0], c[1], c[2], 2.0 * bk * (1 - j / 12), 1.5, 3); } }
       return true;
     });
     CITIES.forEach(function (c, ci) {
@@ -470,7 +538,7 @@
       put(D, v[0] * 1.003, v[1] * 1.003, v[2] * 1.003, c.hq ? 0.75 : 1, c.hq ? 1 : 0.9, c.hq ? 0.55 : 1, (c.hq ? 2.4 : 1.6) * pul, 2.4, 3);
     });
     // glyph nodes on the ring
-    glyphPos.forEach(function (gp) { put(D, gp[0], gp[1], gp[2], 0.75, 0.92, 1, 2.2, 2.4, 4); });
+    glyphPos.forEach(function (gp, k) { var c = GCOL[k], pu = 0.6 + 0.4 * Math.sin(t * 3.2 + k * 1.6); put(D, gp[0], gp[1], gp[2], c[0], c[1], c[2], 2.6 * pu + 0.6, 3.4, 4); put(D, gp[0], gp[1], gp[2], 1, 1, 1, 2.2, 1.6, 4); });
     return w;
   }
 
@@ -546,7 +614,7 @@
     gl.uniform2f(u.u_c, cx, cy); gl.uniform2f(u.u_res, cv.width, cv.height);
     gl.uniform1f(u.u_f, F * DPR); gl.uniform1f(u.u_D, CAMD); gl.uniform1f(u.u_ps, Math.max(1.6, R / 92) * DPR);
     gl.uniform1f(u.u_t, t); gl.uniform1f(u.u_conv, conv); gl.uniform3f(u.u_sun, SUN[0], SUN[1], SUN[2]);
-    gl.uniform3fv(u.u_city, cityFlat);
+    gl.uniform3fv(u.u_city, cityFlat); gl.uniform1f(u.u_sw, sweep);
     gl.bindVertexArray(VS.a); gl.drawArrays(gl.POINTS, 0, nStatic);
     gl.bindVertexArray(VD.a); gl.bindBuffer(gl.ARRAY_BUFFER, VD.b); gl.bufferSubData(gl.ARRAY_BUFFER, 0, D, 0, nd * STRIDE); gl.drawArrays(gl.POINTS, 0, nd);
     gl.disable(gl.BLEND);
@@ -560,10 +628,20 @@
     pass(P_COMP, null);
     bindTex(0, RT.s.t); bindTex(1, RT.q1.t); bindTex(2, RT.e2.t);
     gl.uniform1i(P_COMP.u.u_s, 0); gl.uniform1i(P_COMP.u.u_b1, 1); gl.uniform1i(P_COMP.u.u_b2, 2); gl.uniform1f(P_COMP.u.u_flash, flash);
+    gl.uniform1f(P_COMP.u.u_gl, glI); gl.uniform1f(P_COMP.u.u_gy, glY); gl.uniform1f(P_COMP.u.u_gh, glH); gl.uniform1f(P_COMP.u.u_gs, glS); gl.uniform1f(P_COMP.u.u_dpr, DPR);
     tri();
   }
 
   /* ================= loop ================= */
+  var glI = 0, glY = 0.5, glH = 0.02, glS = 0.5, glLeft = 0, glNext = 3.5, sweep = -3.14159, hlEl = $('.hl');
+  function glitch(dur, strong) {
+    if (RM) return; glLeft = dur; glNext = rnd(4.5, 9);
+    if (strong !== false && hlEl) { hlEl.classList.remove('glitch'); void hlEl.offsetWidth; hlEl.classList.add('glitch'); setTimeout(function () { hlEl.classList.remove('glitch'); }, 260); }
+  }
+  function stepGlitch(dt) {
+    glNext -= dt; if (glNext <= 0) glitch(rnd(0.12, 0.28), Math.random() < 0.6);
+    if (glLeft > 0) { glLeft -= dt; glI = Math.random() < 0.7 ? rnd(0.5, 1) : 0; glY = Math.random(); glH = rnd(0.006, 0.06); glS = Math.random(); } else glI = 0;
+  }
   var last = performance.now(), clockT = 0, visible = true;
   document.addEventListener('visibilitychange', function () { visible = !document.hidden; if (visible) { last = performance.now(); requestAnimationFrame(frame); } });
   function frame(now) {
@@ -579,6 +657,7 @@
     conv += ((convT ? 1 : 0) - conv) * Math.min(1, dt * (convT ? 2.6 : 1.8));
     flash *= Math.pow(0.02, dt);
     regV += (regT - regV) * Math.min(1, dt * 1.5);
+    stepGlitch(dt); sweep += dt * (RM ? 0.1 : 0.7); if (sweep > 3.14159) sweep -= 6.28318;
     placeGlyphs(dt);
     var nd = fillDynamic(dt, clockT);
     render(clockT, nd);
