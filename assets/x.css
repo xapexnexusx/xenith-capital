@@ -312,3 +312,59 @@ html.live.phone .cap .cd{display:none}
 html.live.phone .cap .cf{flex-direction:column;align-items:flex-start;gap:.35rem}
 html.live.phone .ft{position:relative;left:auto;right:auto;bottom:auto;flex-direction:column;align-items:center;gap:.7rem;padding:2rem 6vw max(1.6rem,env(safe-area-inset-bottom));text-align:center}
 @media (prefers-reduced-motion:reduce){html.live .intro{display:none}html.live .top,html.live .caps{animation:none}}
+
+/* ================= x-6 ================= */
+/* no blue box on tap: the press shows as a soft scale, and the focus ring is for keyboards only */
+html{-webkit-tap-highlight-color:transparent}
+a,button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+a:focus:not(:focus-visible),button:focus:not(:focus-visible){outline:none}
+html.live .cap:active,html.live .hero .cta:active{transform:scale(.98)}
+
+/* the header: the new logo, alive, and a clean XENITH */
+@property --mka{syntax:"<angle>";inherits:false;initial-value:0deg}
+.mk{display:inline-flex;align-items:center;gap:1.05rem;text-decoration:none;line-height:1}
+.mk-z{position:relative;display:block;width:52px;height:52px;border-radius:12px;isolation:isolate;flex:none}
+.mk-z svg{display:block;width:100%;height:100%;position:relative;z-index:1}
+.mk-z::before{content:"";position:absolute;inset:-2px;z-index:2;border-radius:14px;padding:2px;pointer-events:none;
+  background:conic-gradient(from var(--mka),transparent 0deg 210deg,#8b5cf6 250deg,#ff3d8e 300deg,#22d3ee 345deg,transparent 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  animation:mkBeam 2.4s linear infinite}
+.mk-z::after{content:"";position:absolute;inset:-14px;z-index:0;border-radius:24px;pointer-events:none;
+  background:radial-gradient(circle,#ff3d8e66 0,#8b5cf633 38%,transparent 70%);animation:mkGlow 2.4s ease-in-out infinite}
+.mk-t{font-family:var(--sans);font-weight:300;font-size:.95rem;letter-spacing:.62em;color:#f3f6ff;text-shadow:-.5px 0 #ff3d8e66,.5px 0 #22d3ee66}
+.mk:hover .mk-z::before{animation-duration:.9s}
+.mk:hover .mk-t{text-shadow:-1px 0 #ff3d8eaa,1px 0 #22d3eeaa,0 0 18px #ffffff40}
+@keyframes mkBeam{to{--mka:360deg}}
+@keyframes mkGlow{0%,38%{opacity:.45;transform:scale(.92)}48%{opacity:1;transform:scale(1.12)}70%,100%{opacity:.45;transform:scale(.92)}}
+.mk-z svg{animation:mkGlitch 6.8s steps(1) infinite}
+@keyframes mkGlitch{0%,90%,100%{transform:none;filter:none}
+  91%{transform:translate(-2px,1px) skewX(-6deg);filter:drop-shadow(2px 0 #ff3d8e) drop-shadow(-2px 0 #22d3ee)}
+  92.5%{transform:translate(2px,-1px);filter:drop-shadow(-3px 0 #ff3d8e) drop-shadow(3px 0 #22d3ee)}
+  94%{transform:translate(-1px,0) skewX(4deg);filter:drop-shadow(1px 0 #ff3d8e)}}
+html.live .top{padding:1.05rem var(--edge)}
+html.live.phone .mk-z{width:42px;height:42px;border-radius:10px}
+html.live.phone .mk-t{font-size:.8rem;letter-spacing:.5em}
+html:not(.live) .mk-z{width:44px;height:44px}
+@media (prefers-reduced-motion:reduce){.mk-z::before,.mk-z::after,.mk-z svg{animation:none}.mk-z .zm-motion{display:none}}
+
+/* one stack: header, hero, cards, footer; nothing can sit on anything else at any size */
+html.live{--toph:5.6rem}
+html.live main{display:flex;flex-direction:column;justify-content:flex-end;
+  padding:calc(var(--toph) + .6rem) var(--edge) calc(max(1.2rem,env(safe-area-inset-bottom)) + 2.5rem)}
+html.live .hero{position:relative;left:auto;right:auto;top:auto;bottom:auto;transform:none;margin-top:auto;max-width:min(46vw,40rem)}
+html.live .hl{font-size:min(6.6vw,10vh,7.8rem)}
+html.live .caps{position:relative;left:auto;right:auto;bottom:auto;margin-top:clamp(1.4rem,4.5vh,3rem)}
+@media (max-height:760px){html.live .note{display:none}html.live .acts{margin-top:1.5rem}html.live .sub{margin-top:.9rem}}
+
+/* the cards: the arrow is a corner badge that lights with the card */
+html.live .cap{padding-right:3.4rem}
+html.live .cap .cf{justify-content:flex-start}
+html.live .cap .go{position:absolute;top:.95rem;right:.95rem;display:grid;place-items:center;width:1.9rem;height:1.9rem;border-radius:50%;
+  border:1px solid #ffffff2a;font-family:var(--sans);font-size:.85rem;letter-spacing:0;color:#cfd6e6;
+  transition:background .3s,border-color .3s,color .3s,transform .35s cubic-bezier(.16,1,.3,1)}
+html.live .cap:hover .go,html.live .cap:focus-visible .go{background:var(--cc);border-color:var(--cc);color:#020308;transform:rotate(-45deg)}
+html.live.phone .cap .go{top:.75rem;right:.75rem;width:1.6rem;height:1.6rem;font-size:.75rem}
+html.live.phone .cap{padding-right:2.6rem}
+html.live.phone .caps{grid-template-columns:repeat(2,minmax(0,1fr))}
+html.live.phone .cap .ct{font-size:.74rem;letter-spacing:.18em}
+html.live.phone .cap .v{font-size:.52rem;letter-spacing:.1em}
