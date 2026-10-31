@@ -224,19 +224,91 @@ html.live.phone .bars li,html.live.phone .secs li{grid-template-columns:7.2em 1f
 }
 @media print{#gl,.veil,.orbit,.tag,.mo{display:none!important}html,body{background:#fff!important;color:#000!important;height:auto!important;overflow:visible!important}}
 
-/* ---------- the zenith (2026-10-31): the Xenith mark living in the scene ---------- */
-.mk{display:inline-flex;align-items:center;gap:.8rem;letter-spacing:0;line-height:0}
-.mk-z{width:30px;height:30px;display:block;filter:drop-shadow(0 0 10px #ff3d8e55)}
-.mk-w{height:27px;width:auto;display:block}
-html.live.phone .mk-z{width:26px;height:26px}
+/* ================= x-5: one scene, one voice ================= */
+/* the header: the wordmark (its X carries the zenith) and one clock */
+.mk{display:inline-flex;align-items:center;letter-spacing:0;line-height:0}
+.mk-w{height:26px;width:auto;display:block}
+.top .ck em{color:var(--mute)}
+html:not(.live) .top .ck{display:none}
+html.live .top{padding:1.6rem var(--edge);background:linear-gradient(#020308d9,#02030800)}
+html.live main::before,html.live main::after{display:none}
+
+/* the opening: the zenith flares at the center, then gives its light to the Earth */
+.intro{display:none}
+html.live .intro{display:grid;place-items:center;position:fixed;inset:0;z-index:40;pointer-events:none;
+  background:radial-gradient(circle at 50% 50%,#0b0716 0,#020308 72%);animation:introOut 2.7s cubic-bezier(.7,0,.2,1) forwards}
+html.live .intro svg{width:min(58vmin,34rem);height:auto;overflow:visible;animation:introMark 2.7s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes introOut{0%,52%{opacity:1}100%{opacity:0;visibility:hidden}}
+@keyframes introMark{0%{opacity:0;transform:scale(.84);filter:blur(12px)}20%{opacity:1;transform:scale(1);filter:blur(0)}55%{opacity:1;transform:scale(1.03)}
+  100%{opacity:0;transform:scale(2);filter:blur(22px)}}
+html.live .top{animation:xFade 1.2s ease 1.8s both}
+html.live .caps{animation:xRise 1.3s cubic-bezier(.16,1,.3,1) 2.1s both}
+@keyframes xFade{from{opacity:0}}
+@keyframes xRise{from{opacity:0;transform:translateY(16px)}}
+
+/* the hero: one block, centered on the left, the Earth to its right */
+html.live{--caph:9.4rem}
+/* the hero stands a fixed gap above the cards at every size, so the two can never touch */
+html.live .hero{left:var(--edge);top:auto;transform:none;width:auto;max-width:min(44vw,40rem);
+  bottom:calc(max(1.2rem,env(safe-area-inset-bottom)) + 2.3rem + var(--caph) + 2.8rem)}
+@media (max-height:700px){html.live{--caph:6.4rem}html.live .note{display:none}html.live .acts{margin-top:1.6rem}}
+html.live .kick{color:#c3cbe0}
+html.live .hl{font-size:min(6.6vw,11.5vh,7.8rem)}
+html.live .sub{font-size:clamp(1rem,1.25vw,1.2rem);color:#c3cbe0;max-width:25em}
+html.live .acts{display:flex;align-items:center;flex-wrap:wrap;gap:1.1rem 1.6rem;margin-top:2.3rem;transition:opacity 1s ease 1.3s}
+/* the reveal, after the intro: kicker, then the words, then the sentence, then the one button */
+html.live .kick{transition:opacity 1s ease .25s}
+html.live .sub{transition:opacity 1.1s ease .9s}
+html.live:not(.resolved) .acts{opacity:0}
+html.live .hero .cta{position:relative;right:auto;bottom:auto;display:inline-flex;align-items:center;gap:1rem;min-width:0;
+  padding:1.05rem 1.7rem 1.05rem 1.9rem;border-radius:999px;border:1px solid #ffffff59;
+  background:linear-gradient(135deg,#ffffff1f,#ffffff08);animation:none}
+html.live .hero .cta::before{left:18%;right:18%}
+html.live .hero .cta .k{font-size:.78rem;font-weight:500;letter-spacing:.34em;text-transform:uppercase}
+html.live .hero .cta .ar{font-size:1rem;transition:transform .35s cubic-bezier(.16,1,.3,1)}
+html.live .hero .cta:hover .ar,html.live .hero .cta:focus-visible .ar{transform:translateX(4px)}
+html.live .note{font-family:var(--mono);font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:#7f88a0}
+html:not(.live) .acts{margin-top:1.5rem}
+html:not(.live) .note{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;color:var(--dim);margin-top:1rem}
+
+/* the four capabilities: cards you can see are cards you can open */
+.caps{display:none}
+html.live .caps{position:fixed;left:var(--edge);right:var(--edge);bottom:calc(max(1.2rem,env(safe-area-inset-bottom)) + 2.3rem);z-index:6;
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.9rem;pointer-events:none}
+html.live .cap{pointer-events:auto;position:relative;display:grid;align-content:start;gap:.5rem;text-align:left;padding:1.05rem 1.2rem 1rem;
+  border:1px solid #ffffff1c;border-radius:12px;background:linear-gradient(160deg,#ffffff0e,#ffffff03);
+  backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);
+  transition:border-color .3s,background .3s,transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s;--cc:var(--cy)}
+html.live .cap:nth-child(2){--cc:var(--vi)}html.live .cap:nth-child(3){--cc:var(--pk)}html.live .cap:nth-child(4){--cc:#f4f1fa}
+html.live .cap::before{content:"";position:absolute;left:1.2rem;right:1.2rem;top:-1px;height:1px;background:linear-gradient(90deg,var(--cc),transparent);opacity:.85}
+html.live .cap .cn{font-family:var(--mono);font-size:.56rem;letter-spacing:.24em;color:var(--cc)}
+html.live .cap .ct{font-size:.84rem;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:#fff}
+html.live .cap .cd{font-size:.82rem;line-height:1.45;color:#aeb7cc}
+html.live .cap .cf{display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin-top:.3rem;font-family:var(--mono);font-size:.56rem;letter-spacing:.16em}
+html.live .cap .v{color:var(--cc);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.live .cap .go{color:var(--dim);white-space:nowrap;transition:color .3s,transform .35s cubic-bezier(.16,1,.3,1)}
+html.live .cap:hover,html.live .cap:focus-visible{border-color:color-mix(in srgb,var(--cc) 65%,transparent);transform:translateY(-4px);outline:none;
+  background:linear-gradient(160deg,color-mix(in srgb,var(--cc) 16%,transparent),#ffffff05);
+  box-shadow:0 22px 60px #000000a0,0 0 40px color-mix(in srgb,var(--cc) 24%,transparent)}
+html.live .cap:hover .go,html.live .cap:focus-visible .go{color:#fff;transform:translateX(3px)}
+@media (max-height:700px){html.live .cap .cd{display:none}}
+
+/* city names: only where you point */
+html.live .tag span:empty{display:none}
+
+/* the phone: the Earth heads a page that scrolls */
+html.live.phone,html.live.phone body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
+html.live.phone .top{padding:max(1rem,env(safe-area-inset-top)) 6vw .9rem}
+html.live.phone .top .ck{display:none}
 html.live.phone .mk-w{height:22px}
-.zn{display:none}
-html.live .zn{display:block;position:fixed;z-index:1;pointer-events:none;left:calc(var(--edge) - 3.2rem);
-  top:calc(50vh - min(26vw,25rem));width:min(34vw,32rem);mix-blend-mode:screen;opacity:0;
-  transition:opacity 2.4s cubic-bezier(.16,1,.3,1) .4s}
-html.live.resolved .zn{opacity:1}
-.zn-svg{display:block;width:100%;height:auto;overflow:visible}
-.zn-ring{transform-box:view-box;transform-origin:256px 256px;animation:znr 16s linear infinite}
-@keyframes znr{to{transform:rotate(360deg)}}
-html.live.phone .zn{display:none}   /* on a phone the Earth owns the frame; the mark rides in the header */
-@media (prefers-reduced-motion:reduce){.zn-ring{animation:none}.zn .zn-motion{display:none}}
+html.live.phone main{position:relative;inset:auto;pointer-events:auto;padding:var(--gy) 6vw 0}
+html.live.phone .hero{position:relative;left:auto;right:auto;top:auto;transform:none;max-width:none;text-align:center}
+html.live.phone .hl{font-size:min(13vw,8vh)}
+html.live.phone .sub{margin-left:auto;margin-right:auto}
+html.live.phone .acts{flex-direction:column;justify-content:center;gap:.9rem}
+html.live.phone .caps{position:relative;left:auto;right:auto;bottom:auto;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:2.4rem;pointer-events:auto}
+html.live.phone .cap{padding:.9rem 1rem}
+html.live.phone .cap .cd{display:none}
+html.live.phone .cap .cf{flex-direction:column;align-items:flex-start;gap:.35rem}
+html.live.phone .ft{position:relative;left:auto;right:auto;bottom:auto;flex-direction:column;align-items:center;gap:.7rem;padding:2rem 6vw max(1.6rem,env(safe-area-inset-bottom));text-align:center}
+@media (prefers-reduced-motion:reduce){html.live .intro{display:none}html.live .top,html.live .caps{animation:none}}

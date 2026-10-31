@@ -1,5 +1,5 @@
-/* Xenith Capital: the instrument.
-   WebGL2 Earth lit by the real sun, light streams between financial centers, orbiting capabilities, glass readouts.
+/* Xenith Capital: the instrument (x-5).
+   WebGL2 Earth lit by the real sun, light streams between financial centers, four capability cards, glass readouts.
    Every panel is an illustrative simulation. No network, no storage, no cookies, no third parties. */
 (function () {
   'use strict';
@@ -167,7 +167,7 @@
 
   /* ================= geometry ================= */
   var STRIDE = 9; // pos3, col4, size, mode
-  var ringN = 150, starN = 380;
+  var ringN = 0, starN = 380;   // x-5: the orbit ring is retired; the four capabilities are cards
   var GRAT = []; (function () { var la, lo; for (la = -60; la <= 60; la += 30) for (lo = -180; lo < 180; lo += 2) GRAT.push(vec(la, lo)); for (lo = -180; lo < 180; lo += 30) for (la = -78; la <= 78; la += 2) GRAT.push(vec(la, lo)); })();
   var nStatic = LAND.length / 3 * 2 + OCEAN.length / 3 + starN + ringN + GRAT.length;
   var S = new Float32Array(nStatic * STRIDE), w = 0;
@@ -224,19 +224,16 @@
     root.classList.toggle('phone', PHONE);
     var tb = top.getBoundingClientRect().bottom;
     if (PHONE) {
-      R = Math.min(W * 0.285, H * 0.2);
-      var room = $('#cta').getBoundingClientRect().top - 12 - hero.offsetHeight - 26 - tb - 6;
-      // ring front edge sits ~1.86R below the top of the globe band; shrink the planet before the copy collides with the button
-      R = Math.max(40, Math.min(R, room / (1.5 + RING_R * RING_Y * Math.sqrt(CAMD * CAMD - 1) / (CAMD - RING_R * 0.96))));
-      CX = W / 2; CY = tb + R * 1.5 + 6;
+      R = Math.min(W * 0.31, H * 0.19);
+      CX = W / 2; CY = tb + R * 1.32 + 6;
     } else {
       var shortS = H < 820;
-      R = Math.min(W * 0.2, H * (shortS ? 0.25 : 0.27));
-      CX = W * (shortS ? 0.63 : 0.6); CY = H * (shortS ? 0.39 : 0.41);
+      R = Math.min(W * 0.19, H * (shortS ? 0.24 : 0.26));
+      CX = W * (shortS ? 0.66 : 0.64); CY = H * (shortS ? 0.4 : 0.42);
     }
     F = R * Math.sqrt(CAMD * CAMD - 1);
     var fz = CAMD - RING_R * 0.96, fy = CY + RING_R * RING_Y * F / fz;
-    root.style.setProperty('--gy', Math.round(PHONE ? fy + 26 : CY + R * 1.62 * 0.27 * 0.8 + R * 0.42) + 'px');
+    root.style.setProperty('--gy', Math.round(PHONE ? CY + R * 1.38 + 8 : CY + R * 1.2) + 'px');
     cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
     buildRT(cv.width, cv.height);
     root.setAttribute('data-g', [Math.round(CX), Math.round(CY), Math.round(R)].join(','));
@@ -269,7 +266,7 @@
   }
 
   /* ================= DOM ================= */
-  var glyphs = $$('.gy'), gv = glyphs.map(function (g) { return $('.v', g); });
+  var glyphs = [], caps = $$('.cap'), gv = caps.map(function (g) { return $('.v', g); });
   var tag = $('#tag'), tagK = $('b', tag), tagV = $('span', tag);
   var series = 4112;
   function setText(el, s) { if (el && el.textContent !== s) el.textContent = s; }
@@ -390,6 +387,7 @@
     g.addEventListener('focus', function () { hoverHold++; });
     g.addEventListener('blur', function () { hoverHold = Math.max(0, hoverHold - 1); });
   });
+  caps.forEach(function (c) { c.addEventListener('click', function () { openReadout(c.getAttribute('data-ro')); }); });
   $$('.ro .x').forEach(function (b) { b.addEventListener('click', closeReadout); });
   veil.addEventListener('click', closeReadout);
   document.addEventListener('keydown', function (e) {
@@ -493,6 +491,7 @@
   /* strikes: a capability on the ring fires a beam down onto a city */
   var strikes = [], strikeT = 2.5;
   function spawnStrike() {
+    if (!glyphs.length) return;
     var gk = -1, best = -9, k;
     for (k = 0; k < 4; k++) { var z = glyphPos[k][2] + rnd(0, 1.2); if (glyphPos[k][2] > -0.6 && z > best) { best = z; gk = k; } }
     if (gk < 0) return;
@@ -552,7 +551,7 @@
       put(D, v[0] * 1.003, v[1] * 1.003, v[2] * 1.003, c.hq ? 0.75 : 1, c.hq ? 1 : 0.9, c.hq ? 0.55 : 1, (c.hq ? 2.4 : 1.6) * pul, 2.4, 3);
     });
     // glyph nodes on the ring
-    glyphPos.forEach(function (gp, k) { var c = GCOL[k], pu = 0.6 + 0.4 * Math.sin(t * 3.2 + k * 1.6); put(D, gp[0], gp[1], gp[2], c[0], c[1], c[2], 2.6 * pu + 0.6, 3.4, 4); put(D, gp[0], gp[1], gp[2], 1, 1, 1, 2.2, 1.6, 4); });
+    if (glyphs.length) glyphPos.forEach(function (gp, k) { var c = GCOL[k], pu = 0.6 + 0.4 * Math.sin(t * 3.2 + k * 1.6); put(D, gp[0], gp[1], gp[2], c[0], c[1], c[2], 2.6 * pu + 0.6, 3.4, 4); put(D, gp[0], gp[1], gp[2], 1, 1, 1, 2.2, 1.6, 4); });
     return w;
   }
 
@@ -574,15 +573,19 @@
     });
   }
   var lockI = 6, lockT = 0;
+  var NAMES = { NYC: 'NEW YORK', LON: 'LONDON', FRA: 'FRANKFURT', TYO: 'TOKYO', HKG: 'HONG KONG', CHI: 'CHICAGO', AUS: 'AUSTIN',
+    SFO: 'SAN FRANCISCO', TOR: 'TORONTO', SAO: 'S\u00c3O PAULO', ZUR: 'ZURICH', DXB: 'DUBAI', MUM: 'MUMBAI', SGP: 'SINGAPORE',
+    SYD: 'SYDNEY', JNB: 'JOHANNESBURG', SEL: 'SEOUL' };
   function placeTag(dt) {
     var best = -1, bd = 1e9, k, p, s;
+    if (PHONE || !pointer) { tag.classList.remove('on'); return; }
     if (pointer && !PHONE) {
       for (k = 0; k < CITIES.length; k++) {
         p = rot(CITIES[k].v); if (p[2] < 0.15) continue; s = project(p);
         var dd = (s[0] - pointer[0]) * (s[0] - pointer[0]) + (s[1] - pointer[1]) * (s[1] - pointer[1]);
         if (dd < bd) { bd = dd; best = k; }
       }
-      if (bd > 160 * 160) best = -1;
+      if (bd > 70 * 70) best = -1;
     } else {
       lockT += dt;
       p = rot(CITIES[lockI].v);
@@ -595,8 +598,8 @@
     if (best < 0 || openRo) { tag.classList.remove('on'); return; }
     var c = CITIES[best]; p = rot(c.v); s = project(p);
     tag.style.transform = 'translate3d(' + s[0].toFixed(1) + 'px,' + s[1].toFixed(1) + 'px,0)';
-    setText(tagK, c.k + (c.hq ? ' · HQ' : ''));
-    setText(tagV, Math.abs(c.la).toFixed(2) + (c.la >= 0 ? 'N ' : 'S ') + Math.abs(c.lo).toFixed(2) + (c.lo >= 0 ? 'E' : 'W') + ' · ' + (c.hq ? 'COMMAND' : 'LINK ' + (18 + ((c.k.charCodeAt(0) * 7 + c.k.charCodeAt(1)) % 140)) + 'ms'));
+    setText(tagK, NAMES[c.k] || c.k);
+    setText(tagV, c.hq ? 'HEADQUARTERS' : '');
     tag.classList.toggle('lft', s[0] > W - 230);
     tag.classList.add('on');
   }
@@ -684,7 +687,7 @@
   stepSignals(); setInterval(stepSignals, RM ? 7000 : 2600);
   nextLine();
   root.classList.add('booted');
-  requestAnimationFrame(function () { root.classList.add('resolved'); });
+  setTimeout(function () { root.classList.add('resolved'); }, RM ? 0 : 1500);
   requestAnimationFrame(frame);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
 })();
