@@ -87,3 +87,8 @@ html.live .foot a{padding:.6rem .2rem}
   html.live,html.live body{height:auto;overflow:visible}html.live main{position:static;width:auto;height:auto;clip-path:none;overflow:visible;padding:2rem 0}
   html.live .lines{position:static;width:auto;height:auto;clip-path:none}html.live .foot{position:static}html.live .foot .legal{display:block}
   *{color:#000!important;background:transparent!important;box-shadow:none!important;text-shadow:none!important}}
+
+/* the zenith lockup (2026-10-31) */
+.mark{display:inline-flex;align-items:center;gap:.7rem;letter-spacing:0;line-height:0}
+.mark-z{width:26px;height:26px;display:block}
+.mark-w{height:23px;width:auto;display:block}

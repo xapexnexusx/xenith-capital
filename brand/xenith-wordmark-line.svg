@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -2 280 64" width="560" height="128">
+  <title>Xenith Capital</title>
+  <defs>
+    <clipPath id="band"><rect x="-10" y="8.3" width="280" height="43.4"/></clipPath>
+    <linearGradient id="istrand" gradientUnits="userSpaceOnUse" x1="0" y1="8.3" x2="0" y2="51.7">
+      <stop offset="0" stop-color="#E6FEFF"/><stop offset="0.08" stop-color="#7DF9FF"/><stop offset="0.26" stop-color="#22D3EE"/>
+      <stop offset="0.26" stop-color="#FF3D8E"/><stop offset="1" stop-color="#FF3D8E"/>
+    </linearGradient>
+    <filter id="glow" x="-200%" y="-50%" width="500%" height="200%">
+      <feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g clip-path="url(#band)" fill="none" stroke="#F4F1FA" stroke-width="3.4" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="8">
+    <path d="M0 8.3 L30 51.7 M30 8.3 L0 51.7"/>
+    <path d="M78 10 H52 V50 H78 M52 30 H72"/>
+    <path d="M100 52 V10 L130 50 V8"/>
+    <path d="M174 10 H204 M189 10 V50"/>
+    <path d="M226 10 V50 M256 10 V50 M226 30 H256"/>
+  </g>
+  <rect x="150.3" y="8.3" width="3.4" height="43.4" fill="url(#istrand)" filter="url(#glow)"/>
+  <!-- the X carries the mark's apex: a white core at the crossing, haloed in pink -->
+  <circle cx="15" cy="30" r="7" fill="#FF3D8E" opacity="0.45" filter="url(#glow)"/>
+  <circle cx="15" cy="30" r="2.6" fill="#FFFFFF" filter="url(#glow)"/>
+</svg>

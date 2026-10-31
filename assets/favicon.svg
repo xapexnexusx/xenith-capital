@@ -1,1 +1,88 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#030306"/><path d="M32 6 54.5 19v26L32 58 9.5 45V19z" fill="none" stroke="#eef1f4" stroke-width="3.5" stroke-linejoin="round"/><path d="M32 6v52" stroke="#2de2ff" stroke-width="2" opacity=".8"/><circle cx="32" cy="17" r="4.5" fill="#ff2e97"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>Xenith Capital</title>
+  <!--
+    THE ZENITH. A pyramid of black glass seen from directly above, from the zenith. Its four edges are the X;
+    its apex, the highest point, is the center. Light runs up the edges and converges there: the strand (pink body
+    to cyan head) on one diagonal, violet on the other, a white core at the apex. Hairline contours ring the faces:
+    the summit as a topographic map. Lit from the upper left, so the faces read as a solid.
+  -->
+  <defs>
+    <clipPath id="tile"><rect x="16" y="16" width="480" height="480" rx="108"/></clipPath>
+
+    <linearGradient id="fTop" gradientUnits="userSpaceOnUse" x1="256" y1="248" x2="256" y2="16">
+      <stop offset="0" stop-color="#4B3B70"/><stop offset="0.4" stop-color="#261D3B"/><stop offset="1" stop-color="#100C19"/></linearGradient>
+    <linearGradient id="fLeft" gradientUnits="userSpaceOnUse" x1="248" y1="256" x2="16" y2="256">
+      <stop offset="0" stop-color="#3A2D57"/><stop offset="0.45" stop-color="#1B1529"/><stop offset="1" stop-color="#0B0811"/></linearGradient>
+    <linearGradient id="fRight" gradientUnits="userSpaceOnUse" x1="264" y1="256" x2="496" y2="256">
+      <stop offset="0" stop-color="#211A33"/><stop offset="0.5" stop-color="#0F0C18"/><stop offset="1" stop-color="#06050A"/></linearGradient>
+    <linearGradient id="fBottom" gradientUnits="userSpaceOnUse" x1="256" y1="264" x2="256" y2="496">
+      <stop offset="0" stop-color="#171223"/><stop offset="0.5" stop-color="#09070F"/><stop offset="1" stop-color="#030205"/></linearGradient>
+
+    <linearGradient id="ePink" gradientUnits="userSpaceOnUse" x1="16" y1="496" x2="256" y2="256">
+      <stop offset="0" stop-color="#FF3D8E" stop-opacity="0.15"/><stop offset="0.7" stop-color="#FF3D8E"/><stop offset="1" stop-color="#FFC2DA"/></linearGradient>
+    <linearGradient id="eCyan" gradientUnits="userSpaceOnUse" x1="496" y1="16" x2="256" y2="256">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.15"/><stop offset="0.7" stop-color="#22D3EE"/><stop offset="1" stop-color="#D2FDFF"/></linearGradient>
+    <linearGradient id="eVioA" gradientUnits="userSpaceOnUse" x1="16" y1="16" x2="256" y2="256">
+      <stop offset="0" stop-color="#8B5CF6" stop-opacity="0.12"/><stop offset="0.75" stop-color="#8B5CF6"/><stop offset="1" stop-color="#E4D9FF"/></linearGradient>
+    <linearGradient id="eVioB" gradientUnits="userSpaceOnUse" x1="496" y1="496" x2="256" y2="256">
+      <stop offset="0" stop-color="#8B5CF6" stop-opacity="0.12"/><stop offset="0.75" stop-color="#8B5CF6"/><stop offset="1" stop-color="#E4D9FF"/></linearGradient>
+
+    <radialGradient id="core" cx="256" cy="256" r="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="0.06" stop-color="#FFE3EF"/><stop offset="0.18" stop-color="#FF3D8E" stop-opacity="0.55"/>
+      <stop offset="0.5" stop-color="#8B5CF6" stop-opacity="0.12"/><stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/></radialGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.10"/><stop offset="0.4" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient>
+
+    <filter id="bloom" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="a"/><feGaussianBlur stdDeviation="16" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="a"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="spill" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>
+    <filter id="hot" x="-400%" y="-400%" width="900%" height="900%">
+      <feGaussianBlur stdDeviation="6" result="a"/><feGaussianBlur stdDeviation="20" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="a"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+
+  <g clip-path="url(#tile)">
+    <rect x="16" y="16" width="480" height="480" fill="#030205"/>
+    <!-- the light, beneath the glass: it shows only through the seams -->
+    <g filter="url(#bloom)" stroke-linecap="round">
+      <line x1="16" y1="496" x2="256" y2="256" stroke="url(#ePink)" stroke-width="11"/>
+      <line x1="496" y1="16" x2="256" y2="256" stroke="url(#eCyan)" stroke-width="11"/>
+      <line x1="16" y1="16" x2="256" y2="256" stroke="url(#eVioA)" stroke-width="9"/>
+      <line x1="496" y1="496" x2="256" y2="256" stroke="url(#eVioB)" stroke-width="9"/>
+    </g>
+    <!-- the four faces of black glass; the seams between them widen toward the apex -->
+    <path d="M19 16 H493 L256 245 Z" fill="url(#fTop)"/>
+    <path d="M16 19 V493 L245 256 Z" fill="url(#fLeft)"/>
+    <path d="M496 19 V493 L267 256 Z" fill="url(#fRight)"/>
+    <path d="M19 496 H493 L256 267 Z" fill="url(#fBottom)"/>
+    <!-- the summit as a map: elevation contours, brightening toward the top -->
+    <g fill="none" stroke="#FFFFFF">
+      <rect x="216" y="216" width="80" height="80" stroke-opacity="0.10" stroke-width="1"/>
+      <rect x="176" y="176" width="160" height="160" stroke-opacity="0.075" stroke-width="1"/>
+      <rect x="136" y="136" width="240" height="240" stroke-opacity="0.06" stroke-width="1"/>
+      <rect x="96" y="96" width="320" height="320" stroke-opacity="0.045" stroke-width="1"/>
+      <rect x="56" y="56" width="400" height="400" stroke-opacity="0.035" stroke-width="1"/>
+    </g>
+    <!-- light spilling from the seams onto the glass, and the hairline edges themselves -->
+    <g filter="url(#spill)" opacity="0.32" stroke-width="8">
+      <line x1="16" y1="496" x2="256" y2="256" stroke="url(#ePink)"/>
+      <line x1="496" y1="16" x2="256" y2="256" stroke="url(#eCyan)"/>
+      <line x1="16" y1="16" x2="256" y2="256" stroke="url(#eVioA)"/>
+      <line x1="496" y1="496" x2="256" y2="256" stroke="url(#eVioB)"/>
+    </g>
+    <g stroke-width="1.6" stroke-linecap="round">
+      <line x1="40" y1="472" x2="250" y2="262" stroke="url(#ePink)"/>
+      <line x1="472" y1="40" x2="262" y2="250" stroke="url(#eCyan)"/>
+      <line x1="40" y1="40" x2="250" y2="250" stroke="url(#eVioA)"/>
+      <line x1="472" y1="472" x2="262" y2="262" stroke="url(#eVioB)"/>
+    </g>
+    <!-- the zenith -->
+    <circle cx="256" cy="256" r="120" fill="url(#core)"/>
+    <circle cx="256" cy="256" r="30" fill="none" stroke="#FF3D8E" stroke-opacity="0.35" stroke-width="1.2"/>
+    <circle cx="256" cy="256" r="8.5" fill="#FFFFFF" filter="url(#hot)"/>
+    <!-- glass: a sheen from the upper left -->
+    <rect x="16" y="16" width="480" height="480" fill="url(#sheen)"/>
+  </g>
+  <rect x="17" y="17" width="478" height="478" rx="107" fill="none" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="2"/>
+</svg>

@@ -3,7 +3,7 @@
 @font-face{font-family:"JetBrains Mono";src:url(/fonts/jetbrains-mono-var.woff2) format("woff2");font-weight:100 800;font-display:swap}
 :root{
   --void:#020308;--tx:#e9eef8;--dim:#8a93a8;--mute:#566079;--hair:#ffffff1c;--hair2:#ffffff10;
-  --cy:#5fe3ff;--vi:#8f7dff;--pk:#ff5fd2;--am:#ffb36b;
+  --cy:#22d3ee;--vi:#8b5cf6;--pk:#ff3d8e;--am:#ffb36b;
   --sans:"Inter Tight",system-ui,-apple-system,sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
   --edge:clamp(1.1rem,4.4vw,4.6rem);--gy:60vh;
 }
@@ -223,3 +223,20 @@ html.live.phone .bars li,html.live.phone .secs li{grid-template-columns:7.2em 1f
   html.live .ro.open{animation:none}
 }
 @media print{#gl,.veil,.orbit,.tag,.mo{display:none!important}html,body{background:#fff!important;color:#000!important;height:auto!important;overflow:visible!important}}
+
+/* ---------- the zenith (2026-10-31): the Xenith mark living in the scene ---------- */
+.mk{display:inline-flex;align-items:center;gap:.8rem;letter-spacing:0;line-height:0}
+.mk-z{width:30px;height:30px;display:block;filter:drop-shadow(0 0 10px #ff3d8e55)}
+.mk-w{height:27px;width:auto;display:block}
+html.live.phone .mk-z{width:26px;height:26px}
+html.live.phone .mk-w{height:22px}
+.zn{display:none}
+html.live .zn{display:block;position:fixed;z-index:1;pointer-events:none;left:calc(var(--edge) - 3.2rem);
+  top:calc(50vh - min(26vw,25rem));width:min(34vw,32rem);mix-blend-mode:screen;opacity:0;
+  transition:opacity 2.4s cubic-bezier(.16,1,.3,1) .4s}
+html.live.resolved .zn{opacity:1}
+.zn-svg{display:block;width:100%;height:auto;overflow:visible}
+.zn-ring{transform-box:view-box;transform-origin:256px 256px;animation:znr 16s linear infinite}
+@keyframes znr{to{transform:rotate(360deg)}}
+html.live.phone .zn{display:none}   /* on a phone the Earth owns the frame; the mark rides in the header */
+@media (prefers-reduced-motion:reduce){.zn-ring{animation:none}.zn .zn-motion{display:none}}
